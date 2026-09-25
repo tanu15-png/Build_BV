@@ -1,0 +1,105 @@
+export const menuItems = [
+  {
+    id: '1',
+    name: 'Masala Dosa',
+    description: 'Crispy dosa served with sambar and coconut chutney.',
+    price: 60,
+    category: 'Breakfast',
+    emoji: '🥞',
+    canteen: 'Central Café',
+    isVeg: true,
+    preparationTime: '10-15 min',
+  },
+
+  {
+    id: '2',
+    name: 'Aloo Paratha',
+    description: 'Stuffed potato paratha served with curd.',
+    price: 50,
+    category: 'Breakfast',
+    emoji: '🫓',
+    canteen: 'Central Café',
+    isVeg: true,
+    preparationTime: '10-15 min',
+  },
+
+  {
+    id: '3',
+    name: 'Veg Thali',
+    description: 'Complete vegetarian meal with dal, sabzi, roti and rice.',
+    price: 100,
+    category: 'Lunch',
+    emoji: '🍛',
+    canteen: 'Central Café',
+    isVeg: true,
+    preparationTime: '15-20 min',
+  },
+
+  {
+    id: '4',
+    name: 'Rajma Rice',
+    description: 'Rajma served with steamed rice.',
+    price: 70,
+    category: 'Lunch',
+    emoji: '🍚',
+    canteen: 'Central Café',
+    isVeg: true,
+    preparationTime: '10-15 min',
+  },
+
+  {
+    id: '5',
+    name: 'Veg Burger',
+    description: 'Crispy vegetable patty with fresh vegetables and cheese.',
+    price: 80,
+    category: 'Snacks',
+    emoji: '🍔',
+    canteen: 'Central Café',
+    isVeg: true,
+    preparationTime: '10 min',
+  },
+
+  {
+    id: '6',
+    name: 'French Fries',
+    description: 'Crispy golden fries with seasoning.',
+    price: 60,
+    category: 'Snacks',
+    emoji: '🍟',
+    canteen: 'Central Café',
+    isVeg: true,
+    preparationTime: '8-10 min',
+  },
+
+  {
+    id: '7',
+    name: 'Cold Coffee',
+    description: 'Chilled creamy coffee.',
+    price: 50,
+    category: 'Beverages',
+    emoji: '☕',
+    canteen: 'Central Café',
+    isVeg: true,
+    preparationTime: '5 min',
+  },
+
+  {
+    id: '8',
+    name: 'Fresh Lime Soda',
+    description: 'Refreshing lime drink.',
+    price: 40,
+    category: 'Beverages',
+    emoji: '🥤',
+    canteen: 'Central Café',
+    isVeg: true,
+    preparationTime: '5 min',
+  },
+];
+
+export const categories = [
+  'All',
+  'Breakfast',
+  'Lunch',
+  'Snacks',
+  'Beverages',
+];
