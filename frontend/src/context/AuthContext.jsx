@@ -25,11 +25,15 @@ export function AuthProvider({ children }) {
     let nextUser;
     if (role === "student") {
       const students = readStoredValue("campusEatsStudentsV2", {});
-      nextUser = studentAccount({ email, name, register }, students);
-      if (register) {
-        students[nextUser.email] = nextUser;
-        localStorage.setItem("campusEatsStudentsV2", JSON.stringify(students));
-      }
+      nextUser = studentAccount({ email, name, register, password },students);
+      if (register) {students[nextUser.email] = nextUser;
+      localStorage.setItem(
+      "campusEatsStudentsV2",JSON.stringify(students));
+
+     // Do not create a login session during signup
+     return nextUser;
+    }setUser(nextUser);
+    return nextUser;
     } else if (role === "canteen") {
       nextUser = canteenMember({ email, cafeId, secretCode }, cafes, canteenAccessCodes);
     } else if (role === "admin") {
