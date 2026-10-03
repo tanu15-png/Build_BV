@@ -1,5 +1,7 @@
 # Build BV — CampusEats architecture
 
+The backend implementation roadmap is in [backend/backend.md](backend/backend.md). It describes planned work; this architecture documents the current frontend prototype.
+
 ## Implemented system
 
 ```mermaid

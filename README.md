@@ -98,3 +98,5 @@ The dashboard shows canteen availability, menu counts, total and active orders, 
 7. Log in as admin in another tab to review the order and canteen summaries.
 
 See [architecture.md](architecture.md) for implementation boundaries, data models, routes, and the future backend sequence.
+
+See [backend/backend.md](backend/backend.md) for the step-by-step backend implementation plan, database design, API contracts, and edge-case coverage.
