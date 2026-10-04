@@ -24,8 +24,8 @@ export function orderNotifications(orders) {
       at: event.at,
       title: event.status === "READY" ? "Ready for pickup" : "Order accepted",
       message: event.status === "READY"
-        ? `${order.cafeName} has prepared order ${order.id}. Show your order ID at pickup.`
-        : `${order.cafeName} accepted order ${order.id}.`,
+        ? `${order.cafeName} has prepared order ${orderCode(order)} (${orderDay(order)}). Show your dated order card at pickup.`
+        : `${order.cafeName} accepted order ${orderCode(order)} (${orderDay(order)}).`,
     }))).sort((a, b) => new Date(b.at) - new Date(a.at));
 }
 
@@ -58,16 +58,35 @@ export function addCartItem(cart, food, cafes, availability) {
     : [...cart, { ...food, quantity: 1 }];
 }
 
-export function generateOrderId(orders, random = Math.random) {
-  const used = new Set(orders.map((order) => order.id));
+const campusDateFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit",
+});
+const campusTimestampFormatter = new Intl.DateTimeFormat("en-IN", {
+  timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short",
+});
+export const formatCampusTimestamp = (timestamp) => campusTimestampFormatter.format(new Date(timestamp));
+export const pickupLabel = (order) => `${formatCampusTimestamp(order.pickupAt)} IST`;
+
+export function campusDay(timestamp = new Date()) {
+  const parts = campusDateFormatter.formatToParts(new Date(timestamp));
+  const value = (type) => parts.find((part) => part.type === type).value;
+  return `${value("year")}-${value("month")}-${value("day")}`;
+}
+
+export const orderCode = (order) => order.orderCode || order.id;
+export const orderDay = (order) => order.codeDay || campusDay(order.createdAt);
+
+export function generateOrderId(orders, random = Math.random, now = new Date()) {
+  const day = campusDay(now);
+  const used = new Set(orders.filter((order) => orderDay(order) === day).map(orderCode));
   const capacity = 36 ** 3;
   const start = Math.floor(random() * capacity);
-  // Probe the finite namespace so collisions cannot produce duplicate IDs.
+  // Probe this campus day's namespace across every canteen and status.
   for (let offset = 0; offset < capacity; offset += 1) {
-    const id = ((start + offset) % capacity).toString(36).toUpperCase().padStart(3, "0");
-    if (!used.has(id)) return id;
+    const code = ((start + offset) % capacity).toString(36).toUpperCase().padStart(3, "0");
+    if (!used.has(code)) return code;
   }
-  throw new Error("All test order IDs are in use. No new order can be placed.");
+  throw new Error("All test order codes are in use for this campus day. No new order can be placed.");
 }
 
 export function buildOrder({ cart, orders, user, cafes, foods, availability, pickupAt, now = new Date() }) {
@@ -86,7 +105,9 @@ export function buildOrder({ cart, orders, user, cafes, foods, availability, pic
   });
   const cafe = cafes.find((item) => item.id === cart[0].cafeId);
   return {
-    id: generateOrderId(orders),
+    id: globalThis.crypto.randomUUID(),
+    orderCode: generateOrderId(orders, Math.random, now),
+    codeDay: campusDay(now),
     studentEmail: user.email,
     studentName: user.name,
     cafeId: cafe.id,
@@ -94,7 +115,7 @@ export function buildOrder({ cart, orders, user, cafes, foods, availability, pic
     items,
     total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     pickupAt: pickup.toISOString(),
-    pickupTime: pickup.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+    pickupTime: pickup.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "2-digit" }),
     createdAt: now.toISOString(),
     status: "RECEIVED",
     paymentStatus: "NOT_REQUIRED_TEST",
@@ -108,8 +129,8 @@ export function transitionOrder(order, user, nextStatus, pickupCode = "", now = 
   }
   const index = orderStatuses.indexOf(order.status);
   if (index < 0 || orderStatuses[index + 1] !== nextStatus) throw new Error("This order cannot move to that status.");
-  if (nextStatus === "COLLECTED" && pickupCode.trim().toUpperCase() !== order.id) {
-    throw new Error("The pickup code does not match this order ID.");
+  if (nextStatus === "COLLECTED" && pickupCode.trim().toUpperCase() !== orderCode(order)) {
+    throw new Error("The pickup code does not match this order.");
   }
   const at = now.toISOString();
   return {

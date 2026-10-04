@@ -19,6 +19,7 @@ export default function Login() {
   const handleSubmit = (event) => {
   event.preventDefault();
     setError("");
+    setSuccess("");
     try {
     const user = login({
       role,
@@ -59,11 +60,11 @@ export default function Login() {
         <section className="p-8 lg:p-12">
           <h2 className="text-3xl font-black">{role === "student" && register ? "Create your account" : "Welcome back"}</h2>
           <div className="mt-6 flex gap-2" aria-label="Account role">
-            {["student", "canteen", "admin"].map((item) => <button key={item} type="button" aria-pressed={role === item} onClick={() => { setRole(item); setError(""); setEmail(""); setPassword(""); setSecretCode(""); }} className={`flex-1 rounded-xl px-3 py-3 text-sm font-bold capitalize ${role === item ? "bg-[#075d50] text-white" : "bg-gray-100 text-gray-600"}`}>{item}</button>)}
+            {["student", "canteen", "admin"].map((item) => <button key={item} type="button" aria-pressed={role === item} onClick={() => { setRole(item); setError(""); setSuccess(""); setEmail(""); setPassword(""); setSecretCode(""); }} className={`flex-1 rounded-xl px-3 py-3 text-sm font-bold capitalize ${role === item ? "bg-[#075d50] text-white" : "bg-gray-100 text-gray-600"}`}>{item}</button>)}
           </div>
           {role === "student" && <div className="mt-6 flex gap-5 text-sm font-bold">
-            <button type="button" onClick={() => { setRegister(false); setError(""); }} className={!register ? "text-[#0f8f73] underline" : "text-gray-500"}>Login</button>
-            <button type="button" onClick={() => { setRegister(true); setError(""); }} className={register ? "text-[#0f8f73] underline" : "text-gray-500"}>Sign up</button>
+            <button type="button" onClick={() => { setRegister(false); setError(""); setSuccess(""); }} className={!register ? "text-[#0f8f73] underline" : "text-gray-500"}>Login</button>
+            <button type="button" onClick={() => { setRegister(true); setError(""); setSuccess(""); }} className={register ? "text-[#0f8f73] underline" : "text-gray-500"}>Sign up</button>
           </div>}
           <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             {role === "student" && register && <label className="block text-sm font-bold">Your name<input autoComplete="name" required value={name} onChange={(event) => setName(event.target.value)} className={inputStyle} /></label>}
@@ -73,7 +74,7 @@ export default function Login() {
             Password
             <input
             type="password"
-            autoComplete="off"
+            autoComplete={register ? "new-password" : "current-password"}
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -82,7 +83,7 @@ export default function Login() {
             />
             </label>
             )}
-            {role === "student" && <p className="text-sm text-gray-500">{register ? "Register with your name and an email ending in @banasthali.in." : "Log in using your registered @banasthali.in email."}</p>}
+            {role === "student" && <p className="text-sm text-gray-500">{register ? "Register with your name and an email ending in @banasthali.in." : "Log in using your registered @banasthali.in email and password."}</p>}
             {role === "canteen" && <>
               <label className="block text-sm font-bold">Your canteen<select required value={cafeId} onChange={(event) => { setCafeId(event.target.value); setSecretCode(""); }} className={inputStyle}><option value="">Select the canteen you represent</option>{cafes.map((cafe) => <option key={cafe.id} value={cafe.id}>{cafe.name}</option>)}</select></label>
               <label className="block text-sm font-bold">Member access code<input type="password" required autoComplete="off" value={secretCode} onChange={(event) => setSecretCode(event.target.value)} className={inputStyle} /></label>

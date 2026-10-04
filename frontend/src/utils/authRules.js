@@ -59,3 +59,21 @@ export function canteenMember({ email, cafeId, secretCode }, cafes, codes) {
     cafeId: cafe.id
   };
 }
+
+export function revokeCanteenMember(members, actor, memberId, now = new Date()) {
+  const target = members.find((member) => member.id === memberId);
+  const authorized = actor?.role === "canteen" && members.some((member) =>
+    member.cafeId === actor.cafeId && member.email === actor.email && member.status === "ACTIVE");
+  if (!authorized || !target || target.cafeId !== actor.cafeId) {
+    throw new Error("You can only remove members from your own canteen.");
+  }
+  return members.map((member) => member.id === memberId
+    ? { ...member, status: "REVOKED", revokedAt: now.toISOString(), revokedBy: actor.email }
+    : member);
+}
+
+export function canteenSessionActive(session, members, now = Date.now()) {
+  return Boolean(session && new Date(session.expiresAt).getTime() > now && members.some((member) =>
+    member.id === session.memberId && member.status === "ACTIVE" &&
+    member.email === session.email && member.cafeId === session.cafeId));
+}

@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { cafes, foods } from "../src/data/mockData.js";
 import { canteenAccessCodes } from "../src/data/canteenAccess.js";
-import { studentAccount, canteenMember } from "../src/utils/authRules.js";
-import { addCartItem, buildOrder, generateOrderId, normalizeStudentEmail, transitionOrder, visibleOrders, orderNotifications } from "../src/utils/orderRules.js";
+import { studentAccount, canteenMember, revokeCanteenMember, canteenSessionActive } from "../src/utils/authRules.js";
+import { addCartItem, buildOrder, generateOrderId, normalizeStudentEmail, transitionOrder, visibleOrders, orderNotifications, campusDay, pickupLabel } from "../src/utils/orderRules.js";
 
 const available = { pausedCafes: [], disabledFoods: [] };
 const student = { role: "student", name: "Test Student", email: "student@banasthali.in" };
@@ -28,13 +28,16 @@ test("student email must match the exact campus domain", () => {
     assert.throws(() => normalizeStudentEmail(email));
   }
 });
-test("signup requires a name; login uses the registered email alone", () => {
-  assert.throws(() => studentAccount({ email: student.email, register: true, name: " " }, {}), /name/);
-  const account = studentAccount({ email: student.email, name: " Test Student ", register: true }, {});
+test("student signup requires name and password; login validates registered email and password", () => {
+  const credentials = { email: student.email, password: "test-password", register: true, name: " Test Student " };
+  assert.throws(() => studentAccount({ ...credentials, name: " " }, {}), /name/);
+  assert.throws(() => studentAccount({ ...credentials, password: "" }, {}), /password/);
+  const account = studentAccount(credentials, {});
   const users = { [account.email]: account };
-  assert.deepEqual(studentAccount({ email: "STUDENT@banasthali.in", register: false }, users), student);
-  assert.throws(() => studentAccount({ email: student.email, register: true, name: "Other" }, users), /already registered/);
-  assert.throws(() => studentAccount({ email: "unknown@banasthali.in", register: false }, users), /not registered/);
+  assert.deepEqual(studentAccount({ ...credentials, email: "STUDENT@banasthali.in", register: false }, users), { ...student, password: credentials.password });
+  assert.throws(() => studentAccount(credentials, users), /already registered/);
+  assert.throws(() => studentAccount({ ...credentials, email: "unknown@banasthali.in", register: false }, users), /not registered/);
+  assert.throws(() => studentAccount({ ...credentials, password: "wrong", register: false }, users), /Incorrect password/);
 });
 test("canteen membership requires a selection, email, and the matching code", () => {
   const credentials = { email: "Member@example.com", cafeId: "bella-bite", secretCode: "Bella Bite" };
@@ -65,9 +68,11 @@ test("checkout rejects empty carts, mixed canteens, past pickup, invalid quantit
   assert.throws(() => makeOrder({ cart: [{ ...food, quantity: 0 }] }), /quantity/);
   assert.throws(() => makeOrder({ user: member }), /student/);
 });
-test("test orders preserve ownership, menu prices, pickup, and a three-character ID without charging", () => {
+test("test orders preserve ownership, menu prices, pickup, and a daily three-character code without charging", () => {
   const order = makeOrder({ cart: [{ ...food, price: 1, quantity: 2 }] });
-  assert.match(order.id, /^[A-Z0-9]{3}$/);
+  assert.match(order.orderCode, /^[A-Z0-9]{3}$/);
+  assert.equal(order.codeDay, "2026-10-01");
+  assert.notEqual(order.id, order.orderCode);
   assert.equal(order.studentEmail, student.email);
   assert.equal(order.cafeId, food.cafeId);
   assert.equal(order.total, food.price * 2);
@@ -76,16 +81,17 @@ test("test orders preserve ownership, menu prices, pickup, and a three-character
   assert.equal(order.pickupAt, new Date(orderInput.pickupAt).toISOString());
 });
 test("ID generation resolves collisions and reports namespace exhaustion", () => {
-  assert.equal(generateOrderId([{ id: "000" }, { id: "001" }], () => 0), "002");
-  const full = Array.from({ length: 36 ** 3 }, (_, index) => ({ id: index.toString(36).toUpperCase().padStart(3, "0") }));
-  assert.throws(() => generateOrderId(full), /in use/);
+  assert.equal(generateOrderId([{ id: "000", createdAt: now }, { id: "001", createdAt: now }], () => 0, now), "002");
+  const full = Array.from({ length: 36 ** 3 }, (_, index) => ({ createdAt: now, id: index.toString(36).toUpperCase().padStart(3, "0") }));
+  assert.throws(() => generateOrderId(full, () => 0, now), /in use/);
+  assert.equal(generateOrderId(full, () => 0, new Date("2026-10-02T12:00:00Z")), "000");
 });
 test("order lifecycle requires acceptance before preparation and staff verification at collection", () => {
   let order = makeOrder();
   for (const status of ["ACCEPTED", "PREPARING", "READY"]) order = transitionOrder(order, member, status, "", now);
   assert.equal(order.history.length, 4);
   assert.throws(() => transitionOrder(order, member, "COLLECTED", "BAD"), /does not match/);
-  const collected = transitionOrder(order, member, "COLLECTED", order.id.toLowerCase(), now);
+  const collected = transitionOrder(order, member, "COLLECTED", order.orderCode.toLowerCase(), now);
   assert.equal(collected.pickupVerifiedBy, member.email);
   assert.equal(collected.collectedAt, now.toISOString());
   assert.throws(() => transitionOrder(collected, member, "READY"), /cannot move/);
@@ -125,4 +131,57 @@ test("pausing new orders does not stop fulfillment of an existing order", () => 
   const order = makeOrder();
   assert.throws(() => makeOrder({ availability: { ...available, pausedCafes: [food.cafeId] } }), /paused/);
   assert.equal(transitionOrder(order, member, "ACCEPTED", "", now).status, "ACCEPTED");
+});
+
+
+test("codes reset at campus midnight and remain unique across canteens and collected orders", () => {
+  const before = new Date("2026-10-01T18:29:59Z");
+  const after = new Date("2026-10-01T18:30:00Z");
+  assert.equal(campusDay(before), "2026-10-01");
+  assert.equal(campusDay(after), "2026-10-02");
+  const old = { id: "old-uuid", orderCode: "000", codeDay: campusDay(before), status: "READY" };
+  assert.equal(generateOrderId([old], () => 0, after), "000");
+  const collected = { id: "new-uuid", orderCode: "000", codeDay: campusDay(after), status: "COLLECTED", cafeId: secondCanteenFood.cafeId };
+  assert.equal(generateOrderId([old, collected], () => 0, after), "001");
+});
+
+test("repeated codes on different days retain separate identities and pickup histories", () => {
+  const old = { ...makeOrder(), orderCode: "000", status: "READY" };
+  const next = { ...makeOrder({ now: new Date("2026-10-02T12:00:00Z"), pickupAt: "2026-10-02T12:20:00Z", orders: [old] }), orderCode: "000", status: "READY" };
+  assert.notEqual(old.id, next.id);
+  assert.equal(transitionOrder(old, member, "COLLECTED", "000").codeDay, "2026-10-01");
+  assert.equal(next.status, "READY");
+  const notifications = orderNotifications([old, next].map((order) => ({ ...order, history: [{ status: "READY", at: order.createdAt }] })));
+  assert.equal(notifications.length, 2);
+  assert.match(notifications[0].message, /2026-10-02/);
+  assert.equal(new Set(notifications.map((item) => item.id)).size, notifications.length);
+});
+
+
+test("member removal is scoped to the canteen and invalidates all of that member's sessions", () => {
+  const manager = { id: "manager", email: member.email, cafeId: member.cafeId, status: "ACTIVE" };
+  const target = { id: "target", email: "staff@example.com", cafeId: member.cafeId, status: "ACTIVE" };
+  const other = { ...target, id: "other", cafeId: secondCanteenFood.cafeId };
+  const members = [manager, target, other];
+  const session = { memberId: target.id, email: target.email, cafeId: target.cafeId, expiresAt: "2026-10-01T13:00:00Z" };
+  assert.equal(canteenSessionActive(session, members, now.getTime()), true);
+  const removed = revokeCanteenMember(members, member, target.id, now);
+  assert.equal(canteenSessionActive(session, removed, now.getTime()), false);
+  assert.equal(removed[1].revokedBy, member.email);
+  assert.equal(removed[2].status, "ACTIVE");
+  assert.throws(() => revokeCanteenMember(members, member, other.id), /own canteen/);
+  assert.throws(() => revokeCanteenMember(members, student, target.id), /own canteen/);
+  assert.throws(() => revokeCanteenMember([{ ...manager, status: "REVOKED" }, target], member, target.id), /own canteen/);
+  assert.equal(canteenSessionActive(session, members, new Date(session.expiresAt).getTime()), false);
+  assert.equal(canteenSessionActive({ ...session, cafeId: other.cafeId }, members, now.getTime()), false);
+});
+
+
+test("pickup display includes the campus date and IST across midnight", () => {
+  const order = makeOrder({ now: new Date("2026-10-01T18:20:00Z"), pickupAt: "2026-10-01T18:40:00Z" });
+  assert.equal(order.codeDay, "2026-10-01");
+  assert.equal(campusDay(order.pickupAt), "2026-10-02");
+  assert.match(pickupLabel(order), /2 Oct 2026/);
+  assert.match(pickupLabel(order), /12:10/);
+  assert.match(pickupLabel(order), /IST$/);
 });

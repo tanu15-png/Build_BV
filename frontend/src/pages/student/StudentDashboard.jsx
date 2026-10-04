@@ -1,3 +1,4 @@
+import { orderCode, orderDay, pickupLabel, statusLabels } from "../../utils/orderRules";
 import {
   Bell,
   Clock3,
@@ -43,11 +44,11 @@ export default function StudentDashboard() {
 
         <div className="flex items-center gap-2 mb-12">
           <div className="w-9 h-9 bg-[#facc15] text-[#075d50] rounded-lg flex items-center justify-center font-black">
-            CE
+            SA
           </div>
 
           <span className="text-xl font-black">
-            Campus<span className="text-[#facc15]">Eats</span>
+            Spoon<span className="text-[#facc15]">Ate</span>
           </span>
         </div>
 
@@ -184,7 +185,7 @@ export default function StudentDashboard() {
           <section className="mb-8">
 
             <p className="text-sm text-[#0f8f73] font-bold">
-              CAMPUS EATS
+              SPOONATE
             </p>
 
             <h1 className="text-3xl lg:text-4xl font-black mt-1">
@@ -213,14 +214,16 @@ export default function StudentDashboard() {
                   <div className="flex items-center gap-4 mt-2">
 
                     <span className="text-4xl font-black tracking-widest text-[#facc15]">
-                      {activeOrder.id}
+                      {orderCode(activeOrder)}
                     </span>
 
                     <span className="px-3 py-1 rounded-full bg-orange-400/20 text-orange-300 text-sm font-bold">
-                      {activeOrder.status}
+                      {statusLabels[activeOrder.status]}
                     </span>
 
                   </div>
+
+                  <p className="mt-2 text-sm text-white/70">Day: {orderDay(activeOrder)}</p>
 
                   <p className="mt-3 font-semibold">
                     {activeOrder.cafeName}
@@ -245,11 +248,11 @@ export default function StudentDashboard() {
                   </div>
 
                   <p className="text-2xl font-black">
-                    {activeOrder.pickupTime}
+                    {pickupLabel(activeOrder)}
                   </p>
 
                   <Link
-                    to={`/student/orders/${activeOrder.id}`}
+                    to={`/student/orders/${orderCode(activeOrder)}`}
                     className="mt-2 bg-[#facc15] text-[#075d50] px-5 py-2.5 rounded-xl font-bold"
                   >
                     Track Order

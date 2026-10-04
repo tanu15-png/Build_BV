@@ -1,3 +1,4 @@
+import { orderCode, orderDay, pickupLabel } from "../../utils/orderRules";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -41,7 +42,8 @@ export default function AdminDashboard() {
   const filteredOrders = orders
     .filter((order) => {
       const searchable = [
-        order.id,
+        orderCode(order),
+        orderDay(order),
         order.cafeName,
         ...order.items.map((item) => item.name),
       ].join(" ").toLowerCase();
@@ -62,9 +64,9 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#f6f8f7]">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col bg-[#075d50] p-6 text-white lg:flex">
         <div className="mb-10 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#facc15] font-black text-[#075d50]">CE</div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#facc15] font-black text-[#075d50]">SA</div>
           <div>
-            <p className="text-xl font-black">Campus<span className="text-[#facc15]">Eats</span></p>
+            <p className="text-xl font-black">Spoon<span className="text-[#facc15]">Ate</span></p>
             <p className="text-xs text-white/60">Administration</p>
           </div>
         </div>
@@ -140,7 +142,7 @@ export default function AdminDashboard() {
               <label className="flex flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3">
                 <Search size={18} className="shrink-0 text-gray-400" />
                 <span className="sr-only">Search orders</span>
-                <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search order ID, café, or food" className="min-w-0 w-full bg-transparent outline-none" />
+                <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search pickup code, day, canteen, or food" className="min-w-0 w-full bg-transparent outline-none" />
               </label>
               <select aria-label="Filter by café" value={cafeId} onChange={(event) => setCafeId(event.target.value)} className="rounded-xl border border-gray-200 bg-white px-4 py-3">
                 <option value="ALL">All cafés</option>
@@ -168,10 +170,10 @@ export default function AdminDashboard() {
                   <tbody>
                     {filteredOrders.map((order) => (
                       <tr key={order.id} className="border-t border-gray-100">
-                        <td className="p-4"><p className="font-black">#{order.id}</p><p className="mt-1 whitespace-nowrap text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</p></td>
+                        <td className="p-4"><p className="font-black">#{orderCode(order)}</p><p className="mt-1 whitespace-nowrap text-xs text-gray-500">{orderDay(order)}</p></td>
                         <td className="p-4">{order.cafeName}</td>
                         <td className="min-w-48 p-4 text-gray-500">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(" · ")}</td>
-                        <td className="whitespace-nowrap p-4">{order.pickupTime}</td>
+                        <td className="whitespace-nowrap p-4">{pickupLabel(order)}</td>
                         <td className="whitespace-nowrap p-4 font-bold">{currency(order.total)}</td>
                         <td className="p-4"><span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold ${statusStyles[order.status] || "bg-gray-100 text-gray-600"}`}>{statusLabels[order.status] || order.status}</span></td>
                       </tr>
