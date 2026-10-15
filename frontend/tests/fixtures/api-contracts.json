@@ -1,0 +1,72 @@
+[
+  {
+    "route": "POST /auth/student/signup",
+    "body": {
+      "name": "Student",
+      "email": "student@banasthali.in",
+      "password": "fixture-only-password"
+    },
+    "response": {
+      "challengeId": "00000000-0000-4000-8000-000000000001",
+      "expiresAt": "2026-10-14T12:10:00Z",
+      "resendAfter": "2026-10-14T12:01:00Z"
+    }
+  },
+  {
+    "route": "POST /cart/items",
+    "body": {
+      "menuItemId": "00000000-0000-4000-8000-000000000001",
+      "quantity": 2,
+      "expectedVersion": 1
+    },
+    "response": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "canteenId": "00000000-0000-4000-8000-000000000001",
+      "version": 2,
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "menuItemId": "00000000-0000-4000-8000-000000000001",
+          "name": "Sample Tea",
+          "quantity": 2,
+          "unitPricePaise": 1500
+        }
+      ],
+      "totalPaise": 3000,
+      "quote": "server-signed-quote"
+    }
+  },
+  {
+    "route": "POST /orders",
+    "body": {
+      "pickupAt": "2026-10-14T12:30:00Z",
+      "expectedVersion": 2,
+      "quote": "server-signed-quote"
+    },
+    "response": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "canteenId": "00000000-0000-4000-8000-000000000001",
+      "studentId": "00000000-0000-4000-8000-000000000001",
+      "status": "RECEIVED",
+      "executionMode": "TEST",
+      "paymentStatus": "NOT_REQUIRED_TEST",
+      "totalPaise": 3000,
+      "pickupAt": "2026-10-14T12:30:00Z",
+      "codeDay": "2026-10-14",
+      "orderCode": "A01",
+      "version": 1,
+      "createdAt": "2026-10-14T12:00:00Z",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "menuItemId": "00000000-0000-4000-8000-000000000001",
+          "name": "Sample Tea",
+          "quantity": 2,
+          "unitPricePaise": 1500
+        }
+      ],
+      "collectedAt": null,
+      "pickupVerifiedBy": null
+    }
+  }
+]

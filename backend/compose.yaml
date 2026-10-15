@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: spoonate
+      POSTGRES_PASSWORD: local-only-password
+      POSTGRES_DB: spoonate
+    ports: ["127.0.0.1:5433:5432"]
+    volumes: ["development-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spoonate"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+  test-db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: spoonate
+      POSTGRES_PASSWORD: local-only-password
+      POSTGRES_DB: spoonate_test
+    ports: ["127.0.0.1:5434:5432"]
+    tmpfs: ["/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spoonate"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+volumes:
+  development-data:

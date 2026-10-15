@@ -1,8 +1,8 @@
 # SpoonAte implementation checklist
 
-Last checked: 2026-10-04. Based on source inspection and the frontend checks below.
+Last checked: 2026-10-14. Backend phase audit and verification are recorded in backend/README.md; historical frontend checks remain dated below.
 
-`[x]` means implemented in the stated scope or verified; `[ ]` means remaining work. Checked frontend features are browser-storage prototype features, not completed backend features. The backend directory currently contains only its implementation plan.
+`[x]` means implemented in the stated scope or verified; `[ ]` means remaining work. Checked frontend features are browser-storage prototype features, not completed backend features. The backend now contains the Phase 1 API foundation and Phase 2 schema, migration, seed and provisioning implementation. Supabase deployment qualification remains pending.
 
 Backend stack: **TypeScript + Node.js + Express + Zod + Prisma + PostgreSQL**. Keep dependencies minimal and use Node.js built-ins where practical. Follow [backend/backend.md](backend/backend.md) for endpoint contracts, business rules, phase dependencies and acceptance criteria.
 
@@ -63,21 +63,27 @@ These checks verify frontend rules, source lint and the production bundle. They 
 
 ## Phase 1 - Backend foundation and contracts
 
-- [ ] Create backend/package.json, lockfile, strict TypeScript configuration and build/start/development/test scripts.
-- [ ] Create Express app factory, server entry point, module Routers and shared Prisma client.
-- [ ] Add Zod environment/body/params/query validation and response contracts aligned with frontend screens.
-- [ ] Add .env.example, bounded JSON parsing, request IDs, redacted logs and the documented error envelope.
-- [ ] Implement /health/live and /health/ready, origin handling and the frontend development API proxy.
-- [ ] Establish PostgreSQL development/test databases and document local setup commands.
-- [ ] Verify startup, invalid configuration, health checks and contract fixtures.
+- [x] Create backend/package.json, lockfile, strict TypeScript configuration and build/start/development/test scripts.
+- [x] Create Express app factory, server entry point, module Routers and shared Prisma client.
+- [x] Add Zod environment/body/params/query validation and response contracts aligned with frontend screens.
+- [x] Add .env.example, bounded JSON parsing, request IDs, redacted logs and the documented error envelope.
+- [x] Implement /health/live and /health/ready, origin handling and the frontend development API proxy.
+- [x] Provide isolated PostgreSQL development/test setup and document local commands.
+- [x] Verify startup, invalid configuration, health checks and contract fixtures.
 
 ## Phase 2 - Database and provisioning
 
-- [ ] Implement Prisma models, relations, constraints and indexes from the backend plan, including shared rate-limit storage.
-- [ ] Generate committed migrations; test empty-database and upgrade application.
-- [ ] Seed the eight stable canteen slugs and development menus without overwriting operator-managed data.
-- [ ] Add canteen-code provisioning/rotation using salted scrypt hashes and an admin provisioning CLI.
-- [ ] Block development codes and authentication bypasses in production; never seed the bundled demo admin password.
+- [x] Implement Prisma models, relations, constraints and indexes from the backend plan, including shared rate-limit storage.
+- [x] Generate committed migrations; test empty-database and existing populated-database application.
+- [x] Seed the eight stable canteen slugs and development menus without overwriting operator-managed data.
+- [x] Add canteen-code provisioning/rotation using salted scrypt hashes and an admin provisioning CLI.
+- [x] Block development codes and authentication bypasses in production; never seed the bundled demo admin password.
+
+- [ ] Qualify Supabase staging/production connections, separate roles, TLS and pooling with project credentials.
+
+Verification (2026-10-14): backend unit/HTTP/contract checks **8 passed**; native PostgreSQL migration/seed/provisioning integration suite **passed**; source/test type checks and backend production build **passed**.
+
+Phase 1/2 deployment dependency: Supabase staging/production projects, separate credentials, pool qualification and production provisioning require operator project access. See [backend/README.md](backend/README.md). Authentication, email delivery and frontend API cutover remain later phases.
 
 ## Phase 3 - Student authentication
 

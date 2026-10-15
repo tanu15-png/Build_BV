@@ -1,32 +1,44 @@
-import express from 'express';
-import cors from 'cors';
-
-import { env } from './config/env.js';
+import express, { Router } from 'express';
+import type { Config } from './config/env.js';
+import type { PrismaClient } from './generated/prisma/client.js';
 import { requestId } from './middleware/requestId.js';
-import { healthRouter } from './routes/health.routes.js';
-import { errorHandler } from "./middleware/errorHandler.js";
-
-export function createApp() {
+import { createHealthRouter } from './routes/health.routes.js';
+import { AppError, errorHandler } from './middleware/errorHandler.js';
+import { canteenSchema } from './schemas/contracts.js';
+export function createApp(config: Config, db: Pick<PrismaClient, 'canteen' | '$queryRawUnsafe'>,
+  log: (entry: object) => void = entry => console.log(JSON.stringify(entry))) {
   const app = express();
-
   app.disable('x-powered-by');
-
-  app.use(
-    cors({
-      origin: env.FRONTEND_ORIGIN,
-      credentials: true,
-    })
-  );
-
-  app.use(
-    express.json({
-      limit: '100kb',
-    })
-  );
-
   app.use(requestId);
-
-  app.use('/health', healthRouter);
+  app.use((req, res, next) => {
+    const started = Date.now();
+    res.on('finish', () => { if (config.LOG_LEVEL !== 'silent') log({ requestId: res.locals.requestId,
+      method: req.method, status: res.statusCode, durationMs: Date.now() - started }); });
+    const origin = req.get('origin');
+    if (origin && origin !== config.FRONTEND_ORIGIN) return next(new AppError(403, 'ORIGIN_DENIED', 'Origin is not allowed.'));
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Expose-Headers', 'X-Request-Id');
+    }
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,X-CSRF-Token,X-Request-Id,Idempotency-Key');
+      res.status(204).end(); return;
+    }
+    next();
+  });
+  app.use(express.json({ limit: config.JSON_LIMIT_BYTES, strict: true }));
+  app.use('/health', createHealthRouter(() => db.$queryRawUnsafe('SELECT 1'), config.DB_TIMEOUT_MS));
+  const api = Router();
+  api.get('/canteens', async (_req, res) => {
+    const rows = await db.canteen.findMany({ orderBy: { slug: 'asc' }, select: {
+      id: true, slug: true, name: true, location: true, hours: true, acceptingOrders: true, operational: true, version: true } });
+    res.json({ canteens: rows.map(row => canteenSchema.parse(row)) });
+  });
+  app.use('/api/v1', api);
+  app.use((_req, _res, next) => next(new AppError(404, 'NOT_FOUND', 'Resource not found.')));
   app.use(errorHandler);
   return app;
 }

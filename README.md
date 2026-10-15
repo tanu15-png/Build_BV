@@ -112,6 +112,6 @@ A canteen member can remove access for a member of the same canteen after confir
 
 Use Supabase-managed PostgreSQL with the TypeScript/Express/Zod/Prisma API and a durable outbox worker. The frontend calls Express, which enforces auth and business rules; database hosting alone does not implement them. Supabase Auth is a separate future decision. API/worker and frontend hosting providers remain to be selected; AWS is an available hosting option, not a required database change.
 
-Track integration in [todo.md](todo.md) and capacity/recovery qualification in [scale.md](scale.md). Real signup/staff OTP delivery, password reset, database migrations, daily-code concurrency enforcement and cross-device synchronization are not implemented. The 30,000-user deployment remains unbenchmarked.
+Track integration in [todo.md](todo.md) and capacity/recovery qualification in [scale.md](scale.md). Backend Phase 1 foundation and Phase 2 schema/migrations/provisioning are implemented; see [backend setup and verification](backend/README.md). Supabase deployment qualification, real signup/staff OTP delivery, password reset, transactional daily-code allocation and cross-device synchronization remain pending. The 30,000-user deployment remains unbenchmarked.
 
 The product is named SpoonAte. Existing `campusEats*` browser keys and the demo admin email are retained for compatibility.
