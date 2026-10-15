@@ -20,14 +20,12 @@ export default function Cart() {
     clearCart,
     updateQuantity,
     removeFromCart,
+    cartBusy, cartState, catalogError, refreshCatalog,
   } = useOrders();
 
-  const subtotal = cart.reduce(
-    (sum, item) =>
-      sum + item.price * item.quantity,
-    0
-  );
+  const subtotal = (cartState?.totalPaise || 0) / 100;
 
+  if (!cartState) return <div className="p-10"><p role="status">{catalogError || "Loading your saved cart…"}</p><button onClick={refreshCatalog} className="mt-4 underline">Retry</button></div>;
   if (!cart.length) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8faf9]">
@@ -79,7 +77,7 @@ export default function Cart() {
         <h1 className="text-4xl font-black">
           Your Cart
         </h1>
-        <button onClick={clearCart} className="mt-3 text-sm font-bold text-red-600">Empty cart</button>
+        <button disabled={cartBusy} onClick={clearCart} className="mt-3 text-sm font-bold text-red-600">Empty cart</button>
 
         <p className="text-gray-500 mt-2">
           {cafes.find((cafe) => cafe.id === cart[0]?.cafeId)?.name}
@@ -108,12 +106,14 @@ export default function Cart() {
                   </h3>
 
                   <p className="text-[#0f8f73] font-bold mt-1">
-                    ₹{item.price}
+                    ₹{item.price.toFixed(2)}
                   </p>
 
+                  {!item.available && <p className="mt-2 text-sm text-red-700">Unavailable now. You can reduce the quantity or remove it.</p>}
                   <div className="flex items-center gap-3 mt-4">
 
                     <button
+                      disabled={cartBusy}
                       onClick={() =>
                         updateQuantity(
                           item.id,
@@ -130,6 +130,7 @@ export default function Cart() {
                     </span>
 
                     <button
+                      disabled={cartBusy || !item.available || item.quantity >= 99}
                       onClick={() =>
                         updateQuantity(
                           item.id,
@@ -146,6 +147,7 @@ export default function Cart() {
                 </div>
 
                 <button
+                  disabled={cartBusy}
                   onClick={() =>
                     removeFromCart(item.id)
                   }
@@ -168,26 +170,26 @@ export default function Cart() {
 
             <div className="flex justify-between mt-6">
               <span>Subtotal</span>
-              <span>₹{subtotal}</span>
+              <span>₹{subtotal.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between mt-3">
               <span>Pickup</span>
-              <span>Choose at checkout</span>
+              <span>Available with ordering</span>
             </div>
 
             <hr className="my-5" />
 
             <div className="flex justify-between text-xl font-black">
               <span>Total</span>
-              <span>₹{subtotal}</span>
+              <span>₹{subtotal.toFixed(2)}</span>
             </div>
 
             <Link
               to="/student/checkout"
               className="block text-center bg-[#075d50] text-white rounded-xl py-3 mt-6 font-bold"
             >
-              Proceed to Checkout
+              Review Cart
             </Link>
 
           </div>

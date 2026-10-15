@@ -33,6 +33,7 @@ enum ChallengePurpose {
 model User {
   id String @id @default(uuid()) @db.Uuid
   email String @unique
+  supabaseSubject String? @unique @map("supabase_subject") @db.Uuid
   name String
   passwordHash String? @map("password_hash")
   emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz
@@ -71,6 +72,7 @@ model Canteen {
   challenges AuthChallenge[]
   sessions Session[]
   menuItems MenuItem[]
+  categories MenuCategory[]
   carts Cart[]
   cartItems CartItem[]
   orders Order[]
@@ -144,12 +146,25 @@ model Session {
   @@index([userId, revokedAt, expiresAt])
   @@map("sessions")
 }
+model MenuCategory {
+  id String @id @default(uuid()) @db.Uuid
+  canteenId String @map("canteen_id") @db.Uuid
+  name String
+  archived Boolean @default(false)
+  version Int @default(1)
+  canteen Canteen @relation(fields: [canteenId], references: [id], onDelete: Restrict)
+  items MenuItem[]
+  @@unique([id, canteenId])
+  @@unique([canteenId, name])
+  @@map("menu_categories")
+}
 model MenuItem {
   id String @id @default(uuid()) @db.Uuid
   canteenId String @map("canteen_id") @db.Uuid
   name String
   description String?
-  category String
+  categoryId String @map("category_id") @db.Uuid
+  category MenuCategory @relation(fields: [categoryId, canteenId], references: [id, canteenId], onDelete: Restrict, map: "menu_items_category_scope_fkey")
   pricePaise Int @map("price_paise")
   available Boolean @default(true)
   archived Boolean @default(false)
@@ -160,6 +175,7 @@ model MenuItem {
   orderItems OrderItem[]
   @@unique([id, canteenId])
   @@index([canteenId, archived, available])
+  @@index([categoryId])
   @@map("menu_items")
 }
 model Cart {

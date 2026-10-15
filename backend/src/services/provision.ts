@@ -22,15 +22,17 @@ export async function seed(db: PrismaClient, config: Config) {
       }
       // Seed only a completely empty menu; never overwrite operator-managed records or availability.
       if (await tx.menuItem.count({ where: { canteenId: canteen.id } }) === 0) {
+        const snacks = await tx.menuCategory.upsert({ where: { canteenId_name: { canteenId: canteen.id, name: 'Snacks' } }, create: { canteenId: canteen.id, name: 'Snacks' }, update: {} });
+        const drinks = await tx.menuCategory.upsert({ where: { canteenId_name: { canteenId: canteen.id, name: 'Drinks' } }, create: { canteenId: canteen.id, name: 'Drinks' }, update: {} });
         await tx.menuItem.createMany({ data: [
-          { canteenId: canteen.id, name: 'Sample Masala Sandwich', category: 'Snacks', pricePaise: 4500 },
-          { canteenId: canteen.id, name: 'Sample Tea', category: 'Drinks', pricePaise: 1500 },
+          { canteenId: canteen.id, name: 'Sample Masala Sandwich', categoryId: snacks.id, pricePaise: 4500 },
+          { canteenId: canteen.id, name: 'Sample Tea', categoryId: drinks.id, pricePaise: 1500 },
         ] });
       }
     });
   }
 }
-export async function rotateCode(db: PrismaClient, config: Config, slug: string, code: string) {
+export async function rotateCode(db: PrismaClient, config: Config, slug: string, code: string, actor?: { id: string; requestId: string }) {
   if (code.length < 12 || code.length > 256) throw new Error('Access code must contain 12 to 256 characters');
   if (!developmentSeedsAllowed(config) && directory.some(([, name]) => name.toLowerCase() === code.toLowerCase())) throw new Error('Development codes are prohibited');
   const codeHash = await hashSecret(code);
@@ -43,7 +45,7 @@ export async function rotateCode(db: PrismaClient, config: Config, slug: string,
     await tx.canteenAccessCode.create({ data: { canteenId: canteen.id, codeHash, version } });
     await tx.session.updateMany({ where: { canteenId: canteen.id, revokedAt: null }, data: { revokedAt: new Date() } });
     await tx.authChallenge.updateMany({ where: { canteenId: canteen.id, consumedAt: null }, data: { consumedAt: new Date() } });
-    await tx.auditLog.create({ data: { action: 'CANTEEN_CODE_ROTATED', target: canteen.id, requestId: randomUUID(), metadata: { version, source: 'operator-cli' } } });
+    await tx.auditLog.create({ data: { actorId: actor?.id, action: 'CANTEEN_CODE_ROTATED', target: canteen.id, requestId: actor?.requestId ?? randomUUID(), metadata: { version, source: actor ? 'admin-api' : 'operator-cli' } } });
     return version;
   });
 }

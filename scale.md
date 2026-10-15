@@ -6,7 +6,7 @@ Use **Supabase-managed PostgreSQL**, the planned **TypeScript/Express/Zod/Prisma
 
 No architecture can guarantee that every request will succeed. The goal is measurable availability, correct orders, safe retries, and clear recovery when a device, network, provider, or process fails.
 
-This document extends [the backend implementation plan](backend/backend.md) and [the current architecture](architecture.md). Existing product rules remain in force unless an explicitly identified product decision is adopted. The repository currently has a browser-storage prototype, no backend implementation, and no measured production capacity.
+This document extends [the backend implementation plan](backend/backend.md) and [the current architecture](architecture.md). Existing product rules remain in force unless an explicitly identified product decision is adopted. The repository now has a connected PostgreSQL/Express backend and Supabase Auth integration, while ordering remains a browser-storage prototype. Production capacity has not been measured. See [backend/AUTH.md](backend/AUTH.md) for the adopted authentication revision and remaining email/provider qualification.
 
 ## 1. Define the load before buying infrastructure
 
@@ -362,4 +362,4 @@ Students sign up with name, exact institutional email and password. Email OTP ve
 
 Canteen members enter email, selected canteen and member access code, then verify an email OTP before session creation. The dashboard lists own-canteen member emails, members with access, distinct members with valid signed-in sessions and per-member session counts. These counts measure valid sessions, not online presence. Use paginated listing and aggregate counts rather than downloading all session records to clients.
 
-Own-canteen members may remove a person's canteen membership. The backend must atomically revoke that membership and all scoped sessions, audit actor/time, and block rejoining or completion of pending email challenges even with the shared code until admin restoration. Enforce membership on every staff API request and serialize login/verification with revocation. Preserve unrelated canteen memberships and existing order history. The implemented browser-local member panel is a prototype; real OTP delivery, cross-device counts and server authorization remain pending.
+Own-canteen member removal now atomically revokes membership, scoped sessions and pending challenges, audits actor/time and blocks rejoining until admin restoration. Staff requests recheck membership; login/removal serialize on the canteen lock, preserving unrelated memberships/history. Server authorization and shared counts pass isolated PostgreSQL tests. Live SMTP delivery, cross-device browser acceptance, deployment and campus load qualification remain pending.

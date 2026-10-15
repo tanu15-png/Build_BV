@@ -27,6 +27,13 @@ test('configuration rejects unsafe deployed settings without exposing secrets', 
   }
   assert.throws(() => loadConfig({ ...configInput, PORT: '70000' }));
 });
+test('connection pool budget is configurable and bounded', () => {
+  assert.equal(loadConfig(configInput).DB_POOL_MAX, 10);
+  assert.equal(loadConfig({ ...configInput, DB_POOL_MAX: '5' }).DB_POOL_MAX, 5);
+  for (const value of ['0', '51', '1.5', 'invalid']) {
+    assert.throws(() => loadConfig({ ...configInput, DB_POOL_MAX: value }));
+  }
+});
 test('HTTP health, errors, origins, bounds and redacted logs', async () => {
   const entries: object[] = [];
   const db = { $queryRawUnsafe: async () => 1, canteen: { findMany: async () => [] } } as unknown as PrismaClient;
@@ -63,9 +70,9 @@ test('frontend fixtures enforce identity, quantity, campus domain, paise, status
   assert.equal(contracts['POST /orders']!.body.safeParse({ expectedVersion: 1, pickupAt: '2026-10-14T14:00:00Z', quote: 'signed-quote', studentId: id, totalPaise: 1 }).success, false);
   contracts['POST /cart/items']!.body.parse({ expectedVersion: 1, menuItemId: id, quantity: 2 });
   assert.equal(contracts['POST /cart/items']!.body.safeParse({ expectedVersion: 1, menuItemId: id, quantity: 0 }).success, false);
-  assert.equal(contracts['POST /canteens/:id/menu']!.body.safeParse({ name: 'Tea', category: 'Drinks', pricePaise: 1.1 }).success, false);
+  assert.equal(contracts['POST /canteens/:id/menu']!.body.safeParse({ name: 'Tea', categoryId: id, pricePaise: 1.1 }).success, false);
   assert.equal(contracts['GET /canteens']!.response.safeParse({ canteens: [{ id, slug: 'bella-bite', name: 'Bella Bite', location: null, hours: null, acceptingOrders: true, operational: true, version: 1, codeHash: 'secret' }] }).success, false);
-  assert.equal(Object.keys(contracts).length, 37);
+  assert.equal(Object.keys(contracts).length, 43);
 });
 test('validation handles body, params and parsed query with stable 422 envelope', async () => {
   const app = express(); app.use(requestId); app.use(express.json());

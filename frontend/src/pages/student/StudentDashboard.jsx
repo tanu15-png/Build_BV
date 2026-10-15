@@ -18,7 +18,7 @@ import { useOrders } from "../../context/OrderContext";
 
 export default function StudentDashboard() {
   const { user, logout } = useAuth();
-  const { cart, orders, cafes, foods, notifications, addToCart, isFoodAvailable } = useOrders();
+  const { cart, orders, cafes, foods, notifications, addToCart, isFoodAvailable, cartBusy, catalogLoading } = useOrders();
   const [search, setSearch] = useState("");
   const query = search.trim().toLowerCase();
   const initials = user?.name?.split(" ").map((part) => part[0]).slice(0, 2).join("");
@@ -30,9 +30,8 @@ export default function StudentDashboard() {
       order.status !== "COLLECTED"
   );
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    try { await logout(); navigate("/login"); } catch { /* AuthProvider displays the connection error. */ }
   };
 
   return (
@@ -252,7 +251,7 @@ export default function StudentDashboard() {
                   </p>
 
                   <Link
-                    to={`/student/orders/${orderCode(activeOrder)}`}
+                    to={`/student/orders/${activeOrder.id}`}
                     className="mt-2 bg-[#facc15] text-[#075d50] px-5 py-2.5 rounded-xl font-bold"
                   >
                     Track Order
@@ -265,6 +264,7 @@ export default function StudentDashboard() {
             </section>
           )}
 
+          {catalogLoading && !cafes.length && <p role="status">Loading canteens and menus…</p>}
           {/* CAFES */}
 
           <SectionHeader
@@ -332,14 +332,14 @@ export default function StudentDashboard() {
           {/* POPULAR */}
 
           <SectionHeader
-            title="Sample menu highlights"
+            title="Menu highlights"
             action="Browse cafés"
             link="/student#cafes"
           />
 
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-5 pb-20">
 
-            {foods.filter((food) => query ? food.name.toLowerCase().includes(query) || cafes.find((cafe) => cafe.id === food.cafeId)?.name.toLowerCase().includes(query) : food.id.endsWith("-maggi")).map((food) => (
+            {foods.filter((food) => query ? food.name.toLowerCase().includes(query) || cafes.find((cafe) => cafe.id === food.cafeId)?.name.toLowerCase().includes(query) : true).slice(0, 12).map((food) => (
               <div
                 key={food.id}
                 className="bg-white rounded-2xl overflow-hidden shadow-card"
@@ -358,11 +358,11 @@ export default function StudentDashboard() {
 
                   <p className="mt-1 text-xs text-gray-500">{cafes.find((cafe) => cafe.id === food.cafeId)?.name}</p>
                   <p className="text-[#0f8f73] font-black mt-2">
-                    ₹{food.price}
+                    ₹{food.price.toFixed(2)}
                   </p>
 
                   <button
-                    disabled={!isFoodAvailable(food)}
+                    disabled={cartBusy || !isFoodAvailable(food)}
                     onClick={() => addToCart(food)}
                     className="w-full mt-3 border border-[#0f8f73] text-[#0f8f73] rounded-lg py-2 text-sm font-bold hover:bg-[#0f8f73] hover:text-white"
                   >

@@ -1,31 +1,46 @@
 # SpoonAte implementation checklist
 
-Last checked: 2026-10-14. Backend phase audit and verification are recorded in backend/README.md; historical frontend checks remain dated below.
+Last checked: 2026-10-15. Backend phase audit and verification are recorded in backend/README.md; Supabase setup and operator actions are recorded in backend/SUPABASE.md; historical frontend checks remain dated below.
 
-`[x]` means implemented in the stated scope or verified; `[ ]` means remaining work. Checked frontend features are browser-storage prototype features, not completed backend features. The backend now contains the Phase 1 API foundation and Phase 2 schema, migration, seed and provisioning implementation. Supabase deployment qualification remains pending.
+`[x]` means implemented in the stated scope or verified; `[ ]` means remaining work. Historical frontend checks describe the earlier browser prototype. The backend now contains the foundation, database/provisioning and Supabase Auth integration; menus, categories, availability and carts use server APIs; checkout and accept/prepare/ready now use server APIs; historical browser orders are ignored. Student signup/password login were reported working by the operator; broader staff/admin/browser acceptance and production deployment qualification remain pending.
 
 Backend stack: **TypeScript + Node.js + Express + Zod + Prisma + PostgreSQL**. Keep dependencies minimal and use Node.js built-ins where practical. Follow [backend/backend.md](backend/backend.md) for endpoint contracts, business rules, phase dependencies and acceptance criteria.
 
-Database hosting: **Supabase-managed PostgreSQL**, following [scale.md](scale.md). React calls the Express API; Express and the outbox worker access Supabase through Prisma. Supabase database hosting does not automatically implement authentication: student passwords, email OTPs, cookie sessions and canteen membership checks remain backend work. Supabase Auth is a separate future integration decision.
+Database hosting: **Supabase-managed PostgreSQL**, following [scale.md](scale.md). Supabase Auth now manages passwords, email verification and recovery. Express verifies Auth tokens, issues revocable opaque cookie sessions, and enforces application roles/canteen memberships through Prisma. See [backend/AUTH.md](backend/AUTH.md) for the adopted authentication revision, tests and remaining live-email/dashboard acceptance.
+
+## Supabase integration - connected development project
+
+- [x] Apply all three committed migrations (initial schema, Supabase identity binding and menu categories) to the connected development project using separate owner credentials.
+- [x] Add server-only database/Auth environment variables and documented placeholders; keep local credentials Git-ignored and expose only the Auth publishable key to Vite.
+- [x] Configure the dedicated application role, application-table RLS/grants and server-only connection URLs; use session pooling on port 5432.
+- [x] Seed all eight canteens without demo menus or browser account imports; generate separate backend session/OTP secrets.
+- [x] Provision the operator-specified admin and initial canteen access codes; save generated credentials in Git-ignored backend/.env.provisioned without printing passwords.
+- [x] Add repeatable `db:check` and `provision:initial` commands, plus a configurable bounded application pool.
+- [x] Verify the connected session pool: encrypted application connection, applied migrations, restricted grants/RLS on all 20 tables, browser-role denial, named prepared statements, interactive commit/rollback, bounded application-pool timeout/recovery and real Express health/directory responses.
+- [x] Re-run initial provisioning and confirm the existing admin and all eight active canteen codes are preserved.
+
+Scope: this is development setup using the requested encrypted `sslmode=require` connection. The full staging/production TLS, load, restore and application-feature requirements below remain release work. See [backend/SUPABASE.md](backend/SUPABASE.md).
 
 ## Supabase integration - remaining work
 
 - [ ] Create separate Supabase staging and production projects; select region, paid production plan, compute and recovery options using the requirements and load tests in scale.md.
-- [ ] Configure server-only database credentials and TLS connections in backend environment configuration; add placeholder connection variables to .env.example without committing secrets or exposing credentials in frontend Vite variables.
-- [ ] Set up a least-privilege application database role and separate migration credentials. Keep application tables inaccessible to anonymous/browser clients; disable the Supabase Data API if unused, or explicitly secure exposed schemas with tested grants and RLS policies.
-- [ ] Connect the shared Prisma client to Supabase PostgreSQL. Select direct/session/transaction pooling against the pinned Prisma version and hosting environment; use a supported migration connection and verify prepared statements, interactive transactions and connectivity.
+- [ ] Configure and qualify verified TLS and separate server-only credentials for deployed staging/production; development uses the requested encrypted `require` mode.
+- [ ] Confirm the unused Supabase Data API is disabled in the dashboard. Dedicated application/migration roles, table grants/RLS and browser-role denial are implemented and verified for the connected development project.
+- [ ] Qualify production hosting/pooling against the pinned Prisma version and selected resources; development session-pool connectivity, prepared statements and interactive transactions are verified.
 - [ ] Budget pooled and PostgreSQL connections across API replicas, workers, deployments and migration tools; leave operational headroom and test connection exhaustion behavior.
 - [ ] Apply committed Prisma migrations to staging and production; create users, password hashes, email challenges, sessions, canteen memberships, menus, carts, orders, daily code allocations, notifications and outbox tables.
 - [ ] Enforce campus-wide daily code uniqueness with UNIQUE(code_day, code), derive Asia/Kolkata dates from server time, and test simultaneous allocations, collision retries, midnight renewal and daily exhaustion on Supabase PostgreSQL.
 - [ ] Seed the eight canteens and provision production access-code hashes and admin credentials without importing browser passwords or overwriting existing operator-managed data.
-- [ ] Implement student signup OTP activation and email/password login using the backend and Supabase database; store salted password hashes only. Implement canteen email OTP verification, scoped memberships, shared session counts and atomic member/session revocation.
+- [ ] Complete live email/browser acceptance for the implemented Supabase signup/login, staff verification, scoped memberships, shared counts and atomic member/session revocation. See backend/AUTH.md for the implemented code and provider limits.
 - [ ] Connect a production email provider for signup, canteen-login and password-reset OTPs; configure verified sending identity, delivery monitoring, expiry/resend controls and quotas for campus onboarding bursts.
 - [ ] Deploy Express and the durable outbox worker on separately selected hosting; configure their Supabase connections, secrets, health checks and startup/shutdown behavior.
-- [ ] Replace frontend localStorage account/order/member records with authenticated Express API calls backed by Supabase; verify student ordering, canteen updates and member removal across separate devices.
+- [ ] Complete durable notification APIs/worker and live cross-device browser acceptance. Authentication, memberships, menus, carts, orders and accept/prepare/ready now use the backend.
 - [ ] Enable the required database backups/PITR and monitoring; test restoration, migrations, outages, query performance and peak-load scenarios before campus rollout.
 - [ ] Evaluate Supabase Storage for menu images and Supabase Realtime for status updates only when those features are needed; define access policies and load-test quotas before adopting either.
 
-## Completed documentation and frontend prototype
+## Historical documentation and frontend prototype
+
+The auth/account/member browser-storage entries below record the original prototype. They are superseded by the Supabase Auth implementation in Phases 3/4; old plaintext identity storage is removed on startup. Ordering remains a browser prototype.
 
 - [x] Document product requirements, existing architecture and payment-free testing policy in README.md and architecture.md.
 - [x] Define backend stack, planned folder structure, frontend endpoint mappings and 13 implementation phases in backend/backend.md.
@@ -54,12 +69,13 @@ Evidence: frontend/src/App.jsx, context/AuthContext.jsx, context/OrderContext.js
 
 ## Verification completed
 
-- [x] `cd frontend; npm run test`: passed on 2026-10-04; running `node --test --test-isolation=none --test-reporter=spec tests/orderRules.test.js` also confirmed all 19 individual cases passed.
-- [x] `cd frontend; npm run lint`: passed on 2026-10-04.
-- [x] `cd frontend; npm run build`: passed on 2026-10-04.
+- [x] Frontend tests (32), lint and build: passed on 2026-10-15, including auth, category/price mapping and historical order rules.
+- [x] Backend `npm test`: 14 tests passed; isolated PostgreSQL `test:auth`: 16 cases passed on 2026-10-15, including OTP signup with immediate sign-in and replay rejection (mocked Supabase, no emails sent).
+- [x] Backend source/test TypeScript checks and production build: passed on 2026-10-15.
+- [x] Live `auth:check` and `db:check`: passed for the connected development project on 2026-10-15.
 - [ ] Perform and record browser acceptance testing across student, canteen and admin profiles, including mobile layouts, keyboard navigation and refresh/reconnect behavior.
 
-These checks verify frontend rules, source lint and the production bundle. They do not verify browser acceptance, database security, cross-device synchronization, backend behavior or production capacity.
+Verification scope: frontend rules/lint/build, backend auth/authorization against isolated PostgreSQL, and live development database security/connectivity/public Auth settings. Live inbox/callback/browser behavior, cross-device order synchronization and production capacity remain unverified.
 
 ## Phase 1 - Backend foundation and contracts
 
@@ -79,65 +95,79 @@ These checks verify frontend rules, source lint and the production bundle. They 
 - [x] Add canteen-code provisioning/rotation using salted scrypt hashes and an admin provisioning CLI.
 - [x] Block development codes and authentication bypasses in production; never seed the bundled demo admin password.
 
-- [ ] Qualify Supabase staging/production connections, separate roles, TLS and pooling with project credentials.
+- [x] Qualify the connected development project's separate database roles, encrypted session pool, prepared statements and interactive transactions.
+- [ ] Qualify deployed staging/production projects, verified TLS and production connection/load/recovery budgets.
 
 Verification (2026-10-14): backend unit/HTTP/contract checks **8 passed**; native PostgreSQL migration/seed/provisioning integration suite **passed**; source/test type checks and backend production build **passed**.
 
-Phase 1/2 deployment dependency: Supabase staging/production projects, separate credentials, pool qualification and production provisioning require operator project access. See [backend/README.md](backend/README.md). Authentication, email delivery and frontend API cutover remain later phases.
+Phase 1/2 deployment dependency: production project/credentials, verified TLS, load/recovery qualification and production provisioning require operator setup. Development Supabase integration and authentication code are implemented; live email/browser acceptance and the remaining ordering API cutover are pending. See [backend/README.md](backend/README.md).
 
 ## Phase 3 - Student authentication
 
-- [ ] Authenticate student email ownership using a one-time code sent to the exact @banasthali.in address. Domain validation alone is not authentication; do not activate the account or create an authenticated session before successful signup verification.
-- [ ] Implement the confirmed student auth flow: name/email/password signup, email OTP verification before account activation, then registered email/password login. Hash passwords on the server and add email-verified password reset; successful signup returns to login.
-- [ ] Remove plaintext student passwords from browser account/session storage during backend cutover; do not import prototype passwords into production accounts.
-- [ ] Implement student signup/reset email challenges, email/password login, real email delivery, verification and resend endpoints.
-- [ ] Enforce institutional email validation, account uniqueness, OTP expiry, single use, attempt limits and resend invalidation.
-- [ ] Persist hashed opaque sessions; implement /auth/me, logout, expiry and revocation.
-- [ ] Add CSRF bootstrap/checks, secure cookie configuration and shared rate limits.
-- [ ] Test wrong passwords, unverified login, reset/session revocation, OTP replay, concurrent signup, unknown-email responses, delivery failure and account disabling.
+- [x] Require student signup email OTP, verify the code on the server, activate the institutional profile and sign in immediately. Subsequent login uses email/password only; forgot password appears on login, and resend appears only on verification.
+- [x] Bind verified Supabase subjects uniquely while preserving existing application UUIDs. Let Supabase manage student passwords; never import prototype passwords.
+- [x] Remove plaintext student accounts and prototype identity/member/session records from browser storage on startup.
+- [x] Implement hashed opaque cookie sessions, /auth/me, logout, absolute expiry and revocation, plus origin/signed-CSRF checks and shared application rate limits.
+- [x] Verify configured project/key and live public Auth settings: email signup enabled and confirmation required; no test email sent.
+- [x] Test unverified/domain/role denial, subject-binding conflicts, OTP-required signup with automatic session creation, cookie/CSRF/origin checks, recovery revocation, account disabling and redacted provider failure mapping.
+- [ ] Apply the OTP-only Confirm sign up template from backend/email-templates/confirm-signup.html in the Supabase dashboard; then verify real code delivery and signup-to-dashboard behavior.
+- [ ] Complete real inbox/callback/browser acceptance, including wrong passwords, unknown-email reset, expired/wrong/replayed OTPs, resend invalidation, concurrent Supabase signup and delivery outages. Configure production sending quotas/abuse controls; application tests mock Supabase rather than proving provider behavior.
 
 ## Phase 4 - Staff and admin authorization
 
-- [ ] Authenticate canteen member email ownership using a one-time code sent to that member's email. The email OTP is separate from the canteen member access code and the three-character order pickup code.
-- [ ] Bind each staff email challenge to its member email, selected canteen and access-code version; create the membership/session only after successful email verification and a valid canteen access code.
-- [ ] Verify member email and the selected canteen's hashed access code before establishing staff membership/session.
-- [ ] Recheck membership, account status, canteen scope and code version on staff requests.
-- [ ] Implement provisioned admin authentication and server-assigned permissions.
-- [ ] Add own-canteen member list/counts and removal endpoints. Show member emails, members with access, distinct people with valid sessions, and session counts; valid sessions are not online presence.
-- [ ] On removal, revoke the canteen membership and all its sessions atomically, audit the actor/time, and block rejoining even with the existing member code until an admin explicitly restores access. Preserve orders/history and unrelated canteen memberships.
-- [ ] Add audited account disabling, admin-only membership restoration and code rotation.
-- [ ] Test forged roles, cross-canteen listing/removal, removal versus pending OTP completion, blocked rejoining, distinct-person counts, rotation races and CSRF enforcement.
+- [x] Integrate fresh Supabase staff email verification, separate from the canteen access code and order pickup code.
+- [x] Bind ten-minute staff challenges to email, canteen and access-code version; consume once under the canteen lock after a fresh email-authentication proof. Reject stale/password-only proofs and revoked memberships.
+- [x] Recheck account status, server role, canteen scope, membership and code version on authenticated staff requests.
+- [x] Implement provisioned-admin activation/verified identity binding and password login; ignore client metadata when assigning permissions.
+- [x] Add paginated own-canteen members, distinct-person/session counts, versioned removal and frontend integration.
+- [x] Atomically revoke scoped membership/sessions/pending challenges with audit records; block rejoining until explicit admin restoration and preserve unrelated memberships/history.
+- [x] Add audited admin account enable/disable, membership restore/revoke and access-code rotation APIs.
+- [x] Test forged roles, cross-canteen denial, stale/replayed challenges, code rotation, shared counts, removal-versus-login concurrency, restoration, scoped preservation and CSRF/rate limits against isolated PostgreSQL.
+- [ ] Complete real staff/admin email/browser acceptance and concurrent rotation scenarios on Supabase. Build dedicated admin maintenance controls when that UI is implemented.
+
+- [x] Apply the category migration to development Supabase and rerun db:check: restricted role, RLS/browser denial on 20 tables, prepared statements, bounded pool, interactive transactions and live directory/catalog contracts pass.
 
 ## Phase 5 - Catalog, menus and availability
 
-- [ ] Implement directory/menu reads and own-canteen item create/edit/archive endpoints.
-- [ ] Implement explicit canteen and item availability updates with version conflicts.
-- [ ] Validate integer-paise prices and preserve historical order snapshots.
+- [x] Implement the database-backed public canteen directory (`GET /api/v1/canteens`).
+- [x] Implement menu reads and own-canteen item create/edit/archive endpoints.
+- [x] Implement explicit canteen and item availability updates with version conflicts.
+- [x] Validate integer-paise prices and preserve historical order snapshots.
 - [ ] Replace sample menus, locations and hours with confirmed canteen-supplied data before real use.
-- [ ] Test ownership, stale updates and pause behavior without blocking existing fulfillment.
+- [x] Test ownership, stale updates and pause behavior without blocking existing fulfillment.
+
+- [x] Add canteen-owned categories with case-insensitive unique names, rename/archive/restore and category-scoped items.
+- [x] Let staff enter pickup location and opening hours through Manage menu.
 
 ## Phase 6 - Persistent carts
 
-- [ ] Implement server cart read/add/edit/remove/clear endpoints scoped to the authenticated student.
-- [ ] Enforce single-canteen contents transactionally, quantity bounds and availability checks.
-- [ ] Return cart-line IDs, versions, current totals and a server-verifiable price quote.
-- [ ] Allow unavailable-item removal and reject stale checkout reviews with an updated summary.
-- [ ] Test simultaneous device updates, cart restoration and mixed-canteen conflicts.
+- [x] Implement server cart read/add/edit/remove/clear endpoints scoped to the authenticated student.
+- [x] Enforce single-canteen contents transactionally, quantity bounds and availability checks.
+- [x] Return cart-line IDs, versions, current totals and a server-verifiable price quote.
+- [x] Allow unavailable-item removal and reject stale checkout reviews with an updated summary.
+- [x] Test simultaneous device updates, cart restoration and mixed-canteen conflicts.
+
+Student menus/carts now use server records with polling, focus/reconnect refresh, loading/errors and conflict recovery. Legacy local carts/availability are discarded. Checkout performs a server review; checkout and accept/prepare/ready now use server APIs.
+
+- [x] Verify category/cart integration against isolated PostgreSQL: 12 suite cases including concurrent updates, ownership, stale/forged/expired quotes, archive/restore, pause behavior and oversized-cart removal.
+- [x] Recheck authentication (16 suite cases), schema/provisioning (1 suite), backend unit tests (14), TypeScript checks and production builds; verify populated legacy category backfill.
 
 ## Phase 7 - Transactional test orders
 
-- [ ] Implement checkout with pickup timestamp validation and actor-scoped idempotency keys.
-- [ ] Lock/revalidate cart, canteen, items and quote in a Prisma transaction.
-- [ ] Allocate pickup codes using server-derived Asia/Kolkata codeDay and UNIQUE(code_day, code) across all canteens/statuses; detect daily exhaustion.
-- [ ] Atomically create order/item snapshots/history/outbox records, clear the cart and save the retry response.
-- [ ] Test double submits, lost responses, price/availability races, daily collisions/exhaustion, midnight reuse, late pickup and rollback behavior.
+- [x] Implement checkout with pickup timestamp validation and actor-scoped idempotency keys.
+- [x] Lock/revalidate cart, canteen, items and quote in a Prisma transaction.
+- [x] Allocate pickup codes using server-derived Asia/Kolkata codeDay and UNIQUE(code_day, code) across all canteens/statuses; detect daily exhaustion.
+- [x] Atomically create order/item snapshots/history/outbox records, clear the cart and save the retry response.
+- [x] Test double submits, lost responses, price/availability races, daily collisions/exhaustion, midnight reuse, late pickup and rollback behavior.
 
 ## Phase 8 - Fulfillment transitions
 
-- [ ] Implement own-canteen accept, prepare and ready command endpoints.
-- [ ] Enforce consecutive state transitions, expected versions and idempotent command retries.
-- [ ] Write status, actor/time, history and outbox events atomically.
-- [ ] Verify concurrent staff updates and fulfillment after incoming orders are paused.
+- [x] Implement own-canteen accept, prepare and ready command endpoints.
+- [x] Enforce consecutive state transitions, expected versions and idempotent command retries.
+- [x] Write status, actor/time, history and outbox events atomically.
+- [x] Verify concurrent staff updates and fulfillment after incoming orders are paused.
+
+- [x] Verify order integration with 17 isolated PostgreSQL cases, including real full-day code exhaustion, checkout/menu races, staff races and order/fulfillment outbox rollback. Backend unit tests (16), frontend tests (39), source/test type checks and production builds pass. Live Supabase orders:check passed checkout/replay/allocation/scoped reads and accept/prepare/ready; all temporary records rolled back. Real browser acceptance remains pending.
 
 ## Phase 9 - Notifications and synchronization
 
@@ -161,19 +191,23 @@ Phase 1/2 deployment dependency: Supabase staging/production projects, separate 
 
 ## Phase 12 - Frontend API integration and remaining screens
 
-- [ ] Add frontend/src/services/api.js using fetch, credentials, CSRF headers and consistent error handling.
-- [ ] Replace AuthContext local identity with student email/password login, signup/reset and canteen email challenges, verification UI and server session restoration.
-- [ ] Connect the canteen member panel to paginated member/count/removal APIs; revalidate sessions after removal and add admin-only restoration controls.
-- [ ] Add student and canteen email-code entry screens with resend cooldown, expiry, error handling and pending states; never use a frontend flag to mark an email verified.
-- [ ] Replace OrderContext local records with server carts, orders, menus, availability and notifications.
-- [ ] Map canteen slugs to UUIDs, cafeId to canteenId, cart item IDs to cart-line IDs, and rupees to integer paise.
-- [ ] Use order UUIDs in navigation/mutations; show codeDay, orderCode, canteen and items on every order card, and pickup date/time in IST.
-- [ ] Add pending/loading/retry states and reuse idempotency keys after uncertain responses.
+- [x] Add frontend/src/services/api.js using fetch, credentials, CSRF headers and consistent error handling.
+- [x] Replace AuthContext local identity with Supabase signup/login/reset, server session restoration and canteen email challenges.
+- [x] Connect the canteen member panel to paginated member/count/removal APIs and revalidate sessions after removal.
+- [ ] Add dedicated admin-only restoration/maintenance UI; backend authorization endpoints are implemented.
+- [x] Add student/canteen email-code entry, callback and recovery screens with resend cooldown, expiry, errors and pending states; backend proof establishes identity.
+- [x] Replace OrderContext local carts/orders/menus/availability with server records; add scoped paginated reads, UUID detail routes and persisted retry keys.
+- [ ] Replace derived notification previews with the durable notification API/worker in Phase 9.
+- [x] Map canteen slugs/UUIDs for staff login and authenticated canteen identity.
+- [ ] Map remaining catalog/cart/order identifiers and convert frontend rupees to integer paise during the data cutover.
+- [x] Use order UUIDs in navigation/mutations; show allocation day/code, canteen and items on order cards, and pickup date/time in IST.
+- [x] Add order pending/loading/retry states and retain the exact request/key after uncertain checkout or fulfillment responses.
 - [ ] Add notification read/unread UI backed by the notification endpoints.
-- [ ] Implement and route MenuManagement.jsx for menu creation, editing and archiving; it is currently an empty file. Availability toggles already exist on CanteenDashboard.
+- [x] Implement and route MenuManagement.jsx for canteen-owned categories/items, editing/moving, archival/restoration, details and availability.
 - [ ] Implement and route CanteenSettings.jsx for supported canteen settings; it is currently an empty file.
 - [ ] Decide whether dedicated CanteenAnalytics.jsx is required; implement/route it if included. It is currently an empty file; basic dashboard counts already exist.
-- [ ] Remove bundled canteen-code/admin-secret lookups from API mode and prevent silent local-write fallback on outages.
+- [x] Remove bundled canteen-code/demo-admin lookups from login and fail closed when auth APIs are unavailable.
+- [ ] Ensure the remaining ordering data cutover never silently falls back to local writes on API outages.
 - [ ] Verify all role flows across separate devices with persistent server state.
 
 ## Phase 13 - Release readiness
@@ -207,4 +241,26 @@ Phase 1/2 deployment dependency: Supabase staging/production projects, separate 
 
 ## Next implementation step
 
-Begin Phase 1, then Phase 2, completing the Supabase setup/connection/migration tasks alongside those phases. Connect each frontend feature as its endpoint becomes available, and complete the full API cutover in Phase 12. Check tasks only after their implementation and relevant acceptance checks pass; do not mark backend phases complete based on frontend demo behavior.
+Complete the dashboard URL/SMTP and real email/browser acceptance steps in backend/AUTH.md. Run `auth:check` and `db:check` from backend. Phases 5–8 catalog/categories, persistent carts, transactional orders and fulfillment are implemented. Continue with Phase 9 notifications/outbox processing, then complete the remaining frontend data cutover in Phase 12. Do not mark provider acceptance, production qualification or ordering complete based on the authentication tests.
+
+## Run frontend and backend locally
+
+Use two WSL terminals and keep both running. Dependencies and private environment files are already configured for this workspace; do not overwrite `.env` files with examples.
+
+Backend terminal:
+
+```bash
+cd /mnt/c/projects/build_bv/backend
+npm run dev
+```
+
+Frontend terminal:
+
+```bash
+cd /mnt/c/projects/build_bv/frontend
+npm run dev -- --port 5173 --strictPort
+```
+
+Open `http://localhost:5173/login`. The frontend proxies `/api` requests to Express on port 4000. Database readiness is `http://localhost:4000/health/ready`. Supabase hosts the database, so this setup does not require starting local Docker/PostgreSQL. If a server is already running, reuse it or stop that server with Ctrl+C before starting another on the same port. Ctrl+C stops each development server.
+
+Next coding phase: **Phase 9 — Notifications and synchronization**. Checkout, permanent daily pickup codes and scoped accept/prepare/ready actions are implemented. Next process the durable outbox and persist notification/read state; collection verification follows in Phase 10. Real menu/location/hour data and live authentication acceptance remain operator inputs/checks.

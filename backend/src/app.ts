@@ -1,3 +1,6 @@
+import { createOrdersRouter } from './routes/orders.routes.js';
+import type { OrderOptions } from './services/orders.js';
+import { createCatalogRouter } from './routes/catalog.routes.js';
 import express, { Router } from 'express';
 import type { Config } from './config/env.js';
 import type { PrismaClient } from './generated/prisma/client.js';
@@ -5,8 +8,9 @@ import { requestId } from './middleware/requestId.js';
 import { createHealthRouter } from './routes/health.routes.js';
 import { AppError, errorHandler } from './middleware/errorHandler.js';
 import { canteenSchema } from './schemas/contracts.js';
-export function createApp(config: Config, db: Pick<PrismaClient, 'canteen' | '$queryRawUnsafe'>,
-  log: (entry: object) => void = entry => console.log(JSON.stringify(entry))) {
+import { createAuthRouter } from './routes/auth.routes.js';
+export function createApp(config: Config, db: PrismaClient,
+  log: (entry: object) => void = entry => console.log(JSON.stringify(entry)), authFetch: typeof fetch = fetch, orderOptions: OrderOptions = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestId);
@@ -24,7 +28,7 @@ export function createApp(config: Config, db: Pick<PrismaClient, 'canteen' | '$q
     }
     if (req.method === 'OPTIONS') {
       res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,X-CSRF-Token,X-Request-Id,Idempotency-Key');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-CSRF-Token,X-Request-Id,Idempotency-Key');
       res.status(204).end(); return;
     }
     next();
@@ -37,6 +41,9 @@ export function createApp(config: Config, db: Pick<PrismaClient, 'canteen' | '$q
       id: true, slug: true, name: true, location: true, hours: true, acceptingOrders: true, operational: true, version: true } });
     res.json({ canteens: rows.map(row => canteenSchema.parse(row)) });
   });
+  api.use(createAuthRouter(config, db, authFetch));
+  api.use(createCatalogRouter(config, db));
+  api.use(createOrdersRouter(config, db, orderOptions));
   app.use('/api/v1', api);
   app.use((_req, _res, next) => next(new AppError(404, 'NOT_FOUND', 'Resource not found.')));
   app.use(errorHandler);

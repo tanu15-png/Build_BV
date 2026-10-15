@@ -1,92 +1,107 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useState } from "react";
-import { cafes } from "../data/mockData";
-import { canteenAccessCodes } from "../data/canteenAccess";
-import { studentAccount, canteenMember, revokeCanteenMember, canteenSessionActive } from "../utils/authRules";
-import { readStoredValue, usePersistentState } from "../hooks/usePersistentState";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { api } from '../services/api';
+import { supabase } from '../services/supabase';
+import { createAuthActions } from '../services/authActions';
 
 const AuthContext = createContext();
-const emptyRecords = [];
-const memberKey = "campusEatsMembersV2";
-const sessionKey = "campusEatsStaffSessionsV2";
+const actions = createAuthActions({ auth: supabase?.auth, api, storage: sessionStorage, origin: window.location.origin });
 export function AuthProvider({ children }) {
-  const [members, setMembers] = usePersistentState(memberKey, emptyRecords);
-  const [staffSessions, setStaffSessions] = usePersistentState(sessionKey, emptyRecords);
-  const [now, setNow] = useState(Date.now);
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 60_000);
-    return () => clearInterval(timer);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
+  const [canteenMembers, setMembers] = useState([]);
+  const [memberSummary, setMemberSummary] = useState(null);
+  const [memberError, setMemberError] = useState('');
+  const [nextCursor, setNextCursor] = useState(null);
+  const revision = useRef(0);
+  const signingOut = useRef(false);
+  const canteenId = user?.canteenId;
+  const mapUser = useCallback(async identity => {
+    const { canteens } = await api('/canteens');
+    const cafeId = identity.canteenId ? canteens.find(c => c.id === identity.canteenId)?.slug : undefined;
+    if (identity.role === 'CANTEEN' && !cafeId) throw new Error('Your canteen is unavailable. Contact an administrator.');
+    return { ...identity, role: identity.role.toLowerCase(), cafeId };
   }, []);
-  const [savedUser, setSavedUser] = useState(() => {
-    try { return JSON.parse(sessionStorage.getItem("campusEatsSessionV2")); }
-    catch { return null; }
-  });
-  const setUser = (next) => {
-    sessionStorage.setItem("campusEatsSessionV2", JSON.stringify(next));
-    setSavedUser(next);
+  const refreshSession = useCallback(async () => {
+    if (signingOut.current) return;
+    const started = revision.current;
+    try { const next = await mapUser(await api('/auth/me')); if (started === revision.current) { setUser(next); setAuthError(''); } }
+    catch (error) {
+      if (started !== revision.current) return;
+      if ([401, 403].includes(error.status)) { setUser(null); setAuthError(''); }
+      else setAuthError(error.message);
+    } finally { setLoading(false); }
+  }, [mapUser]);
+  useEffect(() => {
+    // Remove prototype plaintext accounts and roles. Never import their credentials.
+    for (const key of ['campusEatsStudentsV2', 'campusEatsMembersV2', 'campusEatsStaffSessionsV2']) localStorage.removeItem(key);
+    sessionStorage.removeItem('campusEatsSessionV2');
+    const initial = setTimeout(() => { void refreshSession(); }, 0);
+    const refresh = () => { void refreshSession(); };
+    const timer = setInterval(refresh, 30000);
+    window.addEventListener('focus', refresh);
+    window.addEventListener('online', refresh);
+    return () => { clearTimeout(initial); clearInterval(timer); window.removeEventListener('focus', refresh); window.removeEventListener('online', refresh); };
+  }, [refreshSession]);
+  const refreshMembers = useCallback(async (cursor = null) => {
+    if (!canteenId) return;
+    const started = revision.current;
+    try {
+      const page = await api(`/canteens/${canteenId}/members?limit=100${cursor ? `&cursor=${cursor}` : ''}`);
+      if (started !== revision.current) return;
+      setMembers(current => cursor ? [...current, ...page.items] : page.items);
+      setNextCursor(page.nextCursor);
+      setMemberSummary(page);
+      setMemberError('');
+    } catch (error) { if (started === revision.current) { setMemberError(error.message); if (error.status === 401) void refreshSession(); } }
+  }, [canteenId, refreshSession]);
+  useEffect(() => {
+    if (!canteenId) return;
+    const initial = setTimeout(() => { void refreshMembers(); }, 0);
+    const timer = setInterval(() => { void refreshMembers(); }, 30000);
+    return () => { clearTimeout(initial); clearInterval(timer); };
+  }, [canteenId, refreshMembers]);
+  const accept = async identity => {
+    revision.current++;
+    const mapped = await mapUser(identity); setUser(mapped); setAuthError(''); setLoading(false); return mapped;
   };
-  const user = savedUser && (
-    (savedUser.role === "student" && /^[^@\s]+@banasthali\.in$/.test(savedUser.email)) ||
-    (savedUser.role === "canteen" && canteenSessionActive(
-      staffSessions.find((session) => session.id === savedUser.sessionId), members, now)) ||
-    savedUser.role === "admin"
-  ) ? savedUser : null;
-
-  const login = ({ role, email, name, register, cafeId, secretCode, password }) => {
-    let nextUser;
-    if (role === "student") {
-      const students = readStoredValue("campusEatsStudentsV2", {});
-      const account = studentAccount({ email, name, register, password }, students);
-      if (register) {
-        students[account.email] = account;
-        localStorage.setItem("campusEatsStudentsV2", JSON.stringify(students));
-        return { role: account.role, email: account.email, name: account.name };
-      }
-      nextUser = { role: account.role, email: account.email, name: account.name };
-    } else if (role === "canteen") {
-      nextUser = canteenMember({ email, cafeId, secretCode }, cafes, canteenAccessCodes);
-      const at = new Date();
-      let membership;
-      setMembers((current) => {
-        const existing = current.find((member) => member.email === nextUser.email && member.cafeId === cafeId);
-        if (existing?.status === "REVOKED") throw new Error("Your access to this canteen has been removed. Contact the canteen administrator.");
-        membership = existing || { id: crypto.randomUUID(), email: nextUser.email, cafeId, status: "ACTIVE", joinedAt: at.toISOString() };
-        return existing ? current : [...current, membership];
-      });
-      const session = { id: crypto.randomUUID(), memberId: membership.id, email: nextUser.email, cafeId,
-        createdAt: at.toISOString(), expiresAt: new Date(at.getTime() + 12 * 60 * 60 * 1000).toISOString() };
-      setStaffSessions((current) => [...current.filter((item) => item.id !== savedUser?.sessionId && canteenSessionActive(item, readStoredValue(memberKey, emptyRecords), at.getTime())), session]);
-      nextUser = { ...nextUser, sessionId: session.id };
-    } else if (role === "admin") {
-      if (email.trim().toLowerCase() !== "admin@campuseats.com" || password !== "admin123") {
-        throw new Error("Incorrect admin email or password.");
-      }
-      nextUser = { role, email: "admin@campuseats.com", name: "SpoonAte Admin" };
-    } else {
-      throw new Error("Choose a valid account role.");
+  const login = async values => {
+    if (values.role === 'student' && values.register) { await actions.signup(values); return { pending: true }; }
+    if (values.role === 'canteen') {
+      const { canteens } = await api('/canteens');
+      const canteen = canteens.find(c => c.slug === values.cafeId);
+      if (!canteen) throw new Error('Select a valid canteen.');
+      await actions.staff({ email: values.email, canteenId: canteen.id, accessCode: values.secretCode });
+      return { pending: true };
     }
-    if (role !== "canteen" && savedUser?.sessionId) {
-      setStaffSessions((current) => current.filter((session) => session.id !== savedUser.sessionId));
-    }
-    setNow(Date.now());
-    setUser(nextUser);
-    return nextUser;
+    const result = await actions.login(values);
+    return result.pending ? result : accept(result);
   };
-  const removeMember = (memberId) => {
-    const currentMembers = readStoredValue(memberKey, emptyRecords);
-    const session = readStoredValue(sessionKey, emptyRecords).find((item) => item.id === savedUser?.sessionId);
-    if (!canteenSessionActive(session, currentMembers)) throw new Error("Sign in again to manage canteen members.");
-    setMembers((current) => revokeCanteenMember(current, user, memberId));
-    setStaffSessions((current) => current.filter((item) => item.memberId !== memberId));
+  const finish = async result => result.verified || result.recovery ? result : accept(result);
+  const logout = async () => {
+    signingOut.current = true;
+    revision.current++;
+    try {
+      await api('/auth/logout', { method: 'POST', body: {} });
+      setUser(null); setMembers([]); setMemberSummary(null); actions.clear();
+      await supabase?.auth.signOut({ scope: 'local' });
+    } catch (error) { setAuthError('Sign-out could not be confirmed. Reconnect and try again.'); throw error; }
+    finally { revision.current++; signingOut.current = false; }
   };
-  const logout = () => {
-    setStaffSessions((current) => current.filter((session) => session.id !== savedUser?.sessionId));
-    setUser(null);
+  const removeMember = async id => {
+    const member = canteenMembers.find(m => m.id === id);
+    if (!member || !user?.canteenId) throw new Error('Refresh the member list and retry.');
+    await api(`/canteens/${user.canteenId}/members/${id}/revoke`, { method: 'POST', body: { expectedVersion: member.version } });
+    await refreshSession(); await refreshMembers();
   };
-  const activeSessions = staffSessions.filter((session) => canteenSessionActive(session, members, now));
-  const canteenMembers = user?.role === "canteen" ? members.filter((member) => member.cafeId === user.cafeId).map((member) => ({
-    ...member, sessionCount: activeSessions.filter((session) => session.memberId === member.id).length,
-  })) : [];
-  return <AuthContext.Provider value={{ user, login, logout, canteenMembers, removeMember }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, authError, refreshSession, login, logout,
+    canteenMembers, memberSummary, memberError, removeMember, loadMoreMembers: nextCursor ? () => refreshMembers(nextCursor) : null,
+    pendingAuth: actions.pending, clearPending: actions.clear, resend: actions.resend,
+    verifyEmail: async code => finish(await actions.verify(code)),
+    completeCallback: async flow => finish(await actions.callback(flow)),
+    activateAdmin: actions.activateAdmin, resetPassword: actions.reset, changePassword: actions.changePassword,
+    requestVerification: actions.requestVerification,
+  }}>{children}</AuthContext.Provider>;
 }
 export function useAuth() { return useContext(AuthContext); }

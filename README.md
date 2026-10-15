@@ -20,22 +20,22 @@ npm run build
 
 ## Current implementation
 
-The repository contains a React/Vite frontend with browser storage. Payment is disabled for testing. Submitting a test order generates a three-character alphanumeric pickup code unique across the campus for its allocation day (Asia/Kolkata), such as `AZ1` or `B7J`, and sends the order to the selected canteen for acceptance. This code is a test exception to the future payment sequence; no payment is collected or represented as paid.
+The repository contains a React/Vite frontend, Express/Prisma backend and Supabase PostgreSQL. Supabase Auth handles verified email signup, password login/reset and staff email verification; Express handles application sessions, server roles and canteen memberships. See [backend/AUTH.md](backend/AUTH.md) for setup and acceptance checks. Canteen categories, menus, availability and student carts now use Express and Supabase PostgreSQL. Staff manage categories/items at `/canteen/menu`; carts refresh across devices and checkout reviews signed, expiring server price quotes. Checkout now creates persistent payment-free test orders with permanent UUIDs and campus-day pickup codes. Staff can accept, prepare and mark orders ready. Order lists/details refresh across devices; browser order records are no longer used by the app. Durable notification delivery and collection verification remain later phases.
 
-Student accounts, carts, orders, and canteen availability are saved in `localStorage` and synchronize between tabs on the same browser and origin. Each tab keeps its own login in `sessionStorage`, so student and canteen sessions can be tested side by side. Different browsers/devices do not share these records. Earlier demo storage keys are retained but are not loaded by the new flows; sign up again to test the new account rules.
+Menus, categories, availability and carts are saved in PostgreSQL and refresh across devices. Orders now use PostgreSQL; historical browser records are ignored. Authentication and memberships use PostgreSQL and HttpOnly cookies; different roles require separate browser profiles. Different devices share scoped order lists and status updates. Prototype plaintext accounts, local role sessions and member records are removed on startup rather than imported.
 
-Authentication here is a frontend prototype: campus-domain validation does not verify email ownership. Canteen codes and the demo admin credentials are bundled client-side. A production backend must authenticate users, verify email ownership, hash and validate member codes, enforce ownership, and persist shared records before real use.
+Authentication code is integrated, with automated tests for server authorization and revocation. Live SMTP delivery and callback/browser acceptance remain operator checks. Production deployment, transactional ordering, restoration and campus load qualification remain pending; the application is still for testing.
 
 ## Student signup and login
 
-- Signup requires the student's name, password and an email ending exactly in `@banasthali.in`. The planned backend verifies that email with an OTP before account activation, then returns the student to login.
-- Login requires the registered email and password. Email OTP is required at signup and password reset, rather than every student login. The prototype currently stores passwords in browser account records; production must store only server-side password hashes. Passwords are excluded from newly created session records.
+- Signup requires the student's name, a 12–256 character password and an email ending exactly in `@banasthali.in`. Enter the email OTP to activate the profile and sign in immediately. Later logins require only email/password. Configure the OTP-only Confirm sign up email template in backend/AUTH.md.
+- Login requires the registered email and password. Supabase manages passwords and recovery; Express issues a hashed opaque cookie session after verifying the token and role. No student passwords are stored in browser account records or the application database.
 - `@gmail.com`, subdomains, and look-alike domains are rejected. The requirement refers to the institutional email domain; a personal Gmail address is not accepted.
 - Students see only their own carts, order history, and acceptance/readiness notifications.
 
 ## Banasthali canteen directory
 
-| Canteen | ID | Current test member access code |
+| Canteen | ID | Historical prototype code (unused) |
 | --- | --- | --- |
 | Mukteshwari's Canteen | `mukteshwari` | `Mukteshwari's Canteen` |
 | Shanu's Canteen | `shanu` | `Shanu's Canteen` |
@@ -46,9 +46,9 @@ Authentication here is a frontend prototype: campus-domain validation does not v
 | Desi Jayka | `desi-jayka` | `Desi Jayka` |
 | Bella Bite | `bella-bite` | `Bella Bite` |
 
-Names are the supplied application directory. Locations, operating hours, menus, and prices have not been confirmed with individual canteens. Every canteen currently has a sample menu for testing, with separate item IDs. Directory and menu data are in `frontend/src/data/mockData.js`.
+Names are the supplied application directory. Locations, operating hours, menus, and prices have not been confirmed with individual canteens. The connected database starts without demo menus. Staff can create categories such as Chinese and Snacks, add real items/prices and enter pickup locations/opening hours through Manage menu. The mockData file remains a historical test fixture and is no longer the student menu source.
 
-Canteen login requires a member email, the canteen represented, and that canteen's access code. Test codes match the names exactly, including capitalization and punctuation. The temporary mapping is in `frontend/src/data/canteenAccess.js`. Replace this lookup with manually entered, backend-managed database codes later; database storage is not implemented in this repository. Production canteen login also requires an OTP sent to the member email before establishing a session.
+Canteen login requires member email, selected canteen and the provisioned database access code, followed by fresh email verification. The name-based codes in the directory table above are historical prototype examples and no longer work in the live login. Generated initial codes are stored privately in Git-ignored `backend/.env.provisioned`; only salted hashes are stored in PostgreSQL. Member lists/counts/removal use the authenticated Express API.
 
 ## Cart and order rules
 
@@ -56,10 +56,10 @@ Canteen login requires a member email, the canteen represented, and that canteen
 2. Staff can pause/resume incoming orders for their canteen and pause/enable any individual menu item. Existing orders remain available for fulfillment.
 3. Item and canteen availability are checked when adding food, increasing quantity, and submitting an order. Checkout uses the current menu price rather than a stored cart price.
 4. Students select estimated pickup in 10, 20, 30, 45, or 60 minutes. The order stores an absolute pickup timestamp and a display time.
-5. Prototype test submission creates a permanent UUID and a three-character uppercase alphanumeric pickup code on a `RECEIVED` order. Codes cannot repeat across any canteen during the same `Asia/Kolkata` calendar day, including collected orders. At campus midnight a new daily namespace becomes available without deleting history or expiring older orders. The limit is 46,656 allocations per day; exhaustion blocks new orders for that day. The prototype checks browser-local records using the device clock; server time and a PostgreSQL UNIQUE(code_day, code) constraint are required for shared concurrent allocation.
+5. Transactional test submission creates a permanent UUID and a three-character uppercase alphanumeric pickup code on a `RECEIVED` order. Codes cannot repeat across any canteen during the same `Asia/Kolkata` calendar day, including collected orders. At campus midnight a new daily namespace becomes available without deleting history or expiring older orders. The limit is 46,656 allocations per day; exhaustion blocks new orders for that day. PostgreSQL server time determines the allocation day, and database uniqueness enforces shared concurrent allocation.
 6. Student and canteen cards show the allocation day, pickup code, canteen, ordered items and quantities, pickup date/time in IST, and status. Canteen cards also show student name and order value; student history/details show order value where applicable.
-7. Staff accept the order, start preparation, and mark it ready. Acceptance and readiness produce real in-app notifications from the order history.
-8. When the student arrives, staff compare the day, canteen and items on the student’s dated order card with the selected order, then enter its code. Verification targets the permanent order UUID; a code alone cannot identify an order across days. Only a matching code on a ready order permits collection. The verifier and collection time are recorded.
+7. Staff accept the order, start preparation, and mark it ready. The UI derives acceptance/readiness previews from server order history; durable notification delivery/read state follows in Phase 9.
+8. Planned Phase 10 collection: when the student arrives, staff compare the day, canteen and items on the student’s dated order card with the selected order, then enter its code. Verification targets the permanent order UUID; a code alone cannot identify an order across days. Only a matching code on a ready order permits collection. The verifier and collection time are recorded.
 
 The application has no order cancellation action or transition. There is no refund flow. Removing food from a cart before submission remains available. Estimated pickup is an arrival estimate, not an automatic expiry deadline.
 
@@ -83,20 +83,21 @@ Payment will be offered only after the canteen accepts an order. Before acceptan
 
 ## Admin
 
-Select **Admin** on the login page. Test credentials: `admin@campuseats.com` / `admin123`.
+Select **Admin** on the login page. For first use, select **First sign-in? Activate account**, enter the provisioned email/password from private `backend/.env.provisioned`, verify the email and return to password login. Demo credentials are no longer accepted.
 
 The dashboard shows canteen availability, menu counts, total and active orders, collected order value, and searchable orders with canteen/status filters. Collected order value is the sum of test order prices, not payment revenue. Account approvals, code management, and payment management are future backend work.
 
-## Test a complete order
+## Test checkout and preparation
 
-1. Sign up as a student with a name, password and an `@banasthali.in` email, then log in using that email/password. Real email OTP is not connected in this prototype.
-2. Open Bella Bite, add items, choose estimated pickup, and place a test order. Note the pickup code and allocation day.
-3. Open a separate tab on the same Vite origin. Select **Canteen**, enter a member email, choose **Bella Bite**, and enter `Bella Bite` as the code.
-4. Accept the order, start preparation, and mark it ready. The student's tracking and notifications update in the other tab.
-5. Compare the student's dated card with the selected ready order, enter its pickup code and verify collection.
-6. Pause incoming orders or a menu item and confirm that new additions/checkout are blocked. Existing orders can still progress.
-7. Sign in another canteen member in a separate tab, check member emails/counts, remove their access and confirm the tab returns to login and cannot rejoin with the same code.
-8. Log in as admin in another tab to review the order and canteen summaries.
+1. Sign in as a canteen in one browser profile. Open Manage menu, create a category and add available items with real prices.
+2. In another browser profile or on another device, sign up with an accessible campus email and enter the signup OTP; verification signs you in automatically. Subsequent login uses email/password.
+3. Open that canteen, add items, open the cart and review checkout. Choose a pickup estimate and place the test order.
+4. Note its code, campus allocation day and canteen. Refresh or reopen the UUID detail link to confirm that the order persists.
+5. In the owning canteen profile, accept the order, start preparation and mark it ready. The student sees the status refresh within fifteen seconds or on focus.
+6. If a submission cannot be confirmed, use Retry previous submission; the exact payload/key retrieves the original order.
+7. Pause incoming orders and confirm that new checkout is blocked while existing orders can still be prepared.
+8. In two staff profiles, try advancing the same version: only one action succeeds and the other receives a conflict.
+9. Collection verification is not enabled yet; it follows in Phase 10. Durable notification delivery/read state follows in Phase 9.
 
 See [architecture.md](architecture.md) for implementation boundaries, data models, routes, and the future backend sequence.
 
@@ -110,8 +111,8 @@ A canteen member can remove access for a member of the same canteen after confir
 
 ## Planned hosting and integration
 
-Use Supabase-managed PostgreSQL with the TypeScript/Express/Zod/Prisma API and a durable outbox worker. The frontend calls Express, which enforces auth and business rules; database hosting alone does not implement them. Supabase Auth is a separate future decision. API/worker and frontend hosting providers remain to be selected; AWS is an available hosting option, not a required database change.
+Use Supabase PostgreSQL and Auth with the TypeScript/Express/Zod/Prisma API and future durable outbox worker. Express enforces application authorization and business rules. API/worker and frontend hosting providers remain to be selected; AWS is an available hosting option, not a required database change.
 
 Track integration in [todo.md](todo.md) and capacity/recovery qualification in [scale.md](scale.md). Backend Phase 1 foundation and Phase 2 schema/migrations/provisioning are implemented; see [backend setup and verification](backend/README.md). Supabase deployment qualification, real signup/staff OTP delivery, password reset, transactional daily-code allocation and cross-device synchronization remain pending. The 30,000-user deployment remains unbenchmarked.
 
-The product is named SpoonAte. Existing `campusEats*` browser keys and the demo admin email are retained for compatibility.
+The product is named SpoonAte. Historical order browser records are ignored; legacy cart and availability keys are discarded; old identity keys and demo login credentials are no longer used.

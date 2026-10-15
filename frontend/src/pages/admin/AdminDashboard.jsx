@@ -55,9 +55,8 @@ export default function AdminDashboard() {
     })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login", { replace: true });
+  const handleLogout = async () => {
+    try { await logout(); navigate("/login", { replace: true }); } catch { /* AuthProvider displays the connection error. */ }
   };
 
   return (

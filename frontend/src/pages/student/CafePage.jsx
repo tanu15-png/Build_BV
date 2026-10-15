@@ -7,11 +7,11 @@ import { useOrders } from "../../context/OrderContext";
 export default function CafePage() {
   const { cafeId } = useParams();
 
-  const { cart, cafes, foods, addToCart, isFoodAvailable } = useOrders();
+  const { cart, cafes, foods, addToCart, isFoodAvailable, categories, cartBusy, catalogLoading, catalogError } = useOrders();
   const [search, setSearch] = useState("");
 
   const [category, setCategory] =
-    useState("All");
+    useState(null);
 
   const cafe = cafes.find(
     (c) => c.id === cafeId
@@ -20,18 +20,19 @@ export default function CafePage() {
   const cafeFoods = foods.filter((food) => food.cafeId === cafeId && food.name.toLowerCase().includes(search.trim().toLowerCase()));
 
   const filteredFoods =
-    category === "All"
+    !categories.some(item => item.id === category)
       ? cafeFoods
       : cafeFoods.filter(
-          (food) => food.category === category
+          (food) => food.categoryId === category
         );
 
   const cartTotal = cart.reduce(
     (sum, item) =>
-      sum + item.price * item.quantity,
+      sum + item.unitPricePaise * item.quantity / 100,
     0
   );
 
+  if (!cafe && (catalogLoading || catalogError)) return <p role="status" className="p-10">{catalogError || "Loading menu…"}</p>;
   if (!cafe) {
     return (
       <div className="p-10">
@@ -77,12 +78,11 @@ export default function CafePage() {
               </h1>
 
               <p className="text-white/70 mt-3">
-                Fast food and beverages
+                {cafe.location}
               </p>
 
               <p className="text-white/60 mt-5">
-                Preparation time:{" "}
-                {cafe.preparationTime}
+                {cafe.hours}
               </p>
 
             </div>
@@ -115,28 +115,27 @@ export default function CafePage() {
         <div className="flex gap-3 mt-6 overflow-x-auto pb-2">
 
           {[
-            "All",
-            "Snacks",
-            "Meals",
-            "Beverages",
+            { id: null, name: "All" },
+            ...categories.filter(item => item.canteenId === cafe.databaseId),
           ].map((item) => (
 
             <button
-              key={item}
-              onClick={() => setCategory(item)}
+              key={item.id || "all-categories"}
+              onClick={() => setCategory(item.id)}
               className={`px-5 py-2.5 rounded-full font-semibold whitespace-nowrap ${
-                category === item
+                category === item.id
                   ? "bg-[#075d50] text-white"
                   : "bg-white border border-gray-200"
               }`}
             >
-              {item}
+              {item.name}
             </button>
 
           ))}
 
         </div>
 
+        {!filteredFoods.length && <p className="mt-8 text-gray-500">No items in this menu yet, or no items match your search.</p>}
         {/* FOOD */}
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8 pb-32">
@@ -166,11 +165,11 @@ export default function CafePage() {
                 <div className="flex justify-between items-center mt-5">
 
                   <span className="text-[#0f8f73] font-black text-xl">
-                    ₹{food.price}
+                    ₹{food.price.toFixed(2)}
                   </span>
 
                   <button
-                    disabled={!isFoodAvailable(food)}
+                    disabled={cartBusy || !isFoodAvailable(food)}
                     onClick={() =>
                       addToCart(food)
                     }
@@ -214,7 +213,7 @@ export default function CafePage() {
                 </p>
 
                 <p className="text-white/60 text-sm">
-                  ₹{cartTotal}
+                  ₹{cartTotal.toFixed(2)}
                 </p>
               </div>
 

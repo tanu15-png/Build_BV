@@ -1,13 +1,12 @@
 import { orderCode, orderDay, pickupLabel } from "../../utils/orderRules";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Check, Circle } from "lucide-react";
-import { useOrders } from "../../context/OrderContext";
+import { useOrderDetails } from "../../hooks/useOrderDetails";
 import { orderStatuses, statusLabels } from "../../utils/orderRules";
 export default function OrderTracking() {
   const { orderId } = useParams();
-  const { orders } = useOrders();
-  const order = orders.find((item) => item.id === orderId);
-  if (!order) return <div className="p-10">Order not found. <Link to="/student/orders">My orders</Link></div>;
+  const { order, error, loading } = useOrderDetails(orderId);
+  if (!order) return <div className="p-10">{error || (loading ? "Loading order…" : "Order not found.")} <Link to="/student/orders">My orders</Link></div>;
   const currentIndex = orderStatuses.indexOf(order.status);
   return (
     <div className="min-h-screen bg-[#f8faf9]">

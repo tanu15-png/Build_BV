@@ -29,11 +29,21 @@
           "menuItemId": "00000000-0000-4000-8000-000000000001",
           "name": "Sample Tea",
           "quantity": 2,
-          "unitPricePaise": 1500
+          "unitPricePaise": 1500,
+          "canteenId": "00000000-0000-4000-8000-000000000001",
+          "categoryId": "00000000-0000-4000-8000-000000000001",
+          "category": "Drinks",
+          "description": null,
+          "imageRef": null,
+          "menuVersion": 1,
+          "available": true,
+          "archived": false
         }
       ],
       "totalPaise": 3000,
-      "quote": "server-signed-quote"
+      "quote": "server-signed-quote",
+      "available": true,
+      "quoteExpiresAt": "2026-10-14T12:15:00Z"
     }
   },
   {
@@ -66,7 +76,10 @@
         }
       ],
       "collectedAt": null,
-      "pickupVerifiedBy": null
+      "pickupVerifiedBy": null,
+      "canteenName": "Bella Bite",
+      "studentName": "Student",
+      "events": []
     }
   }
 ]

@@ -1,14 +1,14 @@
 # Build BV backend implementation plan
 
-Status: **planned, not implemented**. This document defines the backend work that will replace the frontend's browser storage. It follows the [project requirements](../README.md) and [current architecture](../architecture.md), including Bella Bite and the payment-free testing release.
+Status: foundation, database/provisioning and Supabase Auth integration implemented; transactional ordering and full frontend data cutover remain planned. The 2026-10-15 authentication revision in [AUTH.md](AUTH.md) supersedes the custom password/OTP endpoints and storage design in this original roadmap. Supabase manages passwords and email proofs; Express retains opaque cookie sessions, roles and scoped memberships. See [README.md](README.md) for verification evidence.
 
 ## 1. Backend technology stack
 
-The backend stack is **TypeScript + Node.js + Express + Zod + Prisma + PostgreSQL**. Use TypeScript strict mode, Express for HTTP routing, Zod for request/configuration validation and explicit response schemas, Prisma ORM and Prisma Migrate for persistence and migrations, and Supabase-managed PostgreSQL as the source of truth. React calls Express; Express and the outbox worker access the database through Prisma. Supabase Auth is not adopted in this plan; authentication remains in the application. Local development/tests may use PostgreSQL, with Supabase staging qualification before release. API/worker and frontend hosting remain to be selected; follow [scale.md](../scale.md) and the Supabase checklist in [todo.md](../todo.md). Use npm with a committed `package-lock.json`; select supported versions and pin them during Phase 1.
+The backend stack is **TypeScript + Node.js + Express + Zod + Prisma + PostgreSQL**. React uses the official Supabase browser client for authentication and Express for application APIs. Express verifies Supabase tokens and accesses application data through Prisma; roles never come from client metadata. Local tests use isolated PostgreSQL with mocked Auth responses. API/worker and frontend hosting remain to be selected; follow [scale.md](../scale.md) and [todo.md](../todo.md).
 
 Keep dependencies minimal: runtime packages are `express`, `zod` and `@prisma/client`; development packages are `typescript`, `prisma`, `@types/node` and `@types/express`. Compile with `tsc` and run compiled JavaScript with Node.js. Use Node's built-in environment-file support, `crypto` (scrypt for password/access-code hashes, random session tokens and keyed OTP hashes), `fetch`, `node:test` and `node:assert`. Store sessions, rate-limit counters and outbox jobs in PostgreSQL through Prisma. Use Express's JSON parser, cookie response helpers and small application middleware for origin checks, CSRF, session lookup, rate limits, request IDs and redacted structured logs. Do not add packages for functionality already covered by this stack or Node.js.
 
-Email verification requires a delivery service. Keep a small email adapter that calls the selected provider's HTTPS API with built-in `fetch`; use a fake adapter in automated tests. Select the provider before deploying authentication, without adding a mail SDK or custom SMTP implementation. Test APIs using `node:test` and `fetch` against an ephemeral Express server, and use real PostgreSQL for integration/concurrency checks. Verify browser acceptance flows with separate browser profiles; browser automation tooling is optional if later justified.
+Email verification/recovery is delivered by Supabase Auth using dashboard-configured SMTP. Gmail SMTP is selected for development; a transactional provider and measured quotas are needed for campus rollout. The backend uses built-in fetch for token verification and provisioned-admin activation; automated tests mock those calls and never send emails. Test HTTP with node:test/fetch and use real isolated PostgreSQL for integration/concurrency checks. Verify live email/callback flows in separate browser profiles.
 
 The existing frontend remains React (JavaScript/JSX), Vite, React Router, Tailwind CSS and Lucide React. Maintain the endpoint contracts in this document and validate frontend request/response fixtures with the backend Zod schemas; no API-documentation generator or frontend rewrite is required.
 
@@ -165,7 +165,7 @@ Use `401` for missing/expired authentication, `403` for disallowed roles, `404` 
 
 | Area | Required behavior |
 | --- | --- |
-| Student signup | Name, institutional email and password; verify email OTP before activation, then return to login. |
+| Student signup | Name, institutional email and password; enter the email OTP, activate the profile and sign in immediately. Later login requires email/password only. |
 | Student login | Registered email/password for a verified active account; password reset uses email OTP. |
 | Canteen login | Member email, selected canteen and member access code, followed by email OTP verification. |
 | Member management | Own-canteen staff see member emails/access/session counts and may remove membership. Revocation ends scoped sessions and blocks rejoining until admin restoration. |
@@ -266,6 +266,8 @@ Execute phases in order. Every phase includes implementation tasks and a complet
 
 ### Phase 3 — Implement student signup verification and email/password login
 
+The custom password storage design below is historical. Current code uses Supabase Auth as documented in [AUTH.md](AUTH.md). Signup requires numeric OTP verification through Express and immediately creates the student cookie session; subsequent login uses email/password only. Forgot password belongs only on login, and resend belongs only on verification. Live OTP-template/inbox acceptance remains pending.
+
 1. Signup accepts `name`, `email` and `password`. Normalize the exact institutional email domain and validate bounded name/password inputs. Hash the password with salted Node.js `crypto.scrypt`; never persist/log the plaintext or return hashes in API responses.
 2. Issue a purpose-bound signup OTP to that email. Persist only a keyed OTP hash, pending password hash/name, expiry and attempt counters. Proposed defaults: 10-minute expiry, 5 attempts and 60-second resend interval.
 3. Return an opaque challenge ID. Only successful OTP verification activates the account and writes the password hash. A unique normalized-email constraint handles concurrent signup. Signup verification returns to login without creating a session.
@@ -278,6 +280,8 @@ Execute phases in order. Every phase includes implementation tasks and a complet
 **Complete when:** institutional signup requires email ownership, unverified users cannot log in, correct email/password works, wrong password fails uniformly, reset revokes sessions, concurrent signup and OTP expiry/replay/delivery-failure tests pass.
 
 ### Phase 4 — Implement canteen membership and admin authorization
+
+The current implementation uses Supabase email proofs bound to a PostgreSQL canteen challenge, not a second application-generated email OTP. Scoped sessions, shared member counts/removal, admin activation, and audited maintenance APIs are implemented and covered by the isolated PostgreSQL auth suite. Dashboard/live-email acceptance and a dedicated admin maintenance UI remain pending.
 
 1. Canteen login accepts member email, selected canteen UUID, and access code. Verify email ownership through a bound email challenge as well as checking that canteen's code hash.
 2. Check the code when starting the challenge and recheck its active version at completion, so a rotated code cannot finish an older challenge.

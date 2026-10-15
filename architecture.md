@@ -1,6 +1,6 @@
 # Build BV — SpoonAte architecture
 
-The backend implementation roadmap is in [backend/backend.md](backend/backend.md). It describes planned work; this architecture documents the current frontend prototype.
+The backend implementation roadmap is in [backend/backend.md](backend/backend.md). This architecture documents Supabase Auth/Express integration and the remaining browser-storage ordering prototype. Authentication setup is in [backend/AUTH.md](backend/AUTH.md).
 
 ## Implemented system
 
@@ -8,20 +8,18 @@ The backend implementation roadmap is in [backend/backend.md](backend/backend.md
 flowchart TD
     UI[React + Vite frontend] --> Auth[AuthContext]
     UI --> Orders[OrderContext]
-    Auth --> Session[sessionStorage: login per tab]
-    Auth --> Accounts[localStorage: student accounts]
-    Auth --> Codes[Temporary name-based canteen codes]
-    Auth --> Members[localStorage: memberships and staff sessions]
+    Auth --> Supabase[Supabase Auth: passwords and email verification]
+    Auth --> API[Express: verified identity and HttpOnly sessions]
+    API --> DB[Prisma / Supabase PostgreSQL: roles and memberships]
     Orders --> Rules[Pure cart and order rules]
     Orders --> Storage[localStorage: carts, orders, availability]
     Storage --> Sync[storage events: update other tabs]
-    Members --> Sync
     Orders --> Student[Student pages and notifications]
     Orders --> Canteen[Canteen orders, availability, pickup verification]
     Orders --> Admin[Campus-wide admin overview]
 ```
 
-This repository currently has no backend API or database. Browser storage provides a same-browser test application. It does not provide production authentication, secure canteen membership, cross-device delivery, transactional updates, or payment processing. Simultaneous writes from multiple tabs use browser storage and can overwrite each other; a backend must provide transactional updates for production.
+The repository includes an Express/Prisma backend and connected Supabase database. Authentication/memberships use server authorization; order/cart/availability features remain a same-browser prototype. Transactional ordering, cross-device order delivery, production qualification and payment processing remain future work.
 
 ## Actual source structure
 
@@ -94,20 +92,20 @@ Build_BV/
 
 ## Authentication
 
-Student signup validates the exact `@banasthali.in` domain, a nonempty name and password, then saves a local account keyed by normalized email and returns to login. Login checks the registered email/password. Production signup must verify email ownership with an OTP before activating the account, persist only a salted server-side password hash and require a separate email/password login. Password reset requires a bound email OTP. New prototype session records omit the password; local account storage remains an insecure testing mechanism.
+Student signup uses Supabase Auth, followed by numeric email OTP verification through Express. Successful verification activates the institutional profile and issues an app cookie session immediately; no second login is required. Subsequent password login exchanges a verified Supabase token for an Express cookie session without another OTP. Server domain validation rejects non-institutional student identities. Recovery revokes app sessions before saving the new Supabase password. Prototype plaintext account records are removed rather than imported.
 
-Canteen login requires a valid member email, selected canteen, and its matching code. The eight names are Mukteshwari's Canteen, Shanu's Canteen, Spicy Bites, Annapurna Canteen, Agarwal Canteen, Fun 'N' Frolic, Desi Jayka, and Bella Bite. Each current test code is exactly its canteen name. `canteenAccess.js` isolates this temporary mapping. Future manually supplied codes belong in the database, stored as hashes and checked by the backend; they must not be sent to clients.
+Canteen login validates a salted database access-code hash, creates a challenge bound to email/canteen/code version, and requires a fresh Supabase email proof before creating the membership/session. Challenges are consumed under the canteen lock. The historical name-based browser code mapping is not imported by the login bundle.
 
-Admin uses the existing demo email/password. Login is per-tab in `sessionStorage`, allowing separate student, canteen, and admin test tabs. The old demo login key is ignored.
+Admin activation requires provisioned credentials and verified email. Permissions come from database roles, never client metadata. Application sessions are shared across tabs through HttpOnly cookies; use separate browser profiles for different roles. Supabase proof tokens and pending nonsecret verification context use sessionStorage; localStorage cannot establish application identity.
 
 ## Storage model
 
 | Key | Store | Contents |
 | --- | --- | --- |
-| `campusEatsSessionV2` | sessionStorage | Current tab's `{role, email, name, cafeId?, sessionId?}` or null; new sessions omit passwords |
-| `campusEatsStudentsV2` | localStorage | Registered student profiles and plaintext test passwords keyed by normalized email |
-| `campusEatsMembersV2` | localStorage | Canteen membership IDs/emails/status and revocation metadata |
-| `campusEatsStaffSessionsV2` | localStorage | Staff session IDs, memberships, canteen context and 12-hour expiry |
+| `spoonate_session` | HttpOnly cookie / PostgreSQL hash | Revocable application session, 12-hour default absolute lifetime |
+| `spoonate_csrf` | HttpOnly cookie | Signed CSRF nonce matched by the request header |
+| `spoonatePendingAuth` | sessionStorage | Email, flow, challenge ID/expiry and resend time; no passwords or canteen codes |
+| Supabase SDK session | sessionStorage | Auth proof/refresh tokens; Express independently verifies identity on exchange |
 | `campusEatsCartsV2` | localStorage | Cart item arrays keyed by student email |
 | `campusEatsOrdersV2` | localStorage | All test orders |
 | `campusEatsAvailabilityV2` | localStorage | `{pausedCafes: [...ids], disabledFoods: [...ids]}` |
@@ -181,18 +179,26 @@ Payment occurs only after acceptance. Preparation in the paid release is gated o
 
 ### Canteen member management
 
-`AuthContext` persists prototype memberships in `campusEatsMembersV2` and staff sessions in `campusEatsStaffSessionsV2`. Each session has a member ID and a 12-hour expiry. The dashboard shows own-canteen member emails, access status and valid session counts. Counts represent signed-in sessions rather than live presence; a closed tab can remain counted until expiry.
+`AuthContext` reads members and counts from authenticated Express endpoints backed by PostgreSQL. Each session has a member ID and an absolute expiry. The dashboard shows own-canteen member emails, access status and valid session counts, with pagination. Counts represent signed-in sessions rather than live presence.
 
-Confirmed removal marks a membership revoked, records actor/time, invalidates its sessions and blocks new login even with the shared code. Same-origin tabs react to browser storage events and their route guards drop revoked sessions. Member operations check the actor's canteen scope. The backend must implement real email OTP verification before staff session creation, shared session counts, atomic revocation and audited admin-only restoration. Browser records can be edited and are not production authorization.
+Confirmed removal locks the canteen and atomically revokes membership, scoped sessions and pending challenges, recording actor/time. New sign-in cannot restore access, even with the shared code, until an admin explicitly restores membership. Unrelated memberships survive. Express checks scope, account status and code version on every staff request; the UI revalidates on focus/reconnect and every 30 seconds. Admin restoration, account disabling and code-rotation APIs are audited; a dedicated maintenance UI remains future work.
 
 ## Plan alignment and current gaps
 
-The chosen database host is Supabase PostgreSQL; application authentication remains in Express with Prisma persistence and opaque cookie sessions. Supabase Auth is not implemented or required by the current plan. Frontend/API/worker hosting is still an implementation decision. Follow [todo.md](todo.md) for pending integration and [scale.md](scale.md) for the unbenchmarked 30,000-account deployment.
+Supabase PostgreSQL hosts application records, Supabase Auth manages passwords/email proofs, and Express owns application roles, memberships and opaque cookie sessions. Frontend/API/worker hosting is still an implementation decision. Follow [todo.md](todo.md), [backend/AUTH.md](backend/AUTH.md) and [scale.md](scale.md) for live acceptance and the unbenchmarked campus deployment.
 
-Student signup/reset OTP and canteen login OTP screens/delivery, server password hashes, API contracts, database transactions, cross-device member revocation, admin restoration, notification read state and the unused menu/settings/analytics screens remain planned. The deployed backend cookie-session policy may use both absolute and idle expiry; the prototype has only a 12-hour staff expiry, refreshed in the UI every minute. Existing `campusEats*` keys and demo admin email remain compatibility identifiers for SpoonAte.
+Authentication UI, cookie sessions, scoped member revocation and admin maintenance APIs are implemented and tested. Live SMTP/callback/browser acceptance remains pending. Ordering persistence, notification read state, a dedicated admin maintenance UI and unused menu/settings/analytics screens remain planned. The session policy currently uses absolute expiry only; idle expiry is not implemented. Existing order/cart keys remain prototype compatibility identifiers; old identity keys and demo login credentials are not used.
 
 ## Backend foundation — 2026-10-14
 
 The repository now includes a strict TypeScript/Express API, validated server configuration, bounded JSON parsing, request IDs, redacted structured logs, error envelopes, bounded database readiness checks and shared request/response schemas for the 37 planned business operations. `GET /api/v1/canteens` reads the provisioned directory and returns only public fields. The existing Vite proxy supports `/api` development requests; the frontend still uses prototype storage.
 
 Prisma models and the initial migration cover the planned account, membership, challenge, session, catalog, cart, order, daily allocation, notification, outbox, idempotency, audit and shared rate-limit tables. SQL adds check constraints, composite cart/canteen foreign keys, immutable history and browser-role isolation. Repeatable seeds preserve operator data. Interactive CLI commands provision salted scrypt canteen codes and admin credentials. See [backend/README.md](backend/README.md) for setup, checks and the remaining Supabase staging/production qualification.
+
+## Phase 5–6 catalog and cart implementation
+
+Categories, menus, availability and carts now use Express and Supabase PostgreSQL. Each item references a category within its own canteen. Menu writes serialize on the canteen; cart writes serialize on the student and lock the applicable canteen. Aggregate versions prevent lost device updates; signed expiring cart quotes reject stale price/availability reviews. Student menus use live category records, and staff manage categories/items/location/hours at /canteen/menu. Local carts and availability are discarded. Historical browser orders remain readable; new order placement awaits Phase 7. See [backend/CATALOG.md](backend/CATALOG.md) for API and verification details.
+
+## Phase 7–8 order implementation
+
+Orders and fulfillment now use Express/PostgreSQL rather than browser records. Checkout locks user/cart/canteen/menu/category records and atomically commits immutable snapshots, permanent campus-day code allocation, initial history/outbox, cart clearing and actor-scoped idempotency response. Staff commands lock user/canteen/order and commit consecutive status/version changes with actor/time history/outbox and stable retry responses. Scoped UUID reads feed fifteen-second frontend polling and direct details. Pending requests persist before submission and reuse their exact payload/key after uncertain responses or refresh. See [backend/ORDERS.md](backend/ORDERS.md). Durable notification delivery and collection verification remain Phases 9–10.

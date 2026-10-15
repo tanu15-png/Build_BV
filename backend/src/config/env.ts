@@ -7,6 +7,8 @@ export const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
   DATABASE_URL: databaseUrl,
   MIGRATION_DATABASE_URL: databaseUrl.optional(),
+  SUPABASE_URL: z.url().refine(v => v.startsWith('https://') && new URL(v).origin === v, 'Expected HTTPS project origin').optional(),
+  SUPABASE_PUBLISHABLE_KEY: z.string().min(20).refine(v => v.startsWith('sb_publishable_'), 'Expected publishable key, never a secret key').optional(),
   FRONTEND_ORIGIN: z.url().refine(v => new URL(v).origin === v, 'Expected origin without path'),
   ORDER_MODE: z.literal('TEST').default('TEST'),
   SEED_DEVELOPMENT_DATA: flag,
@@ -17,13 +19,18 @@ export const envSchema = z.object({
   OTP_TTL_SECONDS: z.coerce.number().int().positive().max(900).default(600),
   JSON_LIMIT_BYTES: z.coerce.number().int().min(1024).max(1048576).default(102400),
   DB_TIMEOUT_MS: z.coerce.number().int().min(100).max(10000).default(2000),
-  EMAIL_PROVIDER: z.enum(['console', 'http']).default('console'),
+  DB_POOL_MAX: z.coerce.number().int().min(1).max(50).default(10),
+  EMAIL_PROVIDER: z.enum(['console', 'http', 'supabase']).default('console'),
   EMAIL_API_URL: z.url().optional(),
   EMAIL_API_KEY: z.string().optional(),
   EMAIL_FROM: z.email().optional(),
   LOG_LEVEL: z.enum(['info', 'silent']).default('info'),
 }).superRefine((v, ctx) => {
+  if (Boolean(v.SUPABASE_URL) !== Boolean(v.SUPABASE_PUBLISHABLE_KEY) || (v.EMAIL_PROVIDER === 'supabase' && !v.SUPABASE_URL)) {
+    ctx.addIssue({ code: 'custom', message: 'Supabase requires project URL and publishable key together' });
+  }
   const deployed = ['staging', 'production'].includes(v.APP_ENV) || v.NODE_ENV === 'production';
+  if (deployed && !v.SUPABASE_URL) ctx.addIssue({ code: 'custom', message: 'Deployed environments require Supabase Auth configuration' });
   if (deployed && (v.SEED_DEVELOPMENT_DATA || v.EMAIL_PROVIDER === 'console' || !v.FRONTEND_ORIGIN.startsWith('https://'))) {
     ctx.addIssue({ code: 'custom', message: 'Deployed environments require HTTPS, real email and disabled development seeds' });
   }
