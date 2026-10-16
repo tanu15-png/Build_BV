@@ -63,6 +63,7 @@ export const ModelName = {
   Cart: 'Cart',
   CartItem: 'CartItem',
   Order: 'Order',
+  PickupCredential: 'PickupCredential',
   OrderItem: 'OrderItem',
   OrderEvent: 'OrderEvent',
   OrderCodeAllocation: 'OrderCodeAllocation',
@@ -260,6 +261,16 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const PickupCredentialScalarFieldEnum = {
+  orderId: 'orderId',
+  encryptedCode: 'encryptedCode',
+  failedAttempts: 'failedAttempts',
+  windowEndsAt: 'windowEndsAt'
+} as const
+
+export type PickupCredentialScalarFieldEnum = (typeof PickupCredentialScalarFieldEnum)[keyof typeof PickupCredentialScalarFieldEnum]
 
 
 export const OrderItemScalarFieldEnum = {

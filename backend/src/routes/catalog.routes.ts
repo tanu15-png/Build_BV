@@ -6,9 +6,11 @@ import { cartInclude, cartResponse, verifyCartQuote } from '../services/cart.js'
 import { contracts } from '../schemas/contracts.js';
 import { validate } from '../middleware/validate.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { createCatalogEvents } from '../services/catalogEvents.js';
 type Tx = Prisma.TransactionClient;
-export function createCatalogRouter(config: Config, db: PrismaClient) {
+export function createCatalogRouter(config: Config, db: PrismaClient, events = createCatalogEvents()) {
   const router = Router();
+  router.get('/catalog/events', events.subscribe);
   const readSession = createSessionReader(config, db);
   const txOptions = { maxWait: config.DB_TIMEOUT_MS, timeout: 15000 };
   function route(key: string) {
@@ -26,12 +28,19 @@ export function createCatalogRouter(config: Config, db: PrismaClient) {
   }
   async function staffWrite<T>(req: Request, canteenId: string, work: (tx: Tx) => Promise<T>) {
     const { actor } = await readSession(req);
-    if (actor.role !== 'CANTEEN' || actor.canteenId !== canteenId) throw new AppError(403, 'CANTEEN_DENIED', 'You can only manage your own canteen.');
-    return db.$transaction(async tx => {
+    if (actor.role !== 'ADMIN' && (actor.role !== 'CANTEEN' || actor.canteenId !== canteenId)) throw new AppError(403, 'CANTEEN_DENIED', 'You can only manage your own canteen.');
+    const result = await db.$transaction(async tx => {
+      if (actor.role === 'ADMIN') await tx.$queryRaw`SELECT id FROM users WHERE id = ${actor.id}::uuid FOR UPDATE`;
       await tx.$queryRaw`SELECT id FROM canteens WHERE id = ${canteenId}::uuid FOR UPDATE`;
       await createSessionReader(config, tx)(req);
-      return work(tx);
+      const result = await work(tx);
+      if (actor.role === 'ADMIN' && req.method !== 'GET') await tx.auditLog.create({ data: { actorId: actor.id,
+        action: `ADMIN_MENU_${req.method === 'POST' ? 'CREATED' : req.method === 'DELETE' ? 'DELETED' : 'UPDATED'}`,
+        target: req.path, requestId: req.res!.locals.requestId, metadata: { canteenId, fields: Object.keys(req.body).filter(key => key !== 'expectedVersion') } } });
+      return result;
     }, txOptions);
+    if (req.method !== 'GET') events.publish(canteenId);
+    return result;
   }
   async function category(tx: Tx, categoryId: string, canteenId: string) {
     const found = await tx.menuCategory.findFirst({ where: { id: categoryId, canteenId, archived: false } });
@@ -63,6 +72,39 @@ export function createCatalogRouter(config: Config, db: PrismaClient) {
       if (existing.version !== expectedVersion) throw conflict();
       if (data.archived && await tx.menuItem.count({ where: { categoryId: existing.id, archived: false } })) throw new AppError(409, 'CATEGORY_NOT_EMPTY', 'Move or archive the items in this category first.');
       return tx.menuCategory.update({ where: { id: existing.id }, data: { ...data, version: { increment: 1 } } });
+    }));
+  });
+  // Remove menu references while keeping the historical order snapshots intact.
+  async function deleteItems(tx: Tx, ids: string[]) {
+    if (!ids.length) return;
+    const lines = await tx.cartItem.findMany({ where: { menuItemId: { in: ids } }, select: { cartId: true } });
+    await tx.cartItem.deleteMany({ where: { menuItemId: { in: ids } } });
+    for (const cartId of [...new Set(lines.map(line => line.cartId))].sort()) {
+      const remaining = await tx.cartItem.count({ where: { cartId } });
+      await tx.cart.update({ where: { id: cartId }, data: { version: { increment: 1 }, ...(!remaining ? { canteenId: null } : {}) } });
+    }
+    await tx.menuItem.deleteMany({ where: { id: { in: ids } } });
+  }
+  router.delete('/menu-items/:id', ...route('DELETE /menu-items/:id'), async (req, res) => {
+    const initial = await db.menuItem.findUnique({ where: { id: res.locals.params.id } });
+    if (!initial) throw new AppError(404, 'ITEM_NOT_FOUND', 'Menu item not found.');
+    res.json(await staffWrite(req, initial.canteenId, async tx => {
+      const item = await tx.menuItem.findUnique({ where: { id: initial.id } });
+      if (!item || item.version !== req.body.expectedVersion) throw conflict();
+      await deleteItems(tx, [item.id]);
+      return { ok: true };
+    }));
+  });
+  router.delete('/menu-categories/:id', ...route('DELETE /menu-categories/:id'), async (req, res) => {
+    const initial = await db.menuCategory.findUnique({ where: { id: res.locals.params.id } });
+    if (!initial) throw new AppError(404, 'CATEGORY_NOT_FOUND', 'Category not found.');
+    res.json(await staffWrite(req, initial.canteenId, async tx => {
+      const category = await tx.menuCategory.findUnique({ where: { id: initial.id } });
+      if (!category || category.version !== req.body.expectedVersion) throw conflict();
+      const items = await tx.menuItem.findMany({ where: { categoryId: category.id }, select: { id: true } });
+      await deleteItems(tx, items.map(item => item.id));
+      await tx.menuCategory.delete({ where: { id: category.id } });
+      return { ok: true };
     }));
   });
   for (const field of ['availability', 'settings'] as const) {

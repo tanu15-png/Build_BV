@@ -7,7 +7,7 @@ DO $$ DECLARE app_name text := current_setting('spoonate.app_role'); tab text; B
   RAISE EXCEPTION 'Expected dedicated non-superuser application role without BYPASSRLS';
  END IF;
  EXECUTE format('GRANT USAGE ON SCHEMA public TO %I', app_name);
- FOR tab IN SELECT unnest(ARRAY['users','user_roles','canteens','canteen_access_codes','canteen_memberships','auth_challenges','sessions','carts','cart_items','menu_items','menu_categories','orders','order_items','order_events','order_code_allocations','notifications','outbox_events','idempotency_keys','audit_logs','rate_limits']) LOOP
+ FOR tab IN SELECT unnest(ARRAY['users','user_roles','canteens','canteen_access_codes','canteen_memberships','auth_challenges','sessions','carts','cart_items','menu_items','menu_categories','orders','pickup_credentials','order_items','order_events','order_code_allocations','notifications','outbox_events','idempotency_keys','audit_logs','rate_limits']) LOOP
   EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.%I TO %I', tab, app_name);
   EXECUTE format('DROP POLICY IF EXISTS server_access ON public.%I', tab);
   EXECUTE format('CREATE POLICY server_access ON public.%I TO %I USING (true) WITH CHECK (true)', tab, app_name);

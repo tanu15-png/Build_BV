@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { pollingInterval, startVisiblePolling } from '../services/polling';
 import { api } from '../services/api';
 import { createOrderActions, mapOrder } from '../services/orderActions';
-export function useRemoteOrders(user, cafes, refreshCart) {
+export function useRemoteOrders(user, cafes, refreshCart, refreshNotifications, refreshSession) {
   const actorId = user?.id;
-  const owner = user ? user.id + ':' + user.role + ':' + (user.canteenId || '') : '';
+  const owner = user && ['student', 'canteen'].includes(user.role) ? user.id + ':' + user.role + ':' + (user.canteenId || '') : '';
   const actions = useMemo(() => createOrderActions({ api, storage: sessionStorage, actorId }), [actorId]);
   const [state, setState] = useState({ owner: '', items: [], nextCursor: null });
   const [pending, setPending] = useState({ owner: '', request: null });
@@ -11,6 +12,7 @@ export function useRemoteOrders(user, cafes, refreshCart) {
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const generation = useRef(0);
+  const poller = useRef(null);
   const requestSequence = useRef(0);
   const busyRef = useRef(false);
   const recent = useRef(new Map());
@@ -24,6 +26,7 @@ export function useRemoteOrders(user, cafes, refreshCart) {
       setState(current => {
         const incoming = page.items.map(order => {
           const known = recent.current.get(order.id);
+          if (known && order.version > known.version) recent.current.set(order.id, order);
           return known?.version > order.version ? known : order;
         });
         const items = cursor && current.owner === owner
@@ -34,16 +37,19 @@ export function useRemoteOrders(user, cafes, refreshCart) {
         return { owner, items, nextCursor: page.nextCursor };
       });
       setError('');
-    } catch (issue) { if (started === generation.current && sequence === requestSequence.current) setError(issue.message); }
+    } catch (issue) { if (started === generation.current && sequence === requestSequence.current) {
+      setError(issue.message);
+      if ([401, 403].includes(issue.status)) { poller.current?.stop(); void refreshSession(); }
+    } }
     finally { if (started === generation.current && sequence === requestSequence.current) setLoading(false); }
-  }, [owner]);
+  }, [owner, refreshSession]);
   useEffect(() => {
     const activeGeneration = generation.current + 1; generation.current = activeGeneration; busyRef.current = false; recent.current.clear();
-    const initial = setTimeout(() => { setBusy(false); setError(''); setPending({ owner, request: actions.pendingCheckout() }); void refreshOrders(); }, 0);
-    const timer = setInterval(() => { void refreshOrders(); }, 15000);
-    const refresh = () => { void refreshOrders(); };
-    window.addEventListener('focus', refresh); window.addEventListener('online', refresh);
-    return () => { generation.current = activeGeneration + 1; clearTimeout(initial); clearInterval(timer); window.removeEventListener('focus', refresh); window.removeEventListener('online', refresh); };
+    const initial = setTimeout(() => { setBusy(false); setError(''); setPending({ owner, request: actions.pendingCheckout() }); }, 0);
+    const polling = owner ? startVisiblePolling({ refresh: () => refreshOrders(), intervalMs: pollingInterval(import.meta.env.VITE_SYNC_INTERVAL_MS) }) : null;
+    poller.current = polling;
+    return () => { generation.current = activeGeneration + 1; clearTimeout(initial); polling?.stop(); };
+
   }, [actions, owner, refreshOrders]);
   async function mutate(run, checkout = false) {
     if (busyRef.current) throw new Error('Please wait for your current order request.');
@@ -68,7 +74,7 @@ export function useRemoteOrders(user, cafes, refreshCart) {
       if (started === generation.current) {
         busyRef.current = false; setBusy(false); setLoading(false);
         setPending({ owner, request: actions.pendingCheckout() });
-        void refreshOrders();
+        void refreshOrders(); void refreshNotifications();
         if (checkout) void refreshCart();
       }
     }
@@ -78,6 +84,13 @@ export function useRemoteOrders(user, cafes, refreshCart) {
     pendingCheckout: pending.owner === owner ? pending.request : null, refreshOrders,
     loadMoreOrders: state.owner === owner && state.nextCursor ? () => refreshOrders(state.nextCursor) : null,
     createOrder: body => mutate(() => actions.checkout(body), true),
+    pendingCollection: actions.pendingCollection,
+    collectOrder: (id, code, detail) => {
+      const listed = rows.find(item => item.id === id);
+      const order = detail?.id === id && (!listed || detail.version > listed.version) ? detail : listed;
+      if (!order) return Promise.reject(new Error('Refresh the order before verifying pickup.'));
+      return mutate(() => actions.collect(order, code));
+    },
     updateOrderStatus: (id, status, detail) => {
       const listed = rows.find(item => item.id === id);
       const order = detail?.id === id && (!listed || detail.version > listed.version) ? detail : listed;

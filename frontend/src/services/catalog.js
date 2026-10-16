@@ -4,7 +4,7 @@ export function mapCatalog(data) {
   return {
     cafes: data.canteens.map(c => ({ ...c, databaseId: c.id, id: c.slug,
       status: !c.operational ? 'Closed' : c.acceptingOrders ? 'Open' : 'Paused',
-      location: c.location || 'Location not provided', hours: c.hours || 'Hours not provided',
+      hours: c.hours || 'Hours not provided',
       categories: data.categories.filter(category => category.canteenId === c.id).map(category => category.name),
       preparationTime: 'Choose pickup time at checkout', image: foodImage })),
     categories: data.categories,

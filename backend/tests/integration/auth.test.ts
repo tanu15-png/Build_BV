@@ -108,6 +108,7 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
       assert.equal((await db.user.findUniqueOrThrow({ where: { email: admin.email } })).passwordHash, null);
     });
     await t.test('staff code gate binds email/canteen and rejects stale authentication and replay', async () => {
+      assert.equal((await a.request('/auth/canteen/returning', 'POST', { email: staffA.email, canteenId: canteen.id })).status, 403);
       assert.equal((await a.request('/auth/canteen/login', 'POST', { email: staffA.email, canteenId: canteen.id, accessCode: 'wrong' })).status, 401);
       const start = await a.request('/auth/canteen/login', 'POST', { email: staffA.email, canteenId: canteen.id, accessCode: 'Bella Bite' });
       assert.equal(start.status, 200); challengeA = start.body.challengeId;
@@ -116,6 +117,14 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
       assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeA }, token(staffA, 'password'))).status, 401);
       assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeA }, token(staffA, 'otp'))).status, 200);
       assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeA }, token(staffA, 'otp'))).status, 401);
+    });
+    await t.test('returning staff can log in without the code but still need fresh email verification', async () => {
+      assert.equal((await a.request('/auth/canteen/returning', 'POST', { email: staffA.email, canteenId: otherCanteen.id })).status, 403);
+      const returning = await a.request('/auth/canteen/returning', 'POST', { email: staffA.email, canteenId: canteen.id });
+      assert.equal(returning.status, 200);
+      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: returning.body.challengeId }, token(staffA, 'password'))).status, 401);
+      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: returning.body.challengeId }, token(staffA, 'otp'))).status, 200);
+      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: returning.body.challengeId }, token(staffA, 'otp'))).status, 401);
     });
     await t.test('cross-canteen access and non-admin maintenance are denied', async () => {
       assert.equal((await a.request(`/canteens/${otherCanteen.id}/members`)).status, 403);
@@ -140,6 +149,7 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
       assert.equal((await b.request('/auth/me')).status, 401); assert.equal((await bOther.request('/auth/me')).status, 200);
       assert.equal((await b.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeB }, token(staffB, 'otp'))).status, 401);
       assert.equal((await b.request('/auth/canteen/login', 'POST', { email: staffB.email, canteenId: canteen.id, accessCode: 'Bella Bite' })).status, 403);
+      assert.equal((await b.request('/auth/canteen/returning', 'POST', { email: staffB.email, canteenId: canteen.id })).status, 403);
       assert.equal((await a.request(`/canteens/${canteen.id}/members`)).body.signedInPeople, 1);
     });
     await t.test('admin restoration requires a fresh login and does not resurrect old sessions', async () => {
@@ -164,6 +174,8 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
       await rotateCode(db, config, 'bella-bite', 'new secure test access code');
       assert.equal((await a.request('/auth/me')).status, 401); assert.equal((await b.request('/auth/me')).status, 401);
       assert.equal((await b.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: pending.body.challengeId }, token(staffB, 'otp'))).status, 401);
+      const returning = await b.request('/auth/canteen/returning', 'POST', { email: staffB.email, canteenId: canteen.id });
+      assert.equal(returning.status, 403); assert.equal(returning.body.error.code, 'ACCESS_CODE_CHANGED');
     });
     await t.test('password reset revokes all app sessions and disabling prevents new login', async () => {
       assert.equal((await student.request('/auth/revoke-sessions', 'POST', {}, token(students, 'recovery'))).status, 200);

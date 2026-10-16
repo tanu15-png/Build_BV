@@ -409,6 +409,7 @@ export const ModelName = {
   Cart: 'Cart',
   CartItem: 'CartItem',
   Order: 'Order',
+  PickupCredential: 'PickupCredential',
   OrderItem: 'OrderItem',
   OrderEvent: 'OrderEvent',
   OrderCodeAllocation: 'OrderCodeAllocation',
@@ -432,7 +433,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userRole" | "canteen" | "canteenAccessCode" | "canteenMembership" | "authChallenge" | "session" | "menuCategory" | "menuItem" | "cart" | "cartItem" | "order" | "orderItem" | "orderEvent" | "orderCodeAllocation" | "notification" | "outboxEvent" | "idempotencyKey" | "auditLog" | "rateLimit"
+    modelProps: "user" | "userRole" | "canteen" | "canteenAccessCode" | "canteenMembership" | "authChallenge" | "session" | "menuCategory" | "menuItem" | "cart" | "cartItem" | "order" | "pickupCredential" | "orderItem" | "orderEvent" | "orderCodeAllocation" | "notification" | "outboxEvent" | "idempotencyKey" | "auditLog" | "rateLimit"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1324,6 +1325,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PickupCredential: {
+      payload: Prisma.$PickupCredentialPayload<ExtArgs>
+      fields: Prisma.PickupCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PickupCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PickupCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.PickupCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PickupCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.PickupCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.PickupCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.PickupCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PickupCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.PickupCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload>
+        }
+        update: {
+          args: Prisma.PickupCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.PickupCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PickupCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PickupCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.PickupCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PickupCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.PickupCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePickupCredential>
+        }
+        groupBy: {
+          args: Prisma.PickupCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PickupCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PickupCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PickupCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
     OrderItem: {
       payload: Prisma.$OrderItemPayload<ExtArgs>
       fields: Prisma.OrderItemFieldRefs
@@ -2128,6 +2203,16 @@ export const OrderScalarFieldEnum = {
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
 
 
+export const PickupCredentialScalarFieldEnum = {
+  orderId: 'orderId',
+  encryptedCode: 'encryptedCode',
+  failedAttempts: 'failedAttempts',
+  windowEndsAt: 'windowEndsAt'
+} as const
+
+export type PickupCredentialScalarFieldEnum = (typeof PickupCredentialScalarFieldEnum)[keyof typeof PickupCredentialScalarFieldEnum]
+
+
 export const OrderItemScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
@@ -2592,6 +2677,7 @@ export type GlobalOmitConfig = {
   cart?: Prisma.CartOmit
   cartItem?: Prisma.CartItemOmit
   order?: Prisma.OrderOmit
+  pickupCredential?: Prisma.PickupCredentialOmit
   orderItem?: Prisma.OrderItemOmit
   orderEvent?: Prisma.OrderEventOmit
   orderCodeAllocation?: Prisma.OrderCodeAllocationOmit

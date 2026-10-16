@@ -1,3 +1,6 @@
+import { createAdminRouter } from './routes/admin.routes.js';
+import { createCatalogEvents } from './services/catalogEvents.js';
+import { createNotificationsRouter } from './routes/notifications.routes.js';
 import { createOrdersRouter } from './routes/orders.routes.js';
 import type { OrderOptions } from './services/orders.js';
 import { createCatalogRouter } from './routes/catalog.routes.js';
@@ -9,6 +12,18 @@ import { createHealthRouter } from './routes/health.routes.js';
 import { AppError, errorHandler } from './middleware/errorHandler.js';
 import { canteenSchema } from './schemas/contracts.js';
 import { createAuthRouter } from './routes/auth.routes.js';
+function allowsOrigin(origin: string, config: Config): boolean {
+  if (origin === config.FRONTEND_ORIGIN) return true;
+  if (config.APP_ENV !== 'development' || config.NODE_ENV !== 'development') return false;
+  const loopbackHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
+  try {
+    const candidate = new URL(origin);
+    const configured = new URL(config.FRONTEND_ORIGIN);
+    return candidate.origin === origin && loopbackHosts.has(candidate.hostname) &&
+      loopbackHosts.has(configured.hostname) && candidate.protocol === configured.protocol &&
+      candidate.port === configured.port;
+  } catch { return false; }
+}
 export function createApp(config: Config, db: PrismaClient,
   log: (entry: object) => void = entry => console.log(JSON.stringify(entry)), authFetch: typeof fetch = fetch, orderOptions: OrderOptions = {}) {
   const app = express();
@@ -19,7 +34,7 @@ export function createApp(config: Config, db: PrismaClient,
     res.on('finish', () => { if (config.LOG_LEVEL !== 'silent') log({ requestId: res.locals.requestId,
       method: req.method, status: res.statusCode, durationMs: Date.now() - started }); });
     const origin = req.get('origin');
-    if (origin && origin !== config.FRONTEND_ORIGIN) return next(new AppError(403, 'ORIGIN_DENIED', 'Origin is not allowed.'));
+    if (origin && !allowsOrigin(origin, config)) return next(new AppError(403, 'ORIGIN_DENIED', 'Origin is not allowed.'));
     if (origin) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -42,7 +57,10 @@ export function createApp(config: Config, db: PrismaClient,
     res.json({ canteens: rows.map(row => canteenSchema.parse(row)) });
   });
   api.use(createAuthRouter(config, db, authFetch));
-  api.use(createCatalogRouter(config, db));
+  const catalogEvents = createCatalogEvents();
+  api.use(createCatalogRouter(config, db, catalogEvents));
+  api.use(createAdminRouter(config, db, catalogEvents));
+  api.use(createNotificationsRouter(config, db));
   api.use(createOrdersRouter(config, db, orderOptions));
   app.use('/api/v1', api);
   app.use((_req, _res, next) => next(new AppError(404, 'NOT_FOUND', 'Resource not found.')));

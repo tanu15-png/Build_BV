@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import type { PrismaClient } from '../generated/prisma/client.js';
+import { AppError } from '../middleware/errorHandler.js';
+import type { PrismaClient, Prisma } from '../generated/prisma/client.js';
 import { hashSecret } from './hash.js';
 import type { Config } from '../config/env.js';
 export const directory = [
@@ -32,17 +33,19 @@ export async function seed(db: PrismaClient, config: Config) {
     });
   }
 }
-export async function rotateCode(db: PrismaClient, config: Config, slug: string, code: string, actor?: { id: string; requestId: string }) {
-  if (code.length < 12 || code.length > 256) throw new Error('Access code must contain 12 to 256 characters');
-  if (!developmentSeedsAllowed(config) && directory.some(([, name]) => name.toLowerCase() === code.toLowerCase())) throw new Error('Development codes are prohibited');
+export async function rotateCode(db: PrismaClient, config: Config, slug: string, code: string, actor?: { id: string; requestId: string; expectedCodeVersion?: number; authorize?: (tx: Prisma.TransactionClient) => Promise<void> }) {
+  if (code.length < 12 || code.length > 256) throw new AppError(422, 'ACCESS_CODE_INVALID', 'Access code must contain 12 to 256 characters');
+  if (!developmentSeedsAllowed(config) && directory.some(([, name]) => name.toLowerCase() === code.toLowerCase())) throw new AppError(422, 'ACCESS_CODE_INVALID', 'Development codes are prohibited');
   const codeHash = await hashSecret(code);
   return db.$transaction(async tx => {
+    if (actor) { await tx.$queryRaw`SELECT id FROM users WHERE id = ${actor.id}::uuid FOR UPDATE`; await actor.authorize?.(tx); }
     await tx.$queryRaw`SELECT id FROM canteens WHERE slug = ${slug} FOR UPDATE`;
     const canteen = await tx.canteen.findUniqueOrThrow({ where: { slug } });
     const last = await tx.canteenAccessCode.findFirst({ where: { canteenId: canteen.id }, orderBy: { version: 'desc' } });
+    if (actor?.expectedCodeVersion !== undefined && actor.expectedCodeVersion !== (last?.version ?? 0)) throw new AppError(409, 'VERSION_CONFLICT', 'Access code changed. Refresh before rotating it again.');
     const version = (last?.version ?? 0) + 1;
     await tx.canteenAccessCode.updateMany({ where: { canteenId: canteen.id, active: true }, data: { active: false } });
-    await tx.canteenAccessCode.create({ data: { canteenId: canteen.id, codeHash, version } });
+    await tx.canteenAccessCode.create({ data: { canteenId: canteen.id, codeHash, version, rotatedBy: actor?.id } });
     await tx.session.updateMany({ where: { canteenId: canteen.id, revokedAt: null }, data: { revokedAt: new Date() } });
     await tx.authChallenge.updateMany({ where: { canteenId: canteen.id, consumedAt: null }, data: { consumedAt: new Date() } });
     await tx.auditLog.create({ data: { actorId: actor?.id, action: 'CANTEEN_CODE_ROTATED', target: canteen.id, requestId: actor?.requestId ?? randomUUID(), metadata: { version, source: actor ? 'admin-api' : 'operator-cli' } } });

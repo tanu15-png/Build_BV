@@ -9,6 +9,7 @@ import {
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { OrderProvider } from "./context/OrderContext";
 import MenuManagement from "./pages/canteen/MenuManagement.jsx";
+import CanteenMembers from "./pages/canteen/CanteenMembers.jsx";
 import CanteenDashboard from "./pages/canteen/CanteenDashboard.jsx";
 import CanteenOrders from "./pages/canteen/CanteenOrders.jsx";
 import CanteenOrderDetails from "./pages/canteen/CanteenOrderDetails.jsx";
@@ -163,7 +164,10 @@ function App() {
 
             <Route path="/canteen/menu" element={<ProtectedRoute role="canteen"><MenuManagement /></ProtectedRoute>} />
 
+            <Route path="/canteen/members" element={<ProtectedRoute role="canteen"><CanteenMembers /></ProtectedRoute>} />
+
             {/* ADMIN */}
+            <Route path="/admin/canteens/:canteenId/menu" element={<ProtectedRoute role="admin"><MenuManagement /></ProtectedRoute>} />
 
             <Route path="/canteen/orders" element={<ProtectedRoute role="canteen"><CanteenOrders /></ProtectedRoute>} />
             <Route path="/canteen/orders/:orderId" element={<ProtectedRoute role="canteen"><CanteenOrderDetails /></ProtectedRoute>} />

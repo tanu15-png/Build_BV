@@ -305,6 +305,7 @@ export type OrderWhereInput = {
   items?: Prisma.OrderItemListRelationFilter
   events?: Prisma.OrderEventListRelationFilter
   allocation?: Prisma.XOR<Prisma.OrderCodeAllocationNullableScalarRelationFilter, Prisma.OrderCodeAllocationWhereInput> | null
+  pickupCredential?: Prisma.XOR<Prisma.PickupCredentialNullableScalarRelationFilter, Prisma.PickupCredentialWhereInput> | null
   notifications?: Prisma.NotificationListRelationFilter
   idempotencyKeys?: Prisma.IdempotencyKeyListRelationFilter
 }
@@ -330,6 +331,7 @@ export type OrderOrderByWithRelationInput = {
   items?: Prisma.OrderItemOrderByRelationAggregateInput
   events?: Prisma.OrderEventOrderByRelationAggregateInput
   allocation?: Prisma.OrderCodeAllocationOrderByWithRelationInput
+  pickupCredential?: Prisma.PickupCredentialOrderByWithRelationInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   idempotencyKeys?: Prisma.IdempotencyKeyOrderByRelationAggregateInput
 }
@@ -360,6 +362,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   items?: Prisma.OrderItemListRelationFilter
   events?: Prisma.OrderEventListRelationFilter
   allocation?: Prisma.XOR<Prisma.OrderCodeAllocationNullableScalarRelationFilter, Prisma.OrderCodeAllocationWhereInput> | null
+  pickupCredential?: Prisma.XOR<Prisma.PickupCredentialNullableScalarRelationFilter, Prisma.PickupCredentialWhereInput> | null
   notifications?: Prisma.NotificationListRelationFilter
   idempotencyKeys?: Prisma.IdempotencyKeyListRelationFilter
 }, "id" | "id_codeDay_orderCode" | "codeDay_orderCode">
@@ -427,6 +430,7 @@ export type OrderCreateInput = {
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutOrderInput
 }
@@ -450,6 +454,7 @@ export type OrderUncheckedCreateInput = {
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationUncheckedCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutOrderInput
 }
@@ -473,6 +478,7 @@ export type OrderUpdateInput = {
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutOrderNestedInput
 }
@@ -496,6 +502,7 @@ export type OrderUncheckedUpdateInput = {
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUncheckedUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutOrderNestedInput
 }
@@ -735,6 +742,20 @@ export type EnumOrderStatusFieldUpdateOperationsInput = {
   set?: $Enums.OrderStatus
 }
 
+export type OrderCreateNestedOneWithoutPickupCredentialInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutPickupCredentialInput, Prisma.OrderUncheckedCreateWithoutPickupCredentialInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutPickupCredentialInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneRequiredWithoutPickupCredentialNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutPickupCredentialInput, Prisma.OrderUncheckedCreateWithoutPickupCredentialInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutPickupCredentialInput
+  upsert?: Prisma.OrderUpsertWithoutPickupCredentialInput
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutPickupCredentialInput, Prisma.OrderUpdateWithoutPickupCredentialInput>, Prisma.OrderUncheckedUpdateWithoutPickupCredentialInput>
+}
+
 export type OrderCreateNestedOneWithoutItemsInput = {
   create?: Prisma.XOR<Prisma.OrderCreateWithoutItemsInput, Prisma.OrderUncheckedCreateWithoutItemsInput>
   connectOrCreate?: Prisma.OrderCreateOrConnectWithoutItemsInput
@@ -825,6 +846,7 @@ export type OrderCreateWithoutStudentInput = {
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutOrderInput
 }
@@ -847,6 +869,7 @@ export type OrderUncheckedCreateWithoutStudentInput = {
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationUncheckedCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutOrderInput
 }
@@ -916,6 +939,7 @@ export type OrderCreateWithoutCanteenInput = {
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutOrderInput
 }
@@ -938,6 +962,7 @@ export type OrderUncheckedCreateWithoutCanteenInput = {
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationUncheckedCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutOrderInput
 }
@@ -968,6 +993,114 @@ export type OrderUpdateManyWithWhereWithoutCanteenInput = {
   data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutCanteenInput>
 }
 
+export type OrderCreateWithoutPickupCredentialInput = {
+  id?: string
+  status?: $Enums.OrderStatus
+  executionMode?: string
+  paymentStatus?: string
+  totalPaise: number
+  pickupAt: Date | string
+  codeDay: Date | string
+  orderCode?: string | null
+  version?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  collectedAt?: Date | string | null
+  pickupVerifiedBy?: string | null
+  student: Prisma.UserCreateNestedOneWithoutOrdersInput
+  canteen: Prisma.CanteenCreateNestedOneWithoutOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  events?: Prisma.OrderEventCreateNestedManyWithoutOrderInput
+  allocation?: Prisma.OrderCodeAllocationCreateNestedOneWithoutOrderInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutOrderInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutPickupCredentialInput = {
+  id?: string
+  studentId: string
+  canteenId: string
+  status?: $Enums.OrderStatus
+  executionMode?: string
+  paymentStatus?: string
+  totalPaise: number
+  pickupAt: Date | string
+  codeDay: Date | string
+  orderCode?: string | null
+  version?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  collectedAt?: Date | string | null
+  pickupVerifiedBy?: string | null
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
+  allocation?: Prisma.OrderCodeAllocationUncheckedCreateNestedOneWithoutOrderInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrderInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutPickupCredentialInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutPickupCredentialInput, Prisma.OrderUncheckedCreateWithoutPickupCredentialInput>
+}
+
+export type OrderUpsertWithoutPickupCredentialInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutPickupCredentialInput, Prisma.OrderUncheckedUpdateWithoutPickupCredentialInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutPickupCredentialInput, Prisma.OrderUncheckedCreateWithoutPickupCredentialInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutPickupCredentialInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutPickupCredentialInput, Prisma.OrderUncheckedUpdateWithoutPickupCredentialInput>
+}
+
+export type OrderUpdateWithoutPickupCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  executionMode?: Prisma.StringFieldUpdateOperationsInput | string
+  paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  student?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  canteen?: Prisma.CanteenUpdateOneRequiredWithoutOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  events?: Prisma.OrderEventUpdateManyWithoutOrderNestedInput
+  allocation?: Prisma.OrderCodeAllocationUpdateOneWithoutOrderNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutOrderNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutPickupCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  canteenId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  executionMode?: Prisma.StringFieldUpdateOperationsInput | string
+  paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
+  allocation?: Prisma.OrderCodeAllocationUncheckedUpdateOneWithoutOrderNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrderNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutOrderNestedInput
+}
+
 export type OrderCreateWithoutItemsInput = {
   id?: string
   status?: $Enums.OrderStatus
@@ -986,6 +1119,7 @@ export type OrderCreateWithoutItemsInput = {
   canteen: Prisma.CanteenCreateNestedOneWithoutOrdersInput
   events?: Prisma.OrderEventCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutOrderInput
 }
@@ -1008,6 +1142,7 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   pickupVerifiedBy?: string | null
   events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationUncheckedCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutOrderInput
 }
@@ -1046,6 +1181,7 @@ export type OrderUpdateWithoutItemsInput = {
   canteen?: Prisma.CanteenUpdateOneRequiredWithoutOrdersNestedInput
   events?: Prisma.OrderEventUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutOrderNestedInput
 }
@@ -1068,6 +1204,7 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUncheckedUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutOrderNestedInput
 }
@@ -1090,6 +1227,7 @@ export type OrderCreateWithoutEventsInput = {
   canteen: Prisma.CanteenCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutOrderInput
 }
@@ -1112,6 +1250,7 @@ export type OrderUncheckedCreateWithoutEventsInput = {
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationUncheckedCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutOrderInput
 }
@@ -1150,6 +1289,7 @@ export type OrderUpdateWithoutEventsInput = {
   canteen?: Prisma.CanteenUpdateOneRequiredWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutOrderNestedInput
 }
@@ -1172,6 +1312,7 @@ export type OrderUncheckedUpdateWithoutEventsInput = {
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUncheckedUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutOrderNestedInput
 }
@@ -1194,6 +1335,7 @@ export type OrderCreateWithoutAllocationInput = {
   canteen: Prisma.CanteenCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventCreateNestedManyWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutOrderInput
 }
@@ -1216,6 +1358,7 @@ export type OrderUncheckedCreateWithoutAllocationInput = {
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutOrderInput
 }
@@ -1254,6 +1397,7 @@ export type OrderUpdateWithoutAllocationInput = {
   canteen?: Prisma.CanteenUpdateOneRequiredWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUpdateManyWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutOrderNestedInput
 }
@@ -1276,6 +1420,7 @@ export type OrderUncheckedUpdateWithoutAllocationInput = {
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutOrderNestedInput
 }
@@ -1299,6 +1444,7 @@ export type OrderCreateWithoutNotificationsInput = {
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialCreateNestedOneWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutOrderInput
 }
 
@@ -1321,6 +1467,7 @@ export type OrderUncheckedCreateWithoutNotificationsInput = {
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationUncheckedCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedCreateNestedOneWithoutOrderInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutOrderInput
 }
 
@@ -1359,6 +1506,7 @@ export type OrderUpdateWithoutNotificationsInput = {
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUpdateOneWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutOrderNestedInput
 }
 
@@ -1381,6 +1529,7 @@ export type OrderUncheckedUpdateWithoutNotificationsInput = {
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUncheckedUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedUpdateOneWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutOrderNestedInput
 }
 
@@ -1403,6 +1552,7 @@ export type OrderCreateWithoutIdempotencyKeysInput = {
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrderInput
 }
 
@@ -1425,6 +1575,7 @@ export type OrderUncheckedCreateWithoutIdempotencyKeysInput = {
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
   allocation?: Prisma.OrderCodeAllocationUncheckedCreateNestedOneWithoutOrderInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedCreateNestedOneWithoutOrderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrderInput
 }
 
@@ -1463,6 +1614,7 @@ export type OrderUpdateWithoutIdempotencyKeysInput = {
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutOrderNestedInput
 }
 
@@ -1485,6 +1637,7 @@ export type OrderUncheckedUpdateWithoutIdempotencyKeysInput = {
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUncheckedUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrderNestedInput
 }
 
@@ -1523,6 +1676,7 @@ export type OrderUpdateWithoutStudentInput = {
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutOrderNestedInput
 }
@@ -1545,6 +1699,7 @@ export type OrderUncheckedUpdateWithoutStudentInput = {
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUncheckedUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutOrderNestedInput
 }
@@ -1601,6 +1756,7 @@ export type OrderUpdateWithoutCanteenInput = {
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutOrderNestedInput
 }
@@ -1623,6 +1779,7 @@ export type OrderUncheckedUpdateWithoutCanteenInput = {
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
   allocation?: Prisma.OrderCodeAllocationUncheckedUpdateOneWithoutOrderNestedInput
+  pickupCredential?: Prisma.PickupCredentialUncheckedUpdateOneWithoutOrderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrderNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutOrderNestedInput
 }
@@ -1723,6 +1880,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   events?: boolean | Prisma.Order$eventsArgs<ExtArgs>
   allocation?: boolean | Prisma.Order$allocationArgs<ExtArgs>
+  pickupCredential?: boolean | Prisma.Order$pickupCredentialArgs<ExtArgs>
   notifications?: boolean | Prisma.Order$notificationsArgs<ExtArgs>
   idempotencyKeys?: boolean | Prisma.Order$idempotencyKeysArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
@@ -1793,6 +1951,7 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   events?: boolean | Prisma.Order$eventsArgs<ExtArgs>
   allocation?: boolean | Prisma.Order$allocationArgs<ExtArgs>
+  pickupCredential?: boolean | Prisma.Order$pickupCredentialArgs<ExtArgs>
   notifications?: boolean | Prisma.Order$notificationsArgs<ExtArgs>
   idempotencyKeys?: boolean | Prisma.Order$idempotencyKeysArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
@@ -1814,6 +1973,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     items: Prisma.$OrderItemPayload<ExtArgs>[]
     events: Prisma.$OrderEventPayload<ExtArgs>[]
     allocation: Prisma.$OrderCodeAllocationPayload<ExtArgs> | null
+    pickupCredential: Prisma.$PickupCredentialPayload<ExtArgs> | null
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     idempotencyKeys: Prisma.$IdempotencyKeyPayload<ExtArgs>[]
   }
@@ -2232,6 +2392,7 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   items<T extends Prisma.Order$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   events<T extends Prisma.Order$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   allocation<T extends Prisma.Order$allocationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$allocationArgs<ExtArgs>>): Prisma.Prisma__OrderCodeAllocationClient<runtime.Types.Result.GetResult<Prisma.$OrderCodeAllocationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  pickupCredential<T extends Prisma.Order$pickupCredentialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$pickupCredentialArgs<ExtArgs>>): Prisma.Prisma__PickupCredentialClient<runtime.Types.Result.GetResult<Prisma.$PickupCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   notifications<T extends Prisma.Order$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   idempotencyKeys<T extends Prisma.Order$idempotencyKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$idempotencyKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IdempotencyKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2743,6 +2904,25 @@ export type Order$allocationArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.OrderCodeAllocationInclude<ExtArgs> | null
   where?: Prisma.OrderCodeAllocationWhereInput
+}
+
+/**
+ * Order.pickupCredential
+ */
+export type Order$pickupCredentialArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PickupCredential
+   */
+  select?: Prisma.PickupCredentialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PickupCredential
+   */
+  omit?: Prisma.PickupCredentialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PickupCredentialInclude<ExtArgs> | null
+  where?: Prisma.PickupCredentialWhereInput
 }
 
 /**

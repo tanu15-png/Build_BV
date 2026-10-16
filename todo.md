@@ -1,6 +1,6 @@
 # SpoonAte implementation checklist
 
-Last checked: 2026-10-15. Backend phase audit and verification are recorded in backend/README.md; Supabase setup and operator actions are recorded in backend/SUPABASE.md; historical frontend checks remain dated below.
+Last checked: 2026-10-16. Backend phase audit and verification are recorded in backend/README.md; Supabase setup and operator actions are recorded in backend/SUPABASE.md; historical frontend checks remain dated below.
 
 `[x]` means implemented in the stated scope or verified; `[ ]` means remaining work. Historical frontend checks describe the earlier browser prototype. The backend now contains the foundation, database/provisioning and Supabase Auth integration; menus, categories, availability and carts use server APIs; checkout and accept/prepare/ready now use server APIs; historical browser orders are ignored. Student signup/password login were reported working by the operator; broader staff/admin/browser acceptance and production deployment qualification remain pending.
 
@@ -171,38 +171,45 @@ Student menus/carts now use server records with polling, focus/reconnect refresh
 
 ## Phase 9 - Notifications and synchronization
 
-- [ ] Persist student notifications independently of browser storage and process the PostgreSQL outbox with retries/leases.
-- [ ] Implement notification pagination and idempotent mark-read actions.
-- [ ] Poll scoped orders/notifications; refresh after writes, on focus and after reconnect.
-- [ ] Verify worker crash recovery, duplicate-event handling and offline notification recovery.
+- [x] Persist student notifications independently of browser storage and process the PostgreSQL outbox with retries/leases.
+- [x] Implement notification pagination and idempotent mark-read actions.
+- [x] Poll scoped orders/notifications; refresh after writes, on focus and after reconnect.
+- [x] Verify worker crash recovery, duplicate-event handling and offline notification recovery.
+
+Verified on 2026-10-16: all eight isolated PostgreSQL notification integration tests passed, including a killed worker, lease recovery, duplicate events, retry/backoff/operator retry, application-role RLS, offline recovery and scoped idempotent reads. Backend unit tests (20), application/test type checks and builds, plus frontend tests/lint/build passed. See [backend/NOTIFICATIONS.md](backend/NOTIFICATIONS.md). Apply migrations and start the separate worker in the running application environment; that environment was not changed by the isolated tests.
 
 ## Phase 10 - Pickup verification
 
-- [ ] Implement collection by UUID plus matching pickup code, READY status and expected version; staff compare the dated student card. Pickup lookup by code requires allocation day and canteen.
-- [ ] Rate-limit failed code attempts and record verifier/time/history atomically.
-- [ ] Test early pickup, wrong codes, cross-canteen collection and simultaneous handover attempts.
+- [x] Generate a separate encrypted student-only random numeric code (1–100) when an order becomes READY; preserve the public dated order reference.
+- [x] Implement collection by UUID, matching private pickup code, READY status and expected version; staff compare the student's name and dated order details.
+- [x] Persist the five-wrong-guess per-order cooldown and staff-wide limits across replicas, and record verifier/time/history/outbox/audit atomically; consume the code and preserve safe retries.
+- [x] Test early pickup, malformed/wrong codes, privacy/scope, cooldowns, cross-canteen collection, simultaneous handovers, rollback, late pickup and legacy READY orders.
+
+Verified on 2026-10-16: all 13 isolated PostgreSQL pickup tests passed, plus the existing order (17) and notification (8) integration suites, 23 backend unit tests, frontend tests/lint/build, backend build and application/test type checks. See [backend/PICKUP.md](backend/PICKUP.md). Apply migrations and restart the API/worker in the running application environment; the tests used disposable local databases.
 
 ## Phase 11 - Admin oversight
 
-- [ ] Implement /admin/overview and paginated /admin/orders with search/status/canteen/date filters.
-- [ ] Compute campus summaries and collected test order value from PostgreSQL.
-- [ ] Connect audited account, membership and access-code maintenance controls.
-- [ ] Verify totals, scope restrictions and retention of existing order history.
+- [x] Implement /admin/overview and paginated /admin/orders with search/status/canteen/date filters.
+- [x] Compute campus summaries and collected test order value from PostgreSQL.
+- [x] Connect audited account, membership and access-code maintenance controls.
+- [x] Verify totals, scope restrictions and retention of existing order history.
+
+Verified on 2026-10-16: 14 isolated PostgreSQL admin scenarios (15 tests including parent) passed, covering full-history totals, stable pagination, role restrictions, concurrent account/session changes, audited maintenance, application-role RLS and retained history. Authentication regressions (17 tests), backend unit/contracts (25), frontend tests/lint/build and backend build/application/test type checks passed. See [backend/ADMIN.md](backend/ADMIN.md). Apply the pagination migration and restart the running application; isolated tests did not change Supabase. Manual browser acceptance remains pending.
 
 ## Phase 12 - Frontend API integration and remaining screens
 
 - [x] Add frontend/src/services/api.js using fetch, credentials, CSRF headers and consistent error handling.
 - [x] Replace AuthContext local identity with Supabase signup/login/reset, server session restoration and canteen email challenges.
 - [x] Connect the canteen member panel to paginated member/count/removal APIs and revalidate sessions after removal.
-- [ ] Add dedicated admin-only restoration/maintenance UI; backend authorization endpoints are implemented.
+- [x] Add dedicated admin-only account/membership restoration, canteen/menu maintenance and join-code rotation UI with audited backend authorization.
 - [x] Add student/canteen email-code entry, callback and recovery screens with resend cooldown, expiry, errors and pending states; backend proof establishes identity.
 - [x] Replace OrderContext local carts/orders/menus/availability with server records; add scoped paginated reads, UUID detail routes and persisted retry keys.
-- [ ] Replace derived notification previews with the durable notification API/worker in Phase 9.
+- [x] Replace derived notification previews with the durable notification API/worker in Phase 9.
 - [x] Map canteen slugs/UUIDs for staff login and authenticated canteen identity.
 - [ ] Map remaining catalog/cart/order identifiers and convert frontend rupees to integer paise during the data cutover.
 - [x] Use order UUIDs in navigation/mutations; show allocation day/code, canteen and items on order cards, and pickup date/time in IST.
 - [x] Add order pending/loading/retry states and retain the exact request/key after uncertain checkout or fulfillment responses.
-- [ ] Add notification read/unread UI backed by the notification endpoints.
+- [x] Add notification read/unread UI backed by the notification endpoints.
 - [x] Implement and route MenuManagement.jsx for canteen-owned categories/items, editing/moving, archival/restoration, details and availability.
 - [ ] Implement and route CanteenSettings.jsx for supported canteen settings; it is currently an empty file.
 - [ ] Decide whether dedicated CanteenAnalytics.jsx is required; implement/route it if included. It is currently an empty file; basic dashboard counts already exist.
@@ -241,17 +248,24 @@ Student menus/carts now use server records with polling, focus/reconnect refresh
 
 ## Next implementation step
 
-Complete the dashboard URL/SMTP and real email/browser acceptance steps in backend/AUTH.md. Run `auth:check` and `db:check` from backend. Phases 5–8 catalog/categories, persistent carts, transactional orders and fulfillment are implemented. Continue with Phase 9 notifications/outbox processing, then complete the remaining frontend data cutover in Phase 12. Do not mark provider acceptance, production qualification or ordering complete based on the authentication tests.
+Complete the dashboard URL/SMTP and real email/browser acceptance steps in backend/AUTH.md. Run `auth:check` and `db:check` from backend. Phases 5–11 catalog/categories, persistent carts, transactional orders, fulfillment, durable notifications, private pickup verification and admin oversight are implemented. Apply migrations and run the notification worker alongside the API. Continue with the remaining frontend API integration and acceptance in Phase 12. Do not mark provider acceptance, production qualification or ordering complete based on the authentication tests.
 
 ## Run frontend and backend locally
 
-Use two WSL terminals and keep both running. Dependencies and private environment files are already configured for this workspace; do not overwrite `.env` files with examples.
+Use three WSL terminals and keep the API, notification worker and frontend running. Dependencies and private environment files are already configured for this workspace; do not overwrite `.env` files with examples.
 
 Backend terminal:
 
 ```bash
 cd /mnt/c/projects/build_bv/backend
 npm run dev
+```
+
+Notification worker terminal (after applying migrations with `npm run db:migrate` from `backend`):
+
+```bash
+cd /mnt/c/projects/build_bv/backend
+npm run worker:dev
 ```
 
 Frontend terminal:
@@ -263,4 +277,4 @@ npm run dev -- --port 5173 --strictPort
 
 Open `http://localhost:5173/login`. The frontend proxies `/api` requests to Express on port 4000. Database readiness is `http://localhost:4000/health/ready`. Supabase hosts the database, so this setup does not require starting local Docker/PostgreSQL. If a server is already running, reuse it or stop that server with Ctrl+C before starting another on the same port. Ctrl+C stops each development server.
 
-Next coding phase: **Phase 9 — Notifications and synchronization**. Checkout, permanent daily pickup codes and scoped accept/prepare/ready actions are implemented. Next process the durable outbox and persist notification/read state; collection verification follows in Phase 10. Real menu/location/hour data and live authentication acceptance remain operator inputs/checks.
+Next coding phase: **Phase 12 — Frontend API integration and remaining screens**. Phase 11 database-wide admin summaries, paginated order search and audited maintenance are implemented and verified; see backend/ADMIN.md. Apply migrations, restart the API/worker and keep the worker running. Real menu/hour data and live authentication acceptance remain operator inputs/checks.

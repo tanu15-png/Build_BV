@@ -54,13 +54,13 @@ async function main() {
         AND has_table_privilege(r.oid, c.oid, 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')) AS browser_access
       FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
       WHERE n.nspname='public' AND c.relkind='r' AND c.relname <> '_prisma_migrations'`, [identity.name]);
-    assert.equal(tables.rows.length, 20, 'Expected all 20 application tables');
+    assert.equal(tables.rows.length, 21, 'Expected all 21 application tables');
     for (const table of tables.rows) {
       assert(table.relrowsecurity && table.app_access && !table.app_owns_table && !table.browser_access, `Unsafe permissions: ${table.relname}`);
     }
     const schema = await owner.query("SELECT has_schema_privilege($1, 'public', 'CREATE') AS can_create", [identity.name]);
     assert.equal(schema.rows[0].can_create, false);
-    console.log('PASS: RLS and restricted grants on 20 tables; browser roles denied; app cannot create schema objects');
+    console.log('PASS: RLS and restricted grants on 21 tables; browser roles denied; app cannot create schema objects');
 
     stage = 'prepared statements';
     const client = await appPool.connect();

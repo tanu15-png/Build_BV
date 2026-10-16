@@ -2,7 +2,7 @@ export function createOrderActions({ api, storage, actorId, uuid = () => crypto.
   const checkoutKey = 'spoonateCheckout:' + actorId;
   const read = key => { try { return JSON.parse(storage.getItem(key)); } catch { return null; } };
   const uncertain = issue => !issue.status || issue.status >= 500 || [401, 403, 408, 429].includes(issue.status);
-  async function execute(key, path, body) {
+  async function execute(key, path, body, collection = false) {
     if (!actorId) throw new Error('Sign in before managing orders.');
     let request = read(key);
     if (!request) {
@@ -15,16 +15,19 @@ export function createOrderActions({ api, storage, actorId, uuid = () => crypto.
       storage.removeItem(key);
       return result;
     } catch (issue) {
-      if (!uncertain(issue)) storage.removeItem(key);
+      if (!uncertain(issue) || (collection && issue.status === 429)) storage.removeItem(key);
       throw issue;
     }
   }
   return {
     pendingCheckout: () => read(checkoutKey),
     checkout: body => execute(checkoutKey, '/orders', body),
+    pendingCollection: id => read('spoonateOrderCommand:' + actorId + ':' + id + ':collect'),
+    collect: (order, code) => execute('spoonateOrderCommand:' + actorId + ':' + order.id + ':collect',
+      '/orders/' + order.id + '/collect', { expectedVersion: order.version, code: code.trim() }, true),
     transition(order, nextStatus) {
       const action = { ACCEPTED: 'accept', PREPARING: 'prepare', READY: 'ready' }[nextStatus];
-      if (!action) throw new Error('Collection confirmation is not available yet.');
+      if (!action) throw new Error('Use pickup verification to collect an order.');
       return execute('spoonateOrderCommand:' + actorId + ':' + order.id + ':' + action,
         '/orders/' + order.id + '/' + action, { expectedVersion: order.version });
     },

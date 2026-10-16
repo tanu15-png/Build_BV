@@ -50,6 +50,34 @@ test('HTTP health, errors, origins, bounds and redacted logs', async () => {
   });
   assert(!JSON.stringify(entries).includes('DO_NOT_LOG'));
 });
+test('development loopback origins work for session requests without allowing other origins', async () => {
+  const db = {} as PrismaClient;
+  await serve(createApp(config, db), async base => {
+    for (const origin of [config.FRONTEND_ORIGIN, 'http://127.0.0.1:5173', 'http://[::1]:5173']) {
+      const preflight = await fetch(`${base}/api/v1/auth/session`, { method: 'OPTIONS', headers: { Origin: origin } });
+      assert.equal(preflight.status, 204);
+      assert.equal(preflight.headers.get('access-control-allow-origin'), origin);
+      assert.equal(preflight.headers.get('access-control-allow-credentials'), 'true');
+      const response = await fetch(`${base}/api/v1/auth/session`, { method: 'POST', headers: { Origin: origin } });
+      assert.equal(response.status, 403);
+      assert.equal((await response.json()).error.code, 'CSRF_INVALID');
+    }
+    for (const origin of ['http://localhost:5174', 'https://localhost:5173', 'http://localhost.evil.example:5173', 'null']) {
+      const response = await fetch(`${base}/api/v1/auth/session`, { method: 'POST', headers: { Origin: origin } });
+      assert.equal(response.status, 403);
+      assert.equal((await response.json()).error.code, 'ORIGIN_DENIED');
+      assert.equal(response.headers.get('access-control-allow-origin'), null);
+    }
+  });
+  for (const override of [{ APP_ENV: 'staging' as const }, { APP_ENV: 'production' as const }, { NODE_ENV: 'production' as const }]) {
+    await serve(createApp({ ...config, ...override }, db), async base => {
+      const response = await fetch(`${base}/api/v1/auth/session`, { method: 'OPTIONS', headers: { Origin: 'http://127.0.0.1:5173' } });
+      assert.equal(response.status, 403);
+      assert.equal((await response.json()).error.code, 'ORIGIN_DENIED');
+      assert.equal((await fetch(`${base}/api/v1/auth/session`, { method: 'OPTIONS', headers: { Origin: config.FRONTEND_ORIGIN } })).status, 204);
+    });
+  }
+});
 test('readiness fails within deadline while liveness remains healthy', async () => {
   for (const check of [async () => { throw new Error('postgres://secret'); }, () => new Promise(() => {})]) {
     const db = { $queryRawUnsafe: check } as unknown as PrismaClient;
@@ -72,7 +100,12 @@ test('frontend fixtures enforce identity, quantity, campus domain, paise, status
   assert.equal(contracts['POST /cart/items']!.body.safeParse({ expectedVersion: 1, menuItemId: id, quantity: 0 }).success, false);
   assert.equal(contracts['POST /canteens/:id/menu']!.body.safeParse({ name: 'Tea', categoryId: id, pricePaise: 1.1 }).success, false);
   assert.equal(contracts['GET /canteens']!.response.safeParse({ canteens: [{ id, slug: 'bella-bite', name: 'Bella Bite', location: null, hours: null, acceptingOrders: true, operational: true, version: 1, codeHash: 'secret' }] }).success, false);
-  assert.equal(Object.keys(contracts).length, 43);
+  for (const route of ['DELETE /menu-items/:id', 'DELETE /menu-categories/:id']) {
+    contracts[route]!.body.parse({ expectedVersion: 1 });
+    assert.equal(contracts[route]!.body.safeParse({}).success, false);
+    assert.equal(contracts[route]!.body.safeParse({ expectedVersion: 1, canteenId: id }).success, false);
+  }
+  assert.equal(Object.keys(contracts).length, 50);
 });
 test('validation handles body, params and parsed query with stable 422 envelope', async () => {
   const app = express(); app.use(requestId); app.use(express.json());

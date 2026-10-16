@@ -28,8 +28,8 @@ export default function AuthCallback() {
     event.preventDefault(); setBusy(true); setError('');
     try {
       if (password !== confirmation) throw new Error('Passwords do not match.');
-      await changePassword(password);
-      navigate('/login', { replace: true, state: { message: 'Password changed and previous SpoonAte sessions ended. Please log in.' } });
+      const result = await changePassword(password, params.get('role') || undefined);
+      navigate(`/${result.role}`, { replace: true });
     } catch (issue) { setError(issue.message); } finally { setBusy(false); }
   }
   return <main className="flex min-h-screen items-center justify-center bg-[#075d50] p-6"><section className="w-full max-w-md rounded-2xl bg-white p-8">

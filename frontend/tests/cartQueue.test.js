@@ -1,0 +1,145 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { setImmediate } from 'node:timers/promises';
+import { createCartQueue } from '../src/services/cartQueue.js';
+const initial = { id: 'cart', version: 1, items: [], quote: 'quote-1' };
+const add = id => () => ({ path: '/cart/items', method: 'POST', values: { menuItemId: id, quantity: 1 } });
+function setup() {
+  const requests = [];
+  let snapshot;
+  const errors = [];
+  const queue = createCartQueue({
+    request: (path, options) => new Promise((resolve, reject) => requests.push({ path, ...options, resolve, reject })),
+    changed: value => { snapshot = value; }, failed: error => errors.push(error),
+  });
+  return { queue, requests, errors, snapshot: () => snapshot };
+}
+test('clicks before loading wait for one shared read, then save in order with confirmed versions', async () => {
+  const { queue, requests, snapshot } = setup();
+  const load = queue.load(true);
+  const first = queue.enqueue(add('noodles'));
+  const second = queue.enqueue(add('tea'));
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].path, '/cart');
+  assert.equal(snapshot().pending, 2);
+  requests[0].resolve(initial);
+  await load;
+  await setImmediate();
+  assert.equal(requests[1].body.expectedVersion, 1);
+  assert.equal(requests[1].body.menuItemId, 'noodles');
+  const noodles = { ...initial, version: 2, items: [{ id: 'line', menuItemId: 'noodles', quantity: 1 }] };
+  requests[1].resolve(noodles);
+  await first;
+  await setImmediate();
+  // A refresh during a write must not issue a stale cart read.
+  assert.deepEqual(await queue.load(true), noodles);
+  assert.equal(requests.length, 3);
+  assert.equal(requests[2].body.expectedVersion, 2);
+  assert.equal(requests[2].body.menuItemId, 'tea');
+  requests[2].resolve({ ...noodles, version: 3 });
+  await second;
+  assert.equal(snapshot().pending, 0);
+  assert.equal(snapshot().cart.version, 3);
+});
+test('repeated clicks add the same item twice without overlapping requests', async () => {
+  const { queue, requests, snapshot } = setup();
+  const first = queue.enqueue(add('noodles'));
+  const second = queue.enqueue(add('noodles'));
+  requests[0].resolve(initial);
+  await queue.load();
+  await setImmediate();
+  assert.equal(requests.length, 2);
+  requests[1].resolve({ ...initial, version: 2, items: [{ id: 'line', menuItemId: 'noodles', quantity: 1 }] });
+  await first;
+  await setImmediate();
+  assert.equal(requests[2].body.expectedVersion, 2);
+  assert.equal(requests[2].body.quantity, 1);
+  requests[2].resolve({ ...initial, version: 3, items: [{ id: 'line', menuItemId: 'noodles', quantity: 2 }] });
+  await second;
+  assert.equal(snapshot().cart.items[0].quantity, 2);
+});
+test('quantity changes and review resolve line IDs and quotes when their turn starts', async () => {
+  const { queue, requests } = setup();
+  const first = queue.enqueue(add('noodles'));
+  const quantity = queue.enqueue(cart => ({ path: `/cart/items/${cart.items[0].id}`, method: 'PATCH', values: { quantity: 2 } }));
+  const review = queue.enqueue(cart => ({ path: '/cart/review', method: 'POST', values: { quote: cart.quote } }));
+  requests[0].resolve(initial);
+  await queue.load();
+  await setImmediate();
+  requests[1].resolve({ ...initial, version: 2, items: [{ id: 'saved-line' }], quote: 'quote-2' });
+  await first;
+  await setImmediate();
+  assert.equal(requests[2].path, '/cart/items/saved-line');
+  requests[2].resolve({ ...initial, version: 3, quote: 'quote-3' });
+  await quantity;
+  await setImmediate();
+  assert.equal(requests[3].body.quote, 'quote-3');
+  assert.equal(requests[3].body.expectedVersion, 3);
+  requests[3].resolve({ ...initial, version: 3 });
+  await review;
+});
+test('failed initial loading rejects queued clicks and a later click can load again', async () => {
+  const { queue, requests, snapshot } = setup();
+  const first = queue.enqueue(add('noodles'));
+  const second = queue.enqueue(add('tea'));
+  requests[0].reject(new Error('Offline'));
+  await assert.rejects(first, /Offline/);
+  await assert.rejects(second, /earlier cart update failed/);
+  assert.equal(snapshot().pending, 0);
+  const retry = queue.enqueue(add('tea'));
+  requests[1].resolve(initial);
+  await queue.load();
+  await setImmediate();
+  requests[2].resolve({ ...initial, version: 2 });
+  await retry;
+});
+test('an uncertain save cancels subsequent writes, reloads on the next click and never replays an addition', async () => {
+  const { queue, requests, snapshot } = setup();
+  const first = queue.enqueue(add('noodles'));
+  const second = queue.enqueue(add('tea'));
+  requests[0].resolve(initial);
+  await queue.load();
+  await setImmediate();
+  requests[1].reject(Object.assign(new Error('Connection lost'), { status: 503, code: 'NETWORK_ERROR' }));
+  await assert.rejects(first, /Connection lost/);
+  await assert.rejects(second, /earlier cart update failed/);
+  assert.equal(requests.length, 2);
+  assert.equal(snapshot().cart, null);
+  const retry = queue.enqueue(add('tea'));
+  assert.equal(requests[2].path, '/cart');
+  requests[2].resolve({ ...initial, version: 2 });
+  await queue.load();
+  await setImmediate();
+  assert.equal(requests[3].body.menuItemId, 'tea');
+  assert.equal(requests[3].body.expectedVersion, 2);
+  requests[3].resolve({ ...initial, version: 3 });
+  await retry;
+});
+test('version conflicts retain the fresh server cart and stop queued writes', async () => {
+  const { queue, requests, snapshot } = setup();
+  const first = queue.enqueue(add('noodles'));
+  const second = queue.enqueue(add('tea'));
+  requests[0].resolve(initial);
+  await queue.load();
+  await setImmediate();
+  const fresh = { ...initial, version: 8 };
+  requests[1].reject(Object.assign(new Error('Cart changed'), { status: 409, details: { cart: fresh } }));
+  await assert.rejects(first, /Cart changed/);
+  await assert.rejects(second, /earlier cart update failed/);
+  assert.deepEqual(snapshot().cart, fresh);
+  assert.equal(requests.length, 2);
+});
+test('switching sessions cancels clicks and ignores late responses', async () => {
+  const { queue, requests, snapshot } = setup();
+  const first = queue.enqueue(add('noodles'));
+  requests[0].resolve(initial);
+  await queue.load();
+  await setImmediate();
+  const previous = snapshot();
+  queue.dispose();
+  await assert.rejects(first, /session changed/);
+  requests[1].resolve({ ...initial, version: 2 });
+  await Promise.resolve();
+  assert.equal(snapshot(), previous);
+  await assert.rejects(queue.enqueue(add('tea')), /session changed/);
+});

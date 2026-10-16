@@ -211,7 +211,7 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
       assert.deepEqual((await staff.browser.request('/orders/' + first.id + '/ready', 'POST', body, key)).body, ready.body);
       assert.equal(await db.outboxEvent.count({ where: { event: { orderId: first.id } } }), 4);
       assert.equal((await staff.browser.request('/orders/' + first.id + '/ready', 'POST', { expectedVersion: 4 }, randomUUID())).status, 409);
-      assert.equal((await staff.browser.request('/orders/' + first.id + '/collect', 'POST', { expectedVersion: 4, code: first.orderCode }, randomUUID())).status, 404);
+      assert.equal((await staff.browser.request('/orders/' + first.id + '/collect', 'POST', { expectedVersion: 4, code: first.orderCode }, randomUUID())).status, 422);
       const c = await db.canteen.findUniqueOrThrow({ where: { id: canteen.id } });
       await staff.browser.request('/canteens/' + canteen.id + '/availability', 'PATCH', { expectedVersion: c.version, acceptingOrders: true });
     });

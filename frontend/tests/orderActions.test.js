@@ -39,7 +39,7 @@ test('staff commands reuse their original expected version and key after an unce
   await assert.rejects(actions.transition({ id: 'order', version: 1 }, 'ACCEPTED'));
   await actions.transition({ id: 'order', version: 2 }, 'ACCEPTED');
   assert.equal(calls[1].path, '/orders/order/accept'); assert.deepEqual(calls[0].body, calls[1].body); assert.equal(calls[1].body.expectedVersion, 1);
-  assert.throws(() => actions.transition({ id: 'order', version: 3 }, 'COLLECTED'), /not available/);
+  assert.throws(() => actions.transition({ id: 'order', version: 3 }, 'COLLECTED'), /pickup verification/);
 });
 test('pending checkout requests are isolated by authenticated actor', async () => {
   const { storage } = fixture();
@@ -68,4 +68,35 @@ test('CSRF recovery preserves the idempotency key and original request body', as
   const writes = calls.filter(call => call.options.method === 'POST');
   assert.equal(writes.length, 2); assert.equal(writes[0].options.headers['Idempotency-Key'], writes[1].options.headers['Idempotency-Key']);
   assert.equal(writes[0].options.body, writes[1].options.body); assert.notEqual(writes[0].options.headers['X-CSRF-Token'], writes[1].options.headers['X-CSRF-Token']);
+});
+test('collection retries preserve the exact code, version and key after a lost response', async () => {
+  const { storage } = fixture(); const calls = [];
+  const actions = createOrderActions({ storage, actorId: 'staff', uuid: () => 'pickup-key', api: async (path, options) => {
+    calls.push({ path, ...options }); if (calls.length === 1) throw new Error('response lost'); return { id: 'order', status: 'COLLECTED' };
+  } });
+  await assert.rejects(actions.collect({ id: 'order', version: 4 }, ' 42 '), /response lost/);
+  assert.deepEqual(actions.pendingCollection('order').body, { expectedVersion: 4, code: '42' });
+  await actions.collect({ id: 'order', version: 5 }, '99');
+  assert.equal(calls[1].path, '/orders/order/collect'); assert.deepEqual(calls[1].body, calls[0].body);
+  assert.equal(calls[1].idempotencyKey, calls[0].idempotencyKey); assert.equal(actions.pendingCollection('order'), null);
+});
+test('wrong-code and cooldown errors release the previous code so staff can correct it', async () => {
+  for (const status of [422, 429]) {
+    const { storage } = fixture(); const calls = []; let counter = 0;
+    const actions = createOrderActions({ storage, actorId: 'staff', uuid: () => 'pickup-' + ++counter, api: async (_path, options) => {
+      calls.push(options); if (calls.length === 1) throw Object.assign(new Error('Try again'), { status }); return { id: 'order', status: 'COLLECTED' };
+    } });
+    await assert.rejects(actions.collect({ id: 'order', version: 4 }, '41'));
+    assert.equal(actions.pendingCollection('order'), null);
+    await actions.collect({ id: 'order', version: 4 }, '42');
+    assert.equal(calls[1].body.code, '42'); assert.notEqual(calls[1].idempotencyKey, calls[0].idempotencyKey);
+  }
+});
+test('pending pickup verification is isolated to the staff member and selected order', async () => {
+  const { storage } = fixture();
+  const a = createOrderActions({ storage, actorId: 'staff-a', uuid: () => 'pickup-key', api: async () => { throw new Error('Offline'); } });
+  await assert.rejects(a.collect({ id: 'order-a', version: 4 }, '42'));
+  assert.equal(a.pendingCollection('order-b'), null);
+  const b = createOrderActions({ storage, actorId: 'staff-b', api: async () => {} });
+  assert.equal(b.pendingCollection('order-a'), null);
 });

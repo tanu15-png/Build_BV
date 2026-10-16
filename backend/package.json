@@ -22,7 +22,13 @@
     "provision:code": "node --env-file-if-exists=.env --import tsx src/cli/code.ts",
     "test:catalog": "tsx --test tests/integration/catalog.test.ts",
     "test:orders": "tsx --test tests/integration/orders.test.ts",
-    "orders:check": "node --env-file-if-exists=.env --import tsx src/cli/orders-check.ts"
+    "orders:check": "node --env-file-if-exists=.env --import tsx src/cli/orders-check.ts",
+    "worker:dev": "node --env-file-if-exists=.env --import tsx src/outbox-worker.ts",
+    "worker:start": "node --env-file-if-exists=.env dist/outbox-worker.js",
+    "worker:retry": "node --env-file-if-exists=.env --import tsx src/cli/outbox-retry.ts",
+    "test:notifications": "tsx --test tests/integration/notifications.test.ts",
+    "test:pickup": "tsx --test tests/integration/pickup.test.ts",
+    "test:admin": "tsx --test tests/integration/admin.test.ts"
   },
   "keywords": [],
   "author": "",

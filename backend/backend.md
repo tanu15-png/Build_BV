@@ -107,7 +107,7 @@ The frontend currently has no HTTP API integration. The following contract maps 
 - `Checkout` / `createOrder`: send `{ pickupAt, expectedCartVersion, quoteToken }` with an `Idempotency-Key`. Return the persisted order and clear the cart only after success. `OrderSuccess`, `MyOrders`, `OrderTracking` and canteen details use UUID `id` in routes and show `orderCode` for pickup. Order responses include `canteenId`, permitted student display details, immutable item snapshots, `orderCode`, `codeDay`, `status`, `totalPaise`, `pickupAt`, `version`, and status history; student email is not exposed in public catalog responses.
 - `CanteenDashboard`, `CanteenOrders`, `CanteenOrderDetails` / `updateOrderStatus`: map `ACCEPTED`, `PREPARING`, `READY`, `COLLECTED` to `/accept`, `/prepare`, `/ready`, `/collect`. Send `{ expectedVersion }`; collection also sends `{ code }`. Reuse command idempotency keys on retries. `toggleOrders` sends `{ acceptingOrders, expectedVersion }`; `toggleFood` sends `{ available, expectedVersion }`, using explicit desired values rather than blind toggles.
 - `CanteenDashboard` member management loads `GET /canteens/{id}/members`, mapping `canteenId` to prototype `cafeId` and valid session counts to `sessionCount`; response includes paginated `{ items, nextCursor }` plus `{ memberCount, signedInPeopleCount }` totals across the scoped list, not just the current page. Removal sends `{ expectedVersion }` to `POST /canteens/{id}/members/{memberId}/revoke`, then refreshes the list and session state. No access-code hash or secret is returned.
-- `Notifications` loads durable notification records and marks them read; `Profile` uses `/auth/me`. `AdminDashboard` uses `/admin/overview` and `/admin/orders` for its existing summaries/search. MenuManagement, CanteenSettings and CanteenAnalytics files are not currently routed in `App.jsx`; connect their routes only when their corresponding UI work is implemented. Analytics can initially derive from scoped order lists; add a dedicated aggregate endpoint only if needed.
+- `Notifications` loads durable notification records and marks them read; `Profile` uses `/auth/me`. `AdminDashboard` uses `/admin/overview` and `/admin/orders` for its existing summaries/search. MenuManagement is routed for owning staff and admins; standalone CanteenSettings/CanteenAnalytics scope remains Phase 12 work. Analytics can initially derive from scoped order lists; add a dedicated aggregate endpoint only if needed.
 
 JSON fields use camelCase. Store/transport money as integer paise and format rupees in the frontend adapter. Transport timestamps as offset-aware ISO 8601 strings and display campus time. Map existing `cafeId` to API `canteenId`, `food.price` to `pricePaise / 100`, and permanent order UUID `id` separately from display `orderCode` and `codeDay`. Do not pass API UUIDs directly into slug comparisons. Lists return `{ items, nextCursor }` with bounded `limit`, stable cursor pagination and documented filters (`status`, `canteenId`, `search`, `from`, `to` where allowed); filters never widen the actor's scope.
 
@@ -140,7 +140,9 @@ All business endpoints use `/api/v1`. Public directory/login endpoints expose on
 | `POST /orders/{id}/accept`, `/prepare`, `/ready` | Own staff | Consecutive status commands. |
 | `POST /orders/{id}/collect` | Own staff | Verify shown code and record pickup. |
 | `GET /notifications`, `PATCH /notifications/{id}/read` | Student | Own durable notifications. |
-| `GET /admin/overview`, `GET /admin/orders` | Admin | Aggregate reports and filtered order search. |
+| `GET /admin/overview`, `GET /admin/orders` | Admin | Full-history aggregate reports and filtered, paginated order search. |
+| `GET /admin/users`, `GET /admin/memberships` | Admin | Safe paginated account/membership maintenance lists. |
+| `PATCH /admin/canteens/{id}` | Admin | Audited versioned directory, operational status and acceptance changes. |
 | `POST /admin/canteens/{id}/access-code` | Admin | Replace code through the audited hashing service. |
 | `PATCH /admin/memberships/{id}`, `PATCH /admin/users/{id}` | Admin | Revoke or explicitly restore membership / manage account status; admin-only restoration never revives previously revoked sessions. |
 
@@ -281,7 +283,7 @@ The custom password storage design below is historical. Current code uses Supaba
 
 ### Phase 4 — Implement canteen membership and admin authorization
 
-The current implementation uses Supabase email proofs bound to a PostgreSQL canteen challenge, not a second application-generated email OTP. Scoped sessions, shared member counts/removal, admin activation, and audited maintenance APIs are implemented and covered by the isolated PostgreSQL auth suite. Dashboard/live-email acceptance and a dedicated admin maintenance UI remain pending.
+The current implementation uses Supabase email proofs bound to a PostgreSQL canteen challenge, not a second application-generated email OTP. Scoped sessions, shared member counts/removal, admin activation, and audited maintenance APIs are implemented and covered by the isolated PostgreSQL auth suite. Dashboard/live-email acceptance remains pending; the dedicated admin maintenance UI is implemented in Phase 11.
 
 1. Canteen login accepts member email, selected canteen UUID, and access code. Verify email ownership through a bound email challenge as well as checking that canteen's code hash.
 2. Check the code when starting the challenge and recheck its active version at completion, so a rotated code cannot finish an older challenge.
@@ -353,6 +355,8 @@ For coordinated availability checks and transitions, implement explicit row lock
 
 ### Phase 9 — Implement notifications and cross-device updates
 
+Implementation and operator workflow: [NOTIFICATIONS.md](NOTIFICATIONS.md). A separate worker must run alongside the API.
+
 1. Persist acceptance and ready notifications addressed to the owning student. Do not infer delivery from a browser alert or return an invented sample notification.
 2. Process outbox entries after transaction commit. Workers use leases/row claims, retry transient failures with backoff, and record persistent failures for operator retry.
 3. Enforce a unique notification/event key, so worker retries cannot duplicate messages. Order transitions remain committed even if delivery temporarily fails.
@@ -365,15 +369,20 @@ For coordinated availability checks and transitions, implement explicit row lock
 
 ### Phase 10 — Implement staff pickup verification
 
-1. Staff compare allocation day, canteen and items on the student’s dated card, select that order by UUID, then submit the three-character code presented by the student to `POST /orders/{order_id}/collect`.
-2. Require the selected canteen's active membership, `READY` status, expected version, and matching normalized code. Code knowledge alone never authorizes collection or order lookup.
-3. Rate-limit failed attempts and return a clear mismatch error without advancing the order.
-4. Atomically record `COLLECTED`, verifier ID, collection timestamp and event. A repeated successful command/key returns its original result; a different duplicate handover request reports the order already collected.
-5. Retain the order history. Never permit collection of a received/preparing order or reverse a completed pickup.
+Implementation and operator workflow: [PICKUP.md](PICKUP.md). The agreed handover credential is a separate private random numeric number (1–100), generated on READY; the three-character daily value remains the public order reference.
 
-**Complete when:** wrong, missing and malformed codes fail; code-only lookup is forbidden and identical codes on different days target separate UUIDs; concurrent verification records one handover and one collection event.
+1. Generate and encrypt the private code in the READY transaction. Only the owning student can fetch it; staff lists/details, notifications and outbox payloads do not expose it.
+2. Staff compare the student's name, allocation day, canteen and items, select the order by UUID, then submit the student's numeric code to `POST /orders/{order_id}/collect`.
+3. Require active own-canteen membership, READY status, expected version and the matching private code. A pickup code cannot locate or authorize reading an order.
+4. Persist failed-attempt counters/audits independently of error responses. Five wrong codes cause a ten-minute order cooldown across staff; twenty staff-wide failures cause a ten-minute account cooldown.
+5. Atomically record COLLECTED, verifier/time/history/outbox/audit and the stable retry response; consume the private credential. A repeated successful command/key returns its original result. A different duplicate handover request reports already collected.
+6. Retain history and public references. Permit late collection of READY orders; never collect received/preparing orders or reverse a completed pickup.
+
+**Complete when:** private codes are generated only for READY, stay student-only and survive reloads; wrong/missing/malformed codes fail; attempts persist across replicas; concurrent verification records one handover; transaction failures preserve the code and READY state; exact retries are safe.
 
 ### Phase 11 — Implement admin oversight
+
+Implemented and verified on 2026-10-16; see [ADMIN.md](ADMIN.md) for APIs, maintenance behavior, synchronization, migration and evidence.
 
 1. Aggregate campus-wide canteen counts, active/total/collected orders, and collected test order value with clearly named metrics.
 2. Add paginated search/filtering by canteen, status, code and date range. Sorting should be stable using timestamp plus UUID; canteen queues use pickup time plus creation time.

@@ -1,3 +1,4 @@
+import PickupCode from "../../components/PickupCode";
 import { orderCode, orderDay, pickupLabel, statusLabels } from "../../utils/orderRules";
 import {
   Bell,
@@ -18,7 +19,7 @@ import { useOrders } from "../../context/OrderContext";
 
 export default function StudentDashboard() {
   const { user, logout } = useAuth();
-  const { cart, orders, cafes, foods, notifications, addToCart, isFoodAvailable, cartBusy, catalogLoading } = useOrders();
+  const { cart, orders, cafes, foods, unreadNotificationCount, catalogLoading } = useOrders();
   const [search, setSearch] = useState("");
   const query = search.trim().toLowerCase();
   const initials = user?.name?.split(" ").map((part) => part[0]).slice(0, 2).join("");
@@ -130,7 +131,7 @@ export default function StudentDashboard() {
               <Bell size={22} />
 
               <span className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
-                {notifications.length}
+                {unreadNotificationCount}
               </span>
             </Link>
 
@@ -261,6 +262,7 @@ export default function StudentDashboard() {
 
               </div>
 
+              <PickupCode order={activeOrder} />
             </section>
           )}
 
@@ -273,7 +275,7 @@ export default function StudentDashboard() {
             link="/student#cafes"
           />
 
-          <div id="cafes" className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-12 scroll-mt-5">
+          <div id="cafes" className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-12 pb-16 scroll-mt-5">
 
             {cafes.filter((cafe) => !query || cafe.name.toLowerCase().includes(query) || foods.some((food) => food.cafeId === cafe.id && food.name.toLowerCase().includes(query))).map((cafe) => (
               <div
@@ -306,15 +308,6 @@ export default function StudentDashboard() {
 
                   </div>
 
-                  <p className="text-sm text-gray-500 mt-2">
-                    {cafe.categories.join(" • ")}
-                  </p>
-
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mt-3">
-                    <Clock3 size={15} />
-                    {cafe.preparationTime}
-                  </div>
-
                   <Link
                     to={`/student/cafe/${cafe.id}`}
                     className="block text-center mt-4 bg-[#0f8f73] text-white rounded-xl py-2.5 font-bold"
@@ -329,52 +322,6 @@ export default function StudentDashboard() {
 
           </div>
 
-          {/* POPULAR */}
-
-          <SectionHeader
-            title="Menu highlights"
-            action="Browse cafés"
-            link="/student#cafes"
-          />
-
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-5 pb-20">
-
-            {foods.filter((food) => query ? food.name.toLowerCase().includes(query) || cafes.find((cafe) => cafe.id === food.cafeId)?.name.toLowerCase().includes(query) : true).slice(0, 12).map((food) => (
-              <div
-                key={food.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-card"
-              >
-
-                <img
-                  src={food.image}
-                  className="w-full aspect-square object-cover"
-                />
-
-                <div className="p-4">
-
-                  <h3 className="font-bold">
-                    {food.name}
-                  </h3>
-
-                  <p className="mt-1 text-xs text-gray-500">{cafes.find((cafe) => cafe.id === food.cafeId)?.name}</p>
-                  <p className="text-[#0f8f73] font-black mt-2">
-                    ₹{food.price.toFixed(2)}
-                  </p>
-
-                  <button
-                    disabled={cartBusy || !isFoodAvailable(food)}
-                    onClick={() => addToCart(food)}
-                    className="w-full mt-3 border border-[#0f8f73] text-[#0f8f73] rounded-lg py-2 text-sm font-bold hover:bg-[#0f8f73] hover:text-white"
-                  >
-                    {isFoodAvailable(food) ? "Add" : "Unavailable"}
-                  </button>
-
-                </div>
-
-              </div>
-            ))}
-
-          </div>
 
         </div>
 

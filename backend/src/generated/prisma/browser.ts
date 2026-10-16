@@ -78,6 +78,11 @@ export type CartItem = Prisma.CartItemModel
  */
 export type Order = Prisma.OrderModel
 /**
+ * Model PickupCredential
+ *
+ */
+export type PickupCredential = Prisma.PickupCredentialModel
+/**
  * Model OrderItem
  * 
  */

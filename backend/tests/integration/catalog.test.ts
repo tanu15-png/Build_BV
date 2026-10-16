@@ -74,6 +74,19 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
       assert(menu.body.categories.some((c: { id: string }) => c.id === categoryId));
       assert(menu.body.items.some((i: { categoryId: string }) => i.categoryId === categoryId));
     });
+    await t.test('committed menu writes notify other browsers immediately through the catalog stream', async () => {
+      const response = await fetch(`${base}/catalog/events`, { signal: AbortSignal.timeout(10000) });
+      const reader = response.body!.getReader();
+      try {
+        assert.match(new TextDecoder().decode((await reader.read()).value), /event: catalog-change/);
+        const updated = await staff.browser.request(`/canteens/${canteen.id}/settings`, 'PATCH', { expectedVersion: canteen.version, hours: '9 AM–8 PM' });
+        assert.equal(updated.status, 200);
+        const event = new TextDecoder().decode((await reader.read()).value);
+        assert(event.includes(canteen.id));
+        const snapshot = await student.browser.request('/catalog');
+        assert.equal(snapshot.body.canteens.find((c: { id: string }) => c.id === canteen.id).hours, '9 AM–8 PM');
+      } finally { await reader.cancel(); }
+    });
     await t.test('menu ownership, stale updates, category renaming and nonempty archival are enforced', async () => {
       assert.equal((await otherStaff.browser.request(`/menu-items/${itemId}`, 'PATCH', { expectedVersion: 1, pricePaise: 1 })).status, 403);
       assert.equal((await staff.browser.request(`/menu-items/${itemId}`, 'PATCH', { expectedVersion: 20, pricePaise: 1 })).status, 409);
@@ -159,6 +172,38 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
       assert.equal((await student.browser.request('/cart/items/' + cart.items[0]!.id, 'DELETE', { expectedVersion: cart.version })).status, 200);
       const reduced = await fresh(); assert.equal(reduced.totalPaise, 1980000000);
       assert.equal((await student.browser.request('/cart/review', 'POST', { expectedVersion: reduced.version, quote: reduced.quote })).status, 200);
+    });
+    await t.test('permanent deletion enforces scope and versions, clears carts and preserves order snapshots', async () => {
+      const category = await db.menuCategory.create({ data: { canteenId: canteen.id, name: 'Delete fixtures' } });
+      const item = await db.menuItem.create({ data: { canteenId: canteen.id, categoryId: category.id, name: 'Deleted tea', pricePaise: 1000 } });
+      const current = await fresh();
+      await student.browser.request('/cart', 'DELETE', { expectedVersion: current.version });
+      assert.equal((await add(item.id)).status, 200);
+      const before = await fresh();
+      const order = await db.order.create({ data: { studentId: student.user.id, canteenId: canteen.id, totalPaise: 1000, pickupAt: new Date(), codeDay: new Date(), items: { create: { menuItemId: item.id, name: item.name, quantity: 1, unitPricePaise: 1000 } } }, include: { items: true } });
+      assert.equal((await otherStaff.browser.request(`/menu-items/${item.id}`, 'DELETE', { expectedVersion: 1 })).status, 403);
+      assert.equal((await student.browser.request(`/menu-items/${item.id}`, 'DELETE', { expectedVersion: 1 })).status, 403);
+      assert.equal((await staff.browser.request(`/menu-items/${item.id}`, 'DELETE', { expectedVersion: 99 })).status, 409);
+      assert.equal((await staff.browser.request(`/menu-items/${item.id}`, 'DELETE', { expectedVersion: 1 })).status, 200);
+      assert.equal(await db.menuItem.findUnique({ where: { id: item.id } }), null);
+      const after = await fresh();
+      assert.equal(after.items.length, 0); assert.equal(after.canteenId, null); assert(after.version > before.version);
+      const snapshot = await db.orderItem.findUniqueOrThrow({ where: { id: order.items[0]!.id } });
+      assert.deepEqual(snapshot, { ...order.items[0], menuItemId: null });
+      await assert.rejects(db.orderItem.update({ where: { id: snapshot.id }, data: { name: 'Rewritten history' } }));
+      await assert.rejects(db.orderItem.delete({ where: { id: snapshot.id } }));
+      const active = await db.menuItem.create({ data: { canteenId: canteen.id, categoryId: category.id, name: 'Active tea', pricePaise: 1000 } });
+      const archived = await db.menuItem.create({ data: { canteenId: canteen.id, categoryId: category.id, name: 'Archived tea', pricePaise: 1000, archived: true } });
+      assert.equal((await add(active.id)).status, 200);
+      assert.equal((await otherStaff.browser.request(`/menu-categories/${category.id}`, 'DELETE', { expectedVersion: 1 })).status, 403);
+      assert.equal((await staff.browser.request(`/menu-categories/${category.id}`, 'DELETE', { expectedVersion: 99 })).status, 409);
+      assert.equal((await staff.browser.request(`/menu-categories/${category.id}`, 'DELETE', { expectedVersion: 1 })).status, 200);
+      assert.equal(await db.menuCategory.findUnique({ where: { id: category.id } }), null);
+      assert.equal(await db.menuItem.count({ where: { id: { in: [active.id, archived.id] } } }), 0);
+      assert.equal((await fresh()).items.length, 0);
+      const managed = await staff.browser.request(`/canteens/${canteen.id}/menu/manage`);
+      assert(!managed.body.categories.some((entry: { id: string }) => entry.id === category.id));
+      assert(!managed.body.items.some((entry: { id: string }) => [item.id, active.id, archived.id].includes(entry.id)));
     });
     await t.test('revoked canteen sessions and disabled students cannot mutate menus or carts', async () => {
       await db.session.update({ where: { id: staff.session.id }, data: { revokedAt: new Date() } });

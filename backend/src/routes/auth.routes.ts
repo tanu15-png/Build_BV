@@ -1,3 +1,4 @@
+import { requireAdmin } from '../services/admin.js';
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
@@ -67,6 +68,8 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
         ...(student ? { roles: { create: { role: 'STUDENT' } } } : {}),
       }, include: { roles: true } });
     }
+    await tx.$queryRaw`SELECT id FROM users WHERE id = ${user.id}::uuid FOR UPDATE`;
+    user = await tx.user.findUniqueOrThrow({ where: { id: user.id }, include: { roles: true } });
     if (user.status !== 'ACTIVE' || (user.supabaseSubject && user.supabaseSubject !== remote.id)) throw new AppError(403, 'ACCOUNT_DENIED', 'This account cannot sign in. Contact an administrator.');
     if (!user.supabaseSubject) {
       const linked = await tx.user.updateMany({ where: { id: user.id, supabaseSubject: null, status: 'ACTIVE' }, data: { supabaseSubject: remote.id, emailVerifiedAt: new Date(remote.email_confirmed_at), passwordHash: null } });
@@ -116,19 +119,42 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
     }, txOptions);
     res.json({ ok: true });
   });
+  async function canteenChallenge(email: string, canteenId: string, accessCodeVersion: number) {
+    return db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM canteens WHERE id = ${canteenId}::uuid FOR UPDATE`;
+      const canteen = await tx.canteen.findUniqueOrThrow({ where: { id: canteenId } });
+      if (!canteen.operational) throw new AppError(403, 'CANTEEN_DISABLED', 'This canteen is not accepting new sign-ins.');
+      const code = await tx.canteenAccessCode.findFirst({ where: { canteenId, active: true } });
+      if (code?.version !== accessCodeVersion) throw new AppError(403, 'ACCESS_CODE_CHANGED', 'The canteen join code changed. Start sign-in again.');
+      const expiresAt = new Date(Date.now() + config.OTP_TTL_SECONDS * 1000);
+      const challenge = await tx.authChallenge.create({ data: { email, canteenId, purpose: 'CANTEEN_LOGIN', accessCodeVersion,
+        otpHash: hash(randomBytes(32).toString('hex')), expiresAt } });
+      return { challengeId: challenge.id, expiresAt: expiresAt.toISOString(), resendAfter: new Date(Date.now() + 60000).toISOString() };
+    }, txOptions);
+  }
+  router.post('/auth/canteen/returning', validate(contracts['POST /auth/canteen/returning']!.body), async (req, res) => {
+    const { email, canteenId } = req.body as { email: string; canteenId: string };
+    await limit(req, 'staff-code', email);
+    const selected = await db.canteen.findUnique({ where: { id: canteenId }, select: { operational: true } });
+    if (selected?.operational === false) throw new AppError(403, 'CANTEEN_DISABLED', 'This canteen is not accepting new sign-ins.');
+    const membership = await db.canteenMembership.findFirst({ where: {
+      canteenId, status: 'ACTIVE', user: { email, status: 'ACTIVE', emailVerifiedAt: { not: null } },
+    } });
+    if (!membership) throw new AppError(403, 'MEMBERSHIP_REQUIRED', 'No active membership for this canteen. Choose Join canteen and use its access code, or contact your administrator.');
+    const code = await db.canteenAccessCode.findFirst({ where: { canteenId, active: true } });
+    if (!code || membership.codeVersion !== code.version) throw new AppError(403, 'ACCESS_CODE_CHANGED', 'The canteen access code changed. Choose Join canteen and enter the updated code once.');
+    res.json(await canteenChallenge(email, canteenId, code.version));
+  });
   router.post('/auth/canteen/login', validate(contracts['POST /auth/canteen/login']!.body), async (req, res) => {
     const { email, canteenId, accessCode } = req.body as { email: string; canteenId: string; accessCode: string };
     await limit(req, 'staff-code', email);
+    const selected = await db.canteen.findUnique({ where: { id: canteenId }, select: { operational: true } });
+    if (selected?.operational === false) throw new AppError(403, 'CANTEEN_DISABLED', 'This canteen is not accepting new sign-ins.');
     const code = await db.canteenAccessCode.findFirst({ where: { canteenId, active: true } });
     if (!code || !await verifySecret(accessCode, code.codeHash)) throw new AppError(401, 'ACCESS_CODE_INVALID', 'Incorrect canteen or access code.');
     const membership = await db.canteenMembership.findFirst({ where: { canteenId, user: { email } } });
     if (membership?.status === 'REVOKED') throw new AppError(403, 'MEMBERSHIP_REVOKED', 'Your access was removed. Contact an administrator.');
-    const expiresAt = new Date(Date.now() + config.OTP_TTL_SECONDS * 1000);
-    const challenge = await db.authChallenge.create({ data: {
-      email, canteenId, purpose: 'CANTEEN_LOGIN', accessCodeVersion: code.version,
-      otpHash: hash(randomBytes(32).toString('hex')), expiresAt,
-    } });
-    res.json({ challengeId: challenge.id, expiresAt: expiresAt.toISOString(), resendAfter: new Date(Date.now() + 60000).toISOString() });
+    res.json(await canteenChallenge(email, canteenId, code.version));
   });
   router.post('/auth/session', validate(z.object({ role: z.enum(['STUDENT', 'CANTEEN', 'ADMIN']), challengeId: z.uuid().optional() }).strict()), async (req, res) => {
     const remote = await auth.verify(bearer(req));
@@ -154,6 +180,8 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
         const initial = await tx.authChallenge.findUnique({ where: { id: challengeId } });
         if (!initial?.canteenId) throw new AppError(401, 'CHALLENGE_INVALID', 'Start canteen sign-in again.');
         await tx.$queryRaw`SELECT id FROM canteens WHERE id = ${initial.canteenId}::uuid FOR UPDATE`;
+        const selected = await tx.canteen.findUniqueOrThrow({ where: { id: initial.canteenId } });
+        if (!selected.operational) throw new AppError(403, 'CANTEEN_DISABLED', 'This canteen is not accepting new sign-ins.');
         const challenge = await tx.authChallenge.findUniqueOrThrow({ where: { id: challengeId } });
         const code = await tx.canteenAccessCode.findFirst({ where: { canteenId: initial.canteenId, active: true } });
         if (challenge.purpose !== 'CANTEEN_LOGIN' || challenge.email !== remote.email || challenge.consumedAt || challenge.expiresAt <= new Date() || challenge.accessCodeVersion !== code?.version) throw new AppError(401, 'CHALLENGE_INVALID', 'This sign-in expired or changed. Start again.');
@@ -228,15 +256,14 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
     }, txOptions);
     res.json({ ok: true });
   });
-  async function adminActor(req: Request) {
-    const { actor } = await current(req);
-    if (actor.role !== 'ADMIN') throw new AppError(403, 'ADMIN_DENIED', 'Administrator access required.');
-    return actor;
-  }
   router.patch('/admin/memberships/:id', validate(idParams, 'params'), validate(contracts['PATCH /admin/memberships/:id']!.body), async (req, res) => {
-    const actor = await adminActor(req);
+    const actor = await requireAdmin(req, config, db);
     await db.$transaction(async tx => {
       const initial = await tx.canteenMembership.findUniqueOrThrow({ where: { id: res.locals.params.id } });
+      await tx.$queryRaw`SELECT id FROM users WHERE id IN (${actor.id}::uuid, ${initial.userId}::uuid) ORDER BY id FOR UPDATE`;
+      await requireAdmin(req, config, tx);
+      const targetUser = await tx.user.findUniqueOrThrow({ where: { id: initial.userId } });
+      if (req.body.status === 'ACTIVE' && targetUser.status !== 'ACTIVE') throw new AppError(409, 'ACCOUNT_DISABLED', 'Enable the account before restoring canteen access.');
       await tx.$queryRaw`SELECT id FROM canteens WHERE id = ${initial.canteenId}::uuid FOR UPDATE`;
       const member = await tx.canteenMembership.findUniqueOrThrow({ where: { id: initial.id } });
       if (member.version !== req.body.expectedVersion) throw new AppError(409, 'VERSION_CONFLICT', 'Membership changed. Refresh and retry.');
@@ -252,9 +279,14 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
     res.json({ ok: true });
   });
   router.patch('/admin/users/:id', validate(idParams, 'params'), validate(contracts['PATCH /admin/users/:id']!.body), async (req, res) => {
-    const actor = await adminActor(req);
+    const actor = await requireAdmin(req, config, db);
+    if (actor.id === res.locals.params.id && req.body.status === 'DISABLED') throw new AppError(409, 'SELF_DISABLE_DENIED', 'You cannot disable your own administrator account.');
     await db.$transaction(async tx => {
-      const user = await tx.user.update({ where: { id: res.locals.params.id }, data: { status: req.body.status } });
+      await tx.$queryRaw`SELECT id FROM users WHERE id IN (${actor.id}::uuid, ${res.locals.params.id}::uuid) ORDER BY id FOR UPDATE`;
+      await requireAdmin(req, config, tx);
+      const existing = await tx.user.findUniqueOrThrow({ where: { id: res.locals.params.id } });
+      if (req.body.expectedUpdatedAt && existing.updatedAt.toISOString() !== req.body.expectedUpdatedAt) throw new AppError(409, 'VERSION_CONFLICT', 'Account changed. Refresh and retry.');
+      const user = await tx.user.update({ where: { id: existing.id }, data: { status: req.body.status } });
       if (user.status === 'DISABLED') {
         await tx.session.updateMany({ where: { userId: user.id, revokedAt: null }, data: { revokedAt: new Date() } });
         await tx.authChallenge.updateMany({ where: { email: user.email, consumedAt: null }, data: { consumedAt: new Date() } });
@@ -264,9 +296,9 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
     res.json({ ok: true });
   });
   router.post('/admin/canteens/:id/access-code', validate(idParams, 'params'), validate(contracts['POST /admin/canteens/:id/access-code']!.body), async (req, res) => {
-    const actor = await adminActor(req);
+    const actor = await requireAdmin(req, config, db);
     const canteen = await db.canteen.findUniqueOrThrow({ where: { id: res.locals.params.id } });
-    await rotateCode(db, config, canteen.slug, req.body.accessCode, { id: actor.id, requestId: res.locals.requestId });
+    await rotateCode(db, config, canteen.slug, req.body.accessCode, { id: actor.id, requestId: res.locals.requestId, expectedCodeVersion: req.body.expectedCodeVersion, authorize: async tx => { await requireAdmin(req, config, tx); } });
     res.json({ ok: true });
   });
   return router;

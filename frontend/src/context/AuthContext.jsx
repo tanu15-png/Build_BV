@@ -72,7 +72,7 @@ export function AuthProvider({ children }) {
       const { canteens } = await api('/canteens');
       const canteen = canteens.find(c => c.slug === values.cafeId);
       if (!canteen) throw new Error('Select a valid canteen.');
-      await actions.staff({ email: values.email, canteenId: canteen.id, accessCode: values.secretCode });
+      await actions.staff({ email: values.email, canteenId: canteen.id, accessCode: values.secretCode, returning: values.canteenMode === 'login' });
       return { pending: true };
     }
     const result = await actions.login(values);
@@ -100,7 +100,8 @@ export function AuthProvider({ children }) {
     pendingAuth: actions.pending, clearPending: actions.clear, resend: actions.resend,
     verifyEmail: async code => finish(await actions.verify(code)),
     completeCallback: async flow => finish(await actions.callback(flow)),
-    activateAdmin: actions.activateAdmin, resetPassword: actions.reset, changePassword: actions.changePassword,
+    activateAdmin: actions.activateAdmin, resetPassword: actions.reset,
+    changePassword: async (password, role) => accept(await actions.changePassword(password, role)),
     requestVerification: actions.requestVerification,
   }}>{children}</AuthContext.Provider>;
 }

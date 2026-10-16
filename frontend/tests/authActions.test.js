@@ -12,15 +12,15 @@ function setup({ apiOverride } = {}) {
     signInWithOtp: async value => { calls.push(['email', value]); return { data: {} }; },
     signOut: async value => { calls.push(['signout', value]); return { data: {} }; },
     verifyOtp: async value => { calls.push(['verify', value]); return { data: { session } }; },
-    getSession: async () => ({ data: { session } }),
+    getSession: async () => ({ data: { session: { ...session, user: { email: 's@banasthali.in' } } } }),
     updateUser: async () => { calls.push(['password']); return { data: {} }; },
-    resetPasswordForEmail: async () => ({ data: {} }),
+    resetPasswordForEmail: async (...value) => { calls.push(['reset-email', ...value]); return { data: {} }; },
     resend: async value => { calls.push(['resend', value]); return { data: {} }; },
   };
   const api = async (path, value) => {
     calls.push([path, value]);
     if (apiOverride) return apiOverride(path, value);
-    if (path === '/auth/canteen/login') return { challengeId: 'challenge', expiresAt: new Date(Date.now() + 600000).toISOString() };
+    if (['/auth/canteen/login', '/auth/canteen/returning'].includes(path)) return { challengeId: 'challenge', expiresAt: new Date(Date.now() + 600000).toISOString() };
     if (path === '/auth/session') return { role: value.body.role, id: 'user' };
     if (path === '/auth/confirm-signup') return { role: 'STUDENT', id: 'user' };
     return { ok: true };
@@ -112,11 +112,119 @@ test('signup fails closed when Supabase email confirmation is disabled', async (
   assert(calls.some(([path]) => path === 'signout'));
   assert(!calls.some(([path]) => path === '/auth/session'));
 });
-test('password recovery revokes application sessions before changing password and signs out globally', async () => {
+test('returning canteen members verify email without resending an access code', async () => {
   const { actions, calls } = setup();
-  await actions.changePassword('new strong password');
-  assert.deepEqual(calls.map(([path]) => path), ['/auth/revoke-sessions', 'password', 'signout']);
+  await actions.staff({ email: 'STAFF@example.com', canteenId: 'canteen', returning: true });
+  assert.deepEqual(calls[0], ['/auth/canteen/returning', { method: 'POST', body: { email: 'staff@example.com', canteenId: 'canteen' } }]);
+  assert.equal(calls[1][0], 'email');
+  assert.equal((await actions.verify('12345678')).role, 'CANTEEN');
+  assert.deepEqual(calls.find(([path]) => path === '/auth/session')[1].body, { role: 'CANTEEN', challengeId: 'challenge' });
+});
+test('unknown or revoked canteen members cannot request returning-member verification', async () => {
+  const { actions, calls } = setup({ apiOverride: async () => { throw new Error('No active membership'); } });
+  await assert.rejects(actions.staff({ email: 'staff@example.com', canteenId: 'canteen', returning: true }), /No active membership/);
+  assert(!calls.some(([path]) => path === 'email'));
+  assert.equal(actions.pending(), null);
+});
+test('canteen verification accepts pasted codes and keeps invalid codes pending for resend', async () => {
+  const { actions, auth, calls, storage } = setup();
+  await actions.staff({ email: 'staff@example.com', canteenId: 'canteen', accessCode: 'secret' });
+  const verify = auth.verifyOtp;
+  auth.verifyOtp = async () => ({ error: { code: 'otp_expired', message: 'Token has expired or is invalid' } });
+  await assert.rejects(actions.verify('12345678'), /newest canteen sign-in email/);
+  assert.equal(actions.pending().flow, 'staff');
+  assert(!calls.some(([path]) => path === '/auth/session'));
+  storage.setItem(pendingAuthKey, JSON.stringify({ ...actions.pending(), resendAfter: 0 }));
+  await actions.resend();
+  assert.equal(calls.filter(([path]) => path === 'email').length, 2);
+  auth.verifyOtp = verify;
+  assert.equal((await actions.verify(' 87654321 ')).role, 'CANTEEN');
+  assert.deepEqual(calls.find(([path]) => path === 'verify')[1], { email: 'staff@example.com', token: '87654321', type: 'email' });
+});
+test('expired canteen challenges require a fresh access-code check before verifying or resending', async () => {
+  const { actions, calls, storage } = setup();
+  await actions.staff({ email: 'staff@example.com', canteenId: 'canteen', accessCode: 'secret' });
+  storage.setItem(pendingAuthKey, JSON.stringify({ ...actions.pending(), expiresAt: new Date(Date.now() - 1000).toISOString(), resendAfter: 0 }));
+  await assert.rejects(actions.verify('12345678'), /Start again with your access code/);
+  await assert.rejects(actions.resend(), /Start again with your access code/);
+  assert(!calls.some(([path]) => path === 'verify' || path === '/auth/session'));
+  assert.equal(calls.filter(([path]) => path === 'email').length, 1);
+});
+test('password recovery ends old sessions and automatically creates a new signed-in session', async () => {
+  const { actions, calls } = setup();
+  const actor = await actions.changePassword('new strong password');
+  assert.equal(actor.role, 'STUDENT');
+  assert.deepEqual(calls.map(([path]) => path), ['/auth/revoke-sessions', 'password', 'signout', 'password-login', '/auth/session']);
   assert.equal(calls[2][1].scope, 'global');
+  assert.deepEqual(calls[3][1], { email: 's@banasthali.in', password: 'new strong password' });
+});
+test('password reset requests a recovery code and verifies it before changing the password', async () => {
+  const { actions, calls } = setup();
+  await actions.reset('S@BANASTHALI.IN', 'student');
+  assert.equal(actions.pending().email, 's@banasthali.in');
+  assert.equal(actions.pending().flow, 'reset');
+  assert.deepEqual(calls, [['reset-email', 's@banasthali.in', { redirectTo: 'https://spoonate.example/auth/callback?flow=reset&role=student' }]]);
+  assert.deepEqual(await actions.verify('12345678'), { recovery: true });
+  assert.deepEqual(calls[1], ['verify', { email: 's@banasthali.in', token: '12345678', type: 'recovery' }]);
+  assert(!calls.some(([path]) => path === 'password'));
+  await actions.changePassword('new strong password');
+  assert.deepEqual(calls.slice(2).map(([path]) => path), ['/auth/revoke-sessions', 'password', 'signout', 'password-login', '/auth/session']);
+  assert.equal(actions.pending(), null);
+});
+test('admin password reset automatically signs in with the pending admin role', async () => {
+  const { actions, calls } = setup();
+  await actions.reset('s@banasthali.in', 'admin');
+  await actions.verify('123456');
+  assert.equal((await actions.changePassword('new strong password')).role, 'ADMIN');
+  assert.deepEqual(calls.find(([path]) => path === '/auth/session')[1].body, { role: 'ADMIN' });
+  assert.equal(actions.pending(), null);
+});
+test('failed password update or session revocation does not start automatic login', async () => {
+  for (const failure of ['revoke', 'update']) {
+    const { actions, calls, auth } = setup({ apiOverride: async () => {
+      if (failure === 'revoke') throw new Error('Revocation failed');
+      return { ok: true };
+    } });
+    if (failure === 'update') auth.updateUser = async () => ({ error: new Error('Update failed') });
+    await assert.rejects(actions.changePassword('new strong password'), /failed/);
+    assert(!calls.some(([path]) => path === 'password-login' || path === '/auth/session'));
+  }
+});
+test('failed application session exchange cleans up automatic password login', async () => {
+  const { actions, calls } = setup({ apiOverride: async path => {
+    if (path === '/auth/session') throw new Error('Account disabled');
+    return { ok: true };
+  } });
+  await assert.rejects(actions.changePassword('new strong password'), /Account disabled/);
+  assert.deepEqual(calls.at(-1), ['signout', { scope: 'local' }]);
+});
+test('invalid, expired and mismatched recovery codes cannot advance to a new password', async () => {
+  const { actions, calls, auth } = setup();
+  await actions.reset('s@banasthali.in', 'student');
+  await assert.rejects(actions.verify('not-a-code'), /Enter the code/);
+  auth.verifyOtp = async () => ({ error: new Error('Invalid or expired code') });
+  await assert.rejects(actions.verify('123456'), /Invalid or expired/);
+  auth.verifyOtp = async () => ({ data: { session: null } });
+  await assert.rejects(actions.verify('123456'), /expired/);
+  auth.verifyOtp = async () => ({ data: { session: { access_token: 'token', user: { email: 'other@banasthali.in' } } } });
+  await assert.rejects(actions.verify('123456'), /different email/);
+  assert.equal(actions.pending().flow, 'reset');
+  assert(!calls.some(([path]) => path === 'password' || path === '/auth/revoke-sessions'));
+});
+test('reset code resend respects cooldown and delivery failures allow retry', async () => {
+  const { actions, calls, auth, storage } = setup();
+  await actions.reset('s@banasthali.in', 'student');
+  await assert.rejects(actions.resend(), /wait/);
+  storage.setItem(pendingAuthKey, JSON.stringify({ ...actions.pending(), resendAfter: 0 }));
+  const send = auth.resetPasswordForEmail;
+  auth.resetPasswordForEmail = async () => ({ error: new Error('Email delivery failed') });
+  await assert.rejects(actions.resend(), /delivery failed/);
+  assert.equal(actions.pending().resendAfter, 0);
+  auth.resetPasswordForEmail = send;
+  await actions.resend();
+  assert.equal(calls.filter(([path]) => path === 'reset-email').length, 2);
+  assert(actions.pending().resendAfter > Date.now());
+  await assert.rejects(actions.resend(), /wait/);
 });
 test('signup resend respects cooldown and staff email links require the original challenge', async () => {
   const { actions } = setup();

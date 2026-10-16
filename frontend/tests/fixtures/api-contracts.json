@@ -81,5 +81,234 @@
       "studentName": "Student",
       "events": []
     }
+  },
+  {
+    "route": "GET /notifications",
+    "body": {},
+    "response": {
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "orderId": "00000000-0000-4000-8000-000000000002",
+          "type": "READY",
+          "message": "Bella Bite has prepared order A01 (2026-10-16).",
+          "createdAt": "2026-10-16T12:00:00.000Z",
+          "readAt": null
+        }
+      ],
+      "nextCursor": null,
+      "unreadCount": 1
+    }
+  },
+  {
+    "route": "PATCH /notifications/:id/read",
+    "body": {},
+    "response": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "orderId": "00000000-0000-4000-8000-000000000002",
+      "type": "READY",
+      "message": "Bella Bite has prepared order A01 (2026-10-16).",
+      "createdAt": "2026-10-16T12:00:00.000Z",
+      "readAt": "2026-10-16T12:05:00.000Z"
+    }
+  },
+  {
+    "route": "GET /orders/:id/pickup-code",
+    "body": {},
+    "response": {
+      "code": "42"
+    }
+  },
+  {
+    "route": "POST /orders/:id/collect",
+    "body": {
+      "expectedVersion": 4,
+      "code": "42"
+    },
+    "response": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "canteenId": "00000000-0000-4000-8000-000000000001",
+      "studentId": "00000000-0000-4000-8000-000000000001",
+      "status": "COLLECTED",
+      "executionMode": "TEST",
+      "paymentStatus": "NOT_REQUIRED_TEST",
+      "totalPaise": 3000,
+      "pickupAt": "2026-10-14T12:30:00Z",
+      "codeDay": "2026-10-14",
+      "orderCode": "A01",
+      "version": 5,
+      "createdAt": "2026-10-14T12:00:00Z",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "menuItemId": "00000000-0000-4000-8000-000000000001",
+          "name": "Sample Tea",
+          "quantity": 2,
+          "unitPricePaise": 1500
+        }
+      ],
+      "collectedAt": "2026-10-16T12:30:00.000Z",
+      "pickupVerifiedBy": "00000000-0000-4000-8000-000000000003",
+      "canteenName": "Bella Bite",
+      "studentName": "Student",
+      "events": []
+    }
+  },
+  {
+    "route": "GET /admin/overview",
+    "body": {},
+    "response": {
+      "totalOrders": 107,
+      "activeOrders": 104,
+      "collectedOrders": 3,
+      "collectedValuePaise": 3000000000,
+      "totalCanteens": 1,
+      "operationalCanteens": 1,
+      "acceptingCanteens": 1,
+      "canteens": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "slug": "bella-bite",
+          "name": "Bella Bite",
+          "location": null,
+          "hours": null,
+          "acceptingOrders": true,
+          "operational": true,
+          "version": 1,
+          "totalOrders": 107,
+          "activeOrders": 104,
+          "collectedOrders": 3,
+          "collectedValuePaise": 3000000000,
+          "menuItemCount": 2,
+          "activeCodeVersion": 1
+        }
+      ]
+    }
+  },
+  {
+    "route": "GET /admin/orders",
+    "body": {},
+    "response": {
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "canteenId": "00000000-0000-4000-8000-000000000001",
+          "studentId": "00000000-0000-4000-8000-000000000001",
+          "status": "RECEIVED",
+          "executionMode": "TEST",
+          "paymentStatus": "NOT_REQUIRED_TEST",
+          "totalPaise": 3000,
+          "pickupAt": "2026-10-14T12:30:00Z",
+          "codeDay": "2026-10-14",
+          "orderCode": "A01",
+          "version": 1,
+          "createdAt": "2026-10-14T12:00:00Z",
+          "items": [
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "menuItemId": "00000000-0000-4000-8000-000000000001",
+              "name": "Sample Tea",
+              "quantity": 2,
+              "unitPricePaise": 1500
+            }
+          ],
+          "collectedAt": null,
+          "pickupVerifiedBy": null,
+          "canteenName": "Bella Bite",
+          "studentName": "Student",
+          "events": []
+        }
+      ],
+      "nextCursor": null,
+      "totalCount": 1
+    }
+  },
+  {
+    "route": "GET /admin/users",
+    "body": {},
+    "response": {
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "email": "student@banasthali.in",
+          "name": "Student",
+          "status": "ACTIVE",
+          "roles": [
+            "STUDENT"
+          ],
+          "createdAt": "2026-10-16T12:00:00.000Z",
+          "updatedAt": "2026-10-16T12:00:00.000Z"
+        }
+      ],
+      "nextCursor": null
+    }
+  },
+  {
+    "route": "GET /admin/memberships",
+    "body": {},
+    "response": {
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "userId": "00000000-0000-4000-8000-000000000001",
+          "canteenId": "00000000-0000-4000-8000-000000000001",
+          "email": "member@example.edu",
+          "userName": "Member",
+          "accountStatus": "ACTIVE",
+          "canteenName": "Bella Bite",
+          "status": "REVOKED",
+          "version": 2,
+          "requiresAccessCode": false
+        }
+      ],
+      "nextCursor": null
+    }
+  },
+  {
+    "route": "PATCH /admin/canteens/:id",
+    "body": {
+      "expectedVersion": 1,
+      "operational": false
+    },
+    "response": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "slug": "bella-bite",
+      "name": "Bella Bite",
+      "location": null,
+      "hours": null,
+      "acceptingOrders": false,
+      "operational": false,
+      "version": 2
+    }
+  },
+  {
+    "route": "PATCH /admin/users/:id",
+    "body": {
+      "status": "DISABLED",
+      "expectedUpdatedAt": "2026-10-16T12:00:00.000Z"
+    },
+    "response": {
+      "ok": true
+    }
+  },
+  {
+    "route": "PATCH /admin/memberships/:id",
+    "body": {
+      "status": "ACTIVE",
+      "expectedVersion": 2
+    },
+    "response": {
+      "ok": true
+    }
+  },
+  {
+    "route": "POST /admin/canteens/:id/access-code",
+    "body": {
+      "accessCode": "fixture-only-join-phrase",
+      "expectedCodeVersion": 1
+    },
+    "response": {
+      "ok": true
+    }
   }
 ]

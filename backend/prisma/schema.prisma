@@ -49,6 +49,7 @@ model User {
   idempotencyKeys IdempotencyKey[]
   events OrderEvent[]
   audits AuditLog[]
+  @@index([createdAt, id])
   @@map("users")
 }
 model UserRole {
@@ -107,6 +108,7 @@ model CanteenMembership {
   sessions Session[]
   @@unique([userId, canteenId])
   @@unique([id, userId, canteenId])
+  @@index([joinedAt, id])
   @@map("canteen_memberships")
 }
 model AuthChallenge {
@@ -223,13 +225,23 @@ model Order {
   items OrderItem[]
   events OrderEvent[]
   allocation OrderCodeAllocation?
+  pickupCredential PickupCredential?
   notifications Notification[]
   idempotencyKeys IdempotencyKey[]
   @@unique([id, codeDay, orderCode])
   @@unique([codeDay, orderCode])
   @@index([studentId, createdAt])
   @@index([canteenId, status, pickupAt])
+  @@index([createdAt, id])
   @@map("orders")
+}
+model PickupCredential {
+  orderId String @id @map("order_id") @db.Uuid
+  encryptedCode String @map("encrypted_code")
+  failedAttempts Int @default(0) @map("failed_attempts")
+  windowEndsAt DateTime @default(now()) @map("window_ends_at") @db.Timestamptz
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  @@map("pickup_credentials")
 }
 model OrderItem {
   id String @id @default(uuid()) @db.Uuid
@@ -239,7 +251,7 @@ model OrderItem {
   quantity Int
   unitPricePaise Int @map("unit_price_paise")
   order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
-  menuItem MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  menuItem MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
   @@index([orderId])
   @@map("order_items")
 }
@@ -281,6 +293,7 @@ model Notification {
   order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
   @@unique([recipientId, sourceEventId, type])
   @@index([recipientId, readAt, createdAt])
+  @@index([recipientId, createdAt, id])
   @@map("notifications")
 }
 model OutboxEvent {

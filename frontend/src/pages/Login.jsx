@@ -14,6 +14,7 @@ export default function Login() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [cafeId, setCafeId] = useState('');
+  const [canteenMode, setCanteenMode] = useState('login');
   const [secretCode, setSecretCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
@@ -42,22 +43,23 @@ export default function Login() {
     void perform(async () => {
       if (recovery) {
         if (password !== confirmation) throw new Error('Passwords do not match.');
-        await auth.changePassword(password); setRecovery(false); setPending(null); setPassword(''); setConfirmation('');
-        setSuccess('Password changed and previous SpoonAte sessions ended. Please log in.'); return;
+        const result = await auth.changePassword(password);
+        setRecovery(false); setPending(null); setPassword(''); setConfirmation('');
+        navigate(`/${result.role}`, { replace: true }); return;
       }
       if (pending) {
         const result = await auth.verifyEmail(code);
         setCode('');
-        if (result.recovery) { setRecovery(true); setPending(null); return; }
+        if (result.recovery) { setRecovery(true); setPending(null); setPassword(''); setConfirmation(''); return; }
         if (result.verified) { setRole(result.role); setPending(null); setRegister(false); setAdminActivate(false); setSuccess('Email verified. Please log in with your password.'); return; }
         navigate(`/${result.role}`, { replace: true }); return;
       }
-      if (reset) { await auth.resetPassword(email, role); setPending(auth.pendingAuth()); setReset(false); setSuccess('If the account exists, a password reset email has been sent.'); return; }
+      if (reset) { await auth.resetPassword(email, role); setPending(auth.pendingAuth()); setReset(false); setPassword(''); setConfirmation(''); setSuccess('If the account exists, a password reset code has been sent to your email.'); return; }
       if (role === 'admin' && adminActivate) {
         await auth.activateAdmin({ email, password }); setPending(auth.pendingAuth()); setPassword('');
         setSuccess('Check your email to verify the provisioned admin account.'); return;
       }
-      const result = await auth.login({ role, email, name, register, cafeId, secretCode, password });
+      const result = await auth.login({ role, email, name, register, cafeId, secretCode, password, canteenMode });
       setPassword(''); setSecretCode('');
       if (result.pending) { const next = auth.pendingAuth(); setPending(next); setSuccess(next.flow === 'signup' ? 'Enter your email OTP to finish signup and sign in. Use Resend OTP if you need a new code.' : 'Check your email for a verification link or code.'); return; }
       navigate(`/${result.role}`, { replace: true });
@@ -65,7 +67,7 @@ export default function Login() {
   };
   function changeRole(value) {
     auth.clearPending(); setPending(null); setRecovery(false); setReset(false); setAdminActivate(false); setRegister(false);
-    setRole(value); setError(''); setSuccess(''); setEmail(''); setPassword(''); setSecretCode(''); setCode('');
+    setRole(value); setCanteenMode('login'); setError(''); setSuccess(''); setEmail(''); setPassword(''); setSecretCode(''); setCode('');
   }
   const inputStyle = 'mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-[#0f8f73]';
   const title = recovery ? 'Choose a new password' : pending ? 'Check your email' : reset ? 'Reset your password'
@@ -83,11 +85,14 @@ export default function Login() {
           <button key={item} type="button" disabled={busy} aria-pressed={role === item} onClick={() => changeRole(item)} className={`flex-1 rounded-xl px-3 py-3 text-sm font-bold capitalize ${role === item ? 'bg-[#075d50] text-white' : 'bg-gray-100 text-gray-600'}`}>{item}</button>)}</div>}
         {role === 'student' && !pending && !recovery && !reset && <div className="mt-6 flex gap-5 text-sm font-bold">{[false, true].map(value =>
           <button key={String(value)} type="button" disabled={busy} onClick={() => { setRegister(value); setError(''); setSuccess(''); }} className={register === value ? 'text-[#0f8f73] underline' : 'text-gray-500'}>{value ? 'Sign up' : 'Login'}</button>)}</div>}
+        {role === 'canteen' && !pending && <div className="mt-6 flex gap-5 text-sm font-bold">{['login', 'join'].map(value =>
+          <button key={value} type="button" disabled={busy} aria-pressed={canteenMode === value} onClick={() => { setCanteenMode(value); setSecretCode(''); setError(''); setSuccess(''); }} className={canteenMode === value ? 'text-[#0f8f73] underline' : 'text-gray-500'}>{value === 'login' ? 'Login' : 'Join canteen'}</button>)}</div>}
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           <fieldset disabled={busy} className="space-y-5">
             {pending && <>
-              <p className="break-all text-sm text-gray-600">{pending.flow === 'signup' ? `Enter the OTP sent to ${pending.email}. After verification, you will be signed in automatically.` : `We sent an email to ${pending.email}. Open its link in this browser, or enter its verification code below if one is included.`}</p>
+              <p className="break-all text-sm text-gray-600">{pending.flow === 'reset' ? `Enter the password reset code sent to ${pending.email}. After verification, choose a new password.` : pending.flow === 'signup' ? `Enter the OTP sent to ${pending.email}. After verification, you will be signed in automatically.` : `We sent an email to ${pending.email}. Open its link in this browser, or enter its verification code below if one is included.`}</p>
               {pending.flow === 'signup' && <p className="text-sm text-gray-500">If verification fails, you can retry here. Wait for the resend timer, request a new OTP and use the newest code.</p>}
+              {pending.flow === 'staff' && <p className="text-sm text-gray-500">Use the code from the newest canteen sign-in email. After requesting another email, discard earlier codes. Each code works once; opening its verification link can also use it.</p>}
               {pending.expiresAt && <p className="text-sm text-gray-600">This canteen sign-in expires at {new Date(pending.expiresAt).toLocaleTimeString()}.</p>}
               <label className="block text-sm font-bold">Email verification code<input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,10}" minLength={6} maxLength={10} required value={code} onChange={event => setCode(event.target.value)} className={inputStyle} /></label>
             </>}
@@ -98,21 +103,21 @@ export default function Login() {
               {role === 'student' && register && !reset && <label className="block text-sm font-bold">Your name<input autoComplete="name" maxLength={120} required value={name} onChange={event => setName(event.target.value)} className={inputStyle} /></label>}
               <label className="block text-sm font-bold">{role === 'student' ? 'Banasthali email' : 'Email'}<input type="email" autoComplete="email" required value={email} placeholder={role === 'student' ? 'yourname@banasthali.in' : 'Enter your email'} onChange={event => setEmail(event.target.value)} className={inputStyle} /></label>
               {role !== 'canteen' && !reset && <label className="block text-sm font-bold">Password<input type="password" autoComplete={register || adminActivate ? 'new-password' : 'current-password'} minLength={register || adminActivate ? 12 : 1} maxLength={256} required value={password} onChange={event => setPassword(event.target.value)} className={inputStyle} /></label>}
-              {role === 'student' && <p className="text-sm text-gray-500">{register ? 'Verify your @banasthali.in email with an OTP to finish signup and sign in. Use at least 12 characters for your password.' : 'Log in with your verified @banasthali.in email and password.'}</p>}
+              {role === 'student' && <p className="text-sm text-gray-500">{reset ? 'We will email a verification code to your registered @banasthali.in address. Verify it to choose a new password.' : register ? 'Verify your @banasthali.in email with an OTP to finish signup and sign in. Use at least 12 characters for your password.' : 'Log in with your verified @banasthali.in email and password.'}</p>}
               {role === 'admin' && adminActivate && <p className="text-sm text-gray-500">Use the email and initial password supplied by your administrator. Verify your email, then return here to log in.</p>}
               {role === 'canteen' && <>
                 <label className="block text-sm font-bold">Your canteen<select required value={cafeId} onChange={event => { setCafeId(event.target.value); setSecretCode(''); }} className={inputStyle}><option value="">Select the canteen you represent</option>{cafes.map(cafe => <option key={cafe.id} value={cafe.id}>{cafe.name}</option>)}</select></label>
-                <label className="block text-sm font-bold">Member access code<input type="password" required maxLength={256} autoComplete="off" value={secretCode} onChange={event => setSecretCode(event.target.value)} className={inputStyle} /></label>
-                <p className="text-sm text-gray-500">After checking your canteen code, we will verify your email.</p>
+                {canteenMode === 'join' && <label className="block text-sm font-bold">Member access code<input type="password" required maxLength={256} autoComplete="off" value={secretCode} onChange={event => setSecretCode(event.target.value)} className={inputStyle} /></label>}
+                <p className="text-sm text-gray-500">{canteenMode === 'login' ? 'Already a member? Verify your email to log in. No access code needed.' : 'Enter the access code once to join, then verify your email. Next time, use Login.'}</p>
               </>}
             </>}
-            <button className="w-full rounded-xl bg-[#0f8f73] py-3 font-black text-white disabled:opacity-60">{busy ? 'Please wait…' : recovery ? 'Save new password' : pending ? 'Verify email' : reset ? 'Send reset email' : adminActivate ? 'Activate account' : role === 'student' && register ? 'Sign up' : role === 'canteen' ? 'Send verification email' : 'Login'}</button>
+            <button className="w-full rounded-xl bg-[#0f8f73] py-3 font-black text-white disabled:opacity-60">{busy ? 'Please wait…' : recovery ? 'Save new password' : pending ? pending.flow === 'reset' ? 'Verify reset code' : 'Verify email' : reset ? 'Send reset code' : adminActivate ? 'Activate account' : role === 'student' && register ? 'Sign up' : role === 'canteen' ? 'Send verification email' : 'Login'}</button>
           </fieldset>
         </form>
         {success && <p role="status" className="mt-4 rounded-xl bg-green-50 p-3 text-sm text-green-700">{success}</p>}
         {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
         {pending && <div className="mt-5 flex flex-wrap gap-4 text-sm font-bold">
-          <button disabled={busy || wait > 0} onClick={() => void perform(async () => { await auth.resend(); setPending(auth.pendingAuth()); setCode(''); setSuccess('New verification email requested. Use the newest code in your inbox.'); })} className="text-[#075d50] disabled:opacity-50">{wait ? `Resend in ${wait}s` : pending.flow === 'signup' ? 'Resend OTP' : 'Resend email'}</button>
+          <button disabled={busy || wait > 0} onClick={() => void perform(async () => { await auth.resend(); setPending(auth.pendingAuth()); setCode(''); setSuccess('New verification email requested. Use the newest code in your inbox.'); })} className="text-[#075d50] disabled:opacity-50">{wait ? `Resend in ${wait}s` : pending.flow === 'reset' ? 'Resend reset code' : pending.flow === 'signup' ? 'Resend OTP' : 'Resend email'}</button>
           <button disabled={busy} onClick={() => { auth.clearPending(); setPending(null); setCode(''); setError(''); setSuccess(''); }} className="text-gray-600">Start again</button>
         </div>}
         {!pending && !recovery && role !== 'canteen' && !(role === 'student' && register) && <div className="mt-5 flex flex-wrap gap-4 text-sm font-bold">

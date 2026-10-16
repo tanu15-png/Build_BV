@@ -77,10 +77,6 @@ export default function CafePage() {
                 {cafe.name}
               </h1>
 
-              <p className="text-white/70 mt-3">
-                {cafe.location}
-              </p>
-
               <p className="text-white/60 mt-5">
                 {cafe.hours}
               </p>
@@ -135,6 +131,7 @@ export default function CafePage() {
 
         </div>
 
+        {cartBusy && <p role="status" className="mt-5 text-sm font-bold text-[#075d50]">Updating your cart… You can keep adding items.</p>}
         {!filteredFoods.length && <p className="mt-8 text-gray-500">No items in this menu yet, or no items match your search.</p>}
         {/* FOOD */}
 
@@ -169,7 +166,7 @@ export default function CafePage() {
                   </span>
 
                   <button
-                    disabled={cartBusy || !isFoodAvailable(food)}
+                    disabled={!isFoodAvailable(food)}
                     onClick={() =>
                       addToCart(food)
                     }

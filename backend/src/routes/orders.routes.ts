@@ -1,3 +1,4 @@
+import { ensurePickupCredential, decryptPickupCode, matchesPickupCode, pickupFailureLimit, pickupStaffFailureLimit, pickupWindowMs, pickupStaffRateKey, collectionRequestHash } from '../services/pickup.js';
 import { Router, type Request } from 'express';
 import type { Config } from '../config/env.js';
 import type { Prisma, PrismaClient, OrderStatus } from '../generated/prisma/client.js';
@@ -101,12 +102,81 @@ export function createOrdersRouter(config: Config, db: PrismaClient, options: Or
         const claim = await tx.idempotencyKey.create({ data: { actorId: actor.id, action: scope, key: value, requestHash: hash } });
         const now = await serverNow(tx, options);
         await tx.order.update({ where: { id }, data: { status: after, version: { increment: 1 }, updatedAt: now } });
+        if (after === 'READY') await ensurePickupCredential(tx, id, config.OTP_SECRET);
         await event(tx, id, actor.id, before, after, now);
         return complete(tx, claim.id, id, 200);
       });
       res.status(result.status).json(result.body);
     });
   }
+
+  router.get('/orders/:id/pickup-code', ...route('GET /orders/:id/pickup-code'), async (req, res) => {
+    const { actor } = await current(req);
+    if (actor.role !== 'STUDENT') throw new AppError(403, 'STUDENT_REQUIRED', 'Pickup codes are only visible to the student who placed the order.');
+    const result = await orderTransaction(db, config.DB_TIMEOUT_MS, async tx => {
+      await tx.$queryRaw`SELECT id FROM users WHERE id = ${actor.id}::uuid FOR UPDATE`;
+      await createSessionReader(config, tx)(req);
+      const locked = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM orders WHERE id = ${res.locals.params.id}::uuid AND student_id = ${actor.id}::uuid FOR UPDATE`;
+      if (!locked.length) throw new AppError(404, 'ORDER_NOT_FOUND', 'Order not found.');
+      const order = await tx.order.findUniqueOrThrow({ where: { id: res.locals.params.id } });
+      if (order.status !== 'READY') return { code: null };
+      // Existing READY orders from before this release receive their code on first access.
+      const credential = await ensurePickupCredential(tx, order.id, config.OTP_SECRET);
+      return { code: decryptPickupCode(credential.encryptedCode, order.id, config.OTP_SECRET) };
+    });
+    res.json(result);
+  });
+
+  router.post('/orders/:id/collect', ...route('POST /orders/:id/collect'), async (req, res) => {
+    const { actor } = await current(req);
+    if (actor.role !== 'CANTEEN' || !actor.canteenId) throw new AppError(403, 'CANTEEN_REQUIRED', 'Only the owning canteen can verify pickup.');
+    const value = key(req); const id = res.locals.params.id;
+    const action = 'ORDER_COLLECT';
+    const hash = collectionRequestHash({ orderId: id, expectedVersion: req.body.expectedVersion, code: req.body.code }, config.OTP_SECRET);
+    const result = await orderTransaction(db, config.DB_TIMEOUT_MS, async tx => {
+      await tx.$queryRaw`SELECT id FROM users WHERE id = ${actor.id}::uuid FOR UPDATE`;
+      await tx.$queryRaw`SELECT id FROM canteens WHERE id = ${actor.canteenId}::uuid FOR UPDATE`;
+      await createSessionReader(config, tx)(req);
+      const locked = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM orders WHERE id = ${id}::uuid AND canteen_id = ${actor.canteenId}::uuid FOR UPDATE`;
+      if (!locked.length) throw new AppError(404, 'ORDER_NOT_FOUND', 'Order not found for your canteen.');
+      const saved = await replay(tx, actor.id, action, value, hash);
+      if (saved) return { ...saved, error: null };
+      const order = await tx.order.findUniqueOrThrow({ where: { id } });
+      if (order.status === 'COLLECTED') throw new AppError(409, 'ORDER_ALREADY_COLLECTED', 'This order has already been collected.', { order: orderResponse(await tx.order.findUniqueOrThrow({ where: { id }, include: orderInclude })) });
+      if (order.status !== 'READY' || order.version !== req.body.expectedVersion) throw new AppError(409, 'ORDER_STATE_CONFLICT', 'Only a ready order at its current version can be collected.', { order: orderResponse(await tx.order.findUniqueOrThrow({ where: { id }, include: orderInclude })) });
+      const now = await serverNow(tx, options);
+      const credential = await ensurePickupCredential(tx, id, config.OTP_SECRET);
+      const rateKey = pickupStaffRateKey(actor.id, config.OTP_SECRET);
+      const staffRate = await tx.rateLimit.findUnique({ where: { key: rateKey } });
+      const orderFailures = credential.windowEndsAt > now ? credential.failedAttempts : 0;
+      const staffFailures = staffRate && staffRate.windowEndsAt > now ? staffRate.count : 0;
+      const blockedUntil = orderFailures >= pickupFailureLimit ? credential.windowEndsAt : staffFailures >= pickupStaffFailureLimit ? staffRate!.windowEndsAt : null;
+      if (blockedUntil) return { error: new AppError(429, 'PICKUP_RATE_LIMITED', 'Too many incorrect pickup codes. Please wait before trying again.', { retryAfterSeconds: Math.max(1, Math.ceil((blockedUntil.getTime() - now.getTime()) / 1000)) }) };
+      if (!matchesPickupCode(credential.encryptedCode, req.body.code, id, config.OTP_SECRET)) {
+        const orderWindow = orderFailures && orderFailures + 1 < pickupFailureLimit ? credential.windowEndsAt : new Date(now.getTime() + pickupWindowMs);
+        const staffWindow = staffFailures && staffFailures + 1 < pickupStaffFailureLimit ? staffRate!.windowEndsAt : new Date(now.getTime() + pickupWindowMs);
+        await tx.pickupCredential.update({ where: { orderId: id }, data: { failedAttempts: orderFailures + 1, windowEndsAt: orderWindow } });
+        await tx.rateLimit.upsert({ where: { key: rateKey }, create: { key: rateKey, count: 1, windowEndsAt: staffWindow }, update: { count: staffFailures + 1, windowEndsAt: staffWindow } });
+        await tx.auditLog.create({ data: { actorId: actor.id, action: 'PICKUP_VERIFY_FAILED', target: `order:${id}`, requestId: res.locals.requestId, createdAt: now, metadata: { reason: 'CODE_MISMATCH' } } });
+        const limited = orderFailures + 1 >= pickupFailureLimit || staffFailures + 1 >= pickupStaffFailureLimit;
+        // Return errors from the transaction so failed-attempt counters and audit records commit.
+        return { error: limited
+          ? new AppError(429, 'PICKUP_RATE_LIMITED', 'Too many incorrect pickup codes. Please wait before trying again.', { retryAfterSeconds: Math.max(1, Math.ceil(((orderFailures + 1 >= pickupFailureLimit ? orderWindow : staffWindow).getTime() - now.getTime()) / 1000)) })
+          : new AppError(422, 'PICKUP_CODE_MISMATCH', 'That pickup code does not match. Ask the student for the pickup code shown on their ready order.') };
+      }
+      const claim = await tx.idempotencyKey.create({ data: { actorId: actor.id, action, key: value, requestHash: hash } });
+      await tx.order.update({ where: { id }, data: { status: 'COLLECTED', version: { increment: 1 }, collectedAt: now, pickupVerifiedBy: actor.id, updatedAt: now } });
+      await tx.pickupCredential.delete({ where: { orderId: id } });
+      await event(tx, id, actor.id, 'READY', 'COLLECTED', now);
+      await tx.auditLog.create({ data: { actorId: actor.id, action: 'ORDER_COLLECTED', target: `order:${id}`, requestId: res.locals.requestId, createdAt: now } });
+      return { ...await complete(tx, claim.id, id, 200), error: null };
+    });
+    if (result.error) {
+      if (result.error.status === 429) res.setHeader('Retry-After', String((result.error.details as { retryAfterSeconds: number }).retryAfterSeconds));
+      throw result.error;
+    }
+    res.status(result.status!).json(result.body);
+  });
 
   function scope(actor: Actor): Prisma.OrderWhereInput {
     if (actor.role === 'STUDENT') return { studentId: actor.id };

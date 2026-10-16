@@ -1,6 +1,6 @@
 # SpoonAte backend
 
-Phase 1 foundation, Phase 2 database/provisioning and Supabase Auth integration are implemented. See [AUTH.md](AUTH.md) for verified signup, password login/reset, staff email challenges, cookie sessions, member removal and admin authorization. Ordering handlers remain later work. `/api/v1/canteens` exposes a safe directory; `/health/live` checks the process and `/health/ready` checks the database within a deadline. Unimplemented business routes return the standard 404 envelope.
+Phase 1 foundation, Phase 2 database/provisioning and Supabase Auth integration are implemented. See [AUTH.md](AUTH.md) for verified signup, password login/reset, staff email challenges, cookie sessions, member removal and admin authorization. Catalog, carts, test orders, fulfillment, notifications, pickup verification and admin oversight are implemented; the feature documents below record their verification and deployment steps. `/api/v1/canteens` exposes a safe directory; `/health/live` checks the process and `/health/ready` checks the database within a deadline. Unimplemented business routes return the standard 404 envelope.
 
 Requires Node.js 24+ and PostgreSQL 17 (or Supabase PostgreSQL). For the connected development project, private credential locations, verification commands and remaining operator work, see [SUPABASE.md](SUPABASE.md).
 
@@ -26,7 +26,7 @@ npm run build
 TEST_DATABASE_URL=postgresql://spoonate:local-only-password@localhost:5434/spoonate_test npm run test:integration
 ```
 
-The integration suite applies the initial migration and applies deployment again to verify an existing database remains valid, then checks repeatable seeds, constraints, salted hashes, rotation, admin provisioning and directory responses. It inserts fixtures and expects a fresh test database for each run; recreate the test container before rerunning it. It skips when `TEST_DATABASE_URL` is absent. Concurrent order allocation belongs to Phase 7. API response/request schemas for all 37 planned business operations are exported in `src/schemas/contracts.ts`; request IDs and idempotency keys are HTTP headers. The contract fixtures use UUIDs, integer paise, versioned writes and an absolute pickup timestamp. The directory response is `{canteens: [...]}`. Future feature implementations must follow these schemas and validate query/params/body through shared middleware.
+The integration suite applies the initial migration and applies deployment again to verify an existing database remains valid, then checks repeatable seeds, constraints, salted hashes, rotation, admin provisioning and directory responses. It inserts fixtures and expects a fresh test database for each run; recreate the test container before rerunning it. It skips when `TEST_DATABASE_URL` is absent. Concurrent order allocation belongs to Phase 7. API response/request schemas for all 50 business operations are exported in `src/schemas/contracts.ts`; request IDs and idempotency keys are HTTP headers. The contract fixtures use UUIDs, integer paise, versioned writes and an absolute pickup timestamp. The directory response is `{canteens: [...]}`. Future feature implementations must follow these schemas and validate query/params/body through shared middleware.
 
 Provision secrets interactively, without shell arguments, echoing, or plaintext SQL:
 
@@ -79,4 +79,8 @@ See [CATALOG.md](CATALOG.md) for the implemented Phase 5–6 APIs, migration, me
 
 ## Transactional test orders and fulfillment
 
-Phases 7–8 implement persistent checkout and scoped accept/prepare/ready commands. See [ORDERS.md](ORDERS.md) for locking, idempotency, daily-code allocation, API contracts and verification. Run test:orders against a fresh local ORDER_TEST_DATABASE_URL; orders:check performs a rolled-back live database/handler probe. Durable notification processing follows in Phase 9 and collection confirmation in Phase 10.
+Phases 7–8 implement persistent checkout and scoped accept/prepare/ready commands. See [ORDERS.md](ORDERS.md) for locking, idempotency, daily-code allocation, API contracts and verification. Run test:orders against a fresh local ORDER_TEST_DATABASE_URL; orders:check performs a rolled-back live database/handler probe. Phase 9 durable notification processing is implemented; Phase 10 collection verification is implemented with a separate private numeric READY code. See [PICKUP.md](PICKUP.md) for migration, attempt limits, APIs and verification. See [NOTIFICATIONS.md](NOTIFICATIONS.md) for worker startup, scoped APIs, read state and crash/retry verification.
+
+## Admin oversight
+
+Phase 11 adds full-history campus aggregates, paginated order search and audited account, membership, canteen/menu and join-code maintenance. See [ADMIN.md](ADMIN.md) for APIs, authorization, synchronization, migration and test evidence. Run `test:admin` with a fresh local `ADMIN_TEST_DATABASE_URL`. Admins retain read-only fulfillment access.

@@ -78,7 +78,7 @@ Build_BV/
 | `/student/cafe/:cafeId` | Student | Browse one canteen's menu and availability |
 | `/student/cart` | Student | Own single-canteen cart, quantities, removal, empty cart |
 | `/student/checkout` | Student | Estimated pickup selection and test order submission |
-| `/student/order-success?id=:id` | Student | Own submitted order UUID, daily pickup code and day |
+| `/student/order-success?id=:id` | Student | Own submitted order UUID, dated public order reference |
 | `/student/orders` | Student | Own active/completed orders |
 | `/student/orders/:orderId` | Student | Own order progress |
 | `/student/notifications` | Student | Own acceptance and readiness events |
@@ -86,9 +86,10 @@ Build_BV/
 | `/canteen` | Canteen | Selected canteen's queue, acceptance, preparation, ready notification, availability, pickup, member list/removal |
 | `/canteen/orders` | Canteen | Selected canteen's order history |
 | `/canteen/orders/:orderId` | Canteen | Details and permitted status action for own order |
-| `/admin/*` | Admin | Campus-wide overview and searchable orders |
+| `/admin/*` | Admin | Database-wide overview, paginated order search and audited account/membership/canteen/code maintenance |
+| `/admin/canteens/:canteenId/menu` | Admin | Shared versioned category/item maintenance with audit records |
 
-`ProtectedRoute` reads the active auth context. `OrderContext` exposes only the student's orders/cart, the selected canteen's orders, or all orders for admin. Domain transition rules check staff role and canteen ownership again. Client-side checks are prototype behavior; the future API must repeat authorization for each request.
+`ProtectedRoute` reads the active auth context. `OrderContext` loads student or selected-canteen orders; admin reports use a dedicated paginated feed and PostgreSQL aggregates. Express checks session, role and canteen ownership on every protected request. Admin reports do not authorize fulfillment or private pickup-code retrieval.
 
 ## Authentication
 
@@ -136,7 +137,7 @@ sequenceDiagram
     participant O as Shared order storage
     participant C as Selected canteen
     S->>O: Submit own single-canteen cart + estimated pickup
-    O-->>S: RECEIVED order + UUID plus daily pickup code/day
+    O-->>S: RECEIVED order + UUID plus dated public order reference
     O-->>C: UUID, code/day, canteen, items, pickup, total
     C->>O: Accept: ACCEPTED
     O-->>S: Acceptance notification
@@ -144,13 +145,13 @@ sequenceDiagram
     C->>O: Mark prepared: READY
     O-->>S: Ready notification and tracking update
     S->>C: Show dated order card at pickup
-    C->>O: Select UUID and verify pickup code: COLLECTED
+    C->>O: Select UUID and verify private two-digit code: COLLECTED
     O-->>S: Pickup confirmed
 ```
 
-Allowed state progression is `RECEIVED → ACCEPTED → PREPARING → READY → COLLECTED`. Staff cannot skip states, reverse collection, or act for another canteen. Collection targets the permanent UUID and requires a matching pickup code on a ready order. Staff compare the allocation day, canteen and items on the dated student card with the selected order; code-only lookup is ambiguous across days. No cancellation, rejection/refund, or automatic expiry state is implemented. A student's estimate does not invalidate an uncollected order.
+Allowed state progression is `RECEIVED → ACCEPTED → PREPARING → READY → COLLECTED`. Staff cannot skip states, reverse collection, or act for another canteen. Collection targets the permanent UUID and requires the student-only two-digit pickup code generated when the order becomes READY. The public three-character order reference is separate. PostgreSQL attempt limits, idempotency and atomic history/audit recording protect verification. Staff compare the allocation day, canteen and items on the dated student card with the selected order; code-only lookup is ambiguous across days. No cancellation, rejection/refund, or automatic expiry state is implemented. A student's estimate does not invalidate an uncollected order.
 
-Notifications are derived from persisted `ACCEPTED` and `READY` history events. They appear in-app and update other same-origin tabs. There is no email, push, or background notification service yet.
+Accepted/ready events are processed by a separate PostgreSQL outbox worker into durable notifications for the owning student. Leased claims, retry backoff and a unique recipient/event/type key prevent lost or duplicate messages after worker crashes. Scoped APIs paginate notifications and persist idempotent read state. Visible/online clients poll orders and notifications every five seconds, revalidate on focus/reconnect and stop authenticated polling on session expiry. No order email or push is sent. See [backend/NOTIFICATIONS.md](backend/NOTIFICATIONS.md).
 
 Availability is independent of order state. A canteen may pause all incoming orders or disable an individual menu item. These changes block new additions, quantity increases, and checkout; existing orders retain item snapshots and continue fulfillment. Cross-canteen cart additions are blocked without silently clearing the student's cart.
 
@@ -181,13 +182,13 @@ Payment occurs only after acceptance. Preparation in the paid release is gated o
 
 `AuthContext` reads members and counts from authenticated Express endpoints backed by PostgreSQL. Each session has a member ID and an absolute expiry. The dashboard shows own-canteen member emails, access status and valid session counts, with pagination. Counts represent signed-in sessions rather than live presence.
 
-Confirmed removal locks the canteen and atomically revokes membership, scoped sessions and pending challenges, recording actor/time. New sign-in cannot restore access, even with the shared code, until an admin explicitly restores membership. Unrelated memberships survive. Express checks scope, account status and code version on every staff request; the UI revalidates on focus/reconnect and every 30 seconds. Admin restoration, account disabling and code-rotation APIs are audited; a dedicated maintenance UI remains future work.
+Confirmed removal locks the canteen and atomically revokes membership, scoped sessions and pending challenges, recording actor/time. New sign-in cannot restore access, even with the shared code, until an admin explicitly restores membership. Unrelated memberships survive. Express checks scope, account status and code version on every staff request; the UI revalidates on focus/reconnect and every 30 seconds. Admin restoration, account disabling and code-rotation APIs are audited; the dedicated maintenance UI is implemented in Phase 11; see [backend/ADMIN.md](backend/ADMIN.md).
 
 ## Plan alignment and current gaps
 
 Supabase PostgreSQL hosts application records, Supabase Auth manages passwords/email proofs, and Express owns application roles, memberships and opaque cookie sessions. Frontend/API/worker hosting is still an implementation decision. Follow [todo.md](todo.md), [backend/AUTH.md](backend/AUTH.md) and [scale.md](scale.md) for live acceptance and the unbenchmarked campus deployment.
 
-Authentication UI, cookie sessions, scoped member revocation and admin maintenance APIs are implemented and tested. Live SMTP/callback/browser acceptance remains pending. Ordering persistence, notification read state, a dedicated admin maintenance UI and unused menu/settings/analytics screens remain planned. The session policy currently uses absolute expiry only; idle expiry is not implemented. Existing order/cart keys remain prototype compatibility identifiers; old identity keys and demo login credentials are not used.
+Authentication UI, cookie sessions, scoped member revocation and admin maintenance APIs are implemented and tested. Live SMTP/callback/browser acceptance remains pending. Ordering persistence and durable notification read state are implemented. The dedicated admin maintenance UI is implemented; remaining settings/analytics scope and browser acceptance belong to Phase 12. The session policy currently uses absolute expiry only; idle expiry is not implemented. Existing order/cart keys remain prototype compatibility identifiers; old identity keys and demo login credentials are not used.
 
 ## Backend foundation — 2026-10-14
 
@@ -201,4 +202,8 @@ Categories, menus, availability and carts now use Express and Supabase PostgreSQ
 
 ## Phase 7–8 order implementation
 
-Orders and fulfillment now use Express/PostgreSQL rather than browser records. Checkout locks user/cart/canteen/menu/category records and atomically commits immutable snapshots, permanent campus-day code allocation, initial history/outbox, cart clearing and actor-scoped idempotency response. Staff commands lock user/canteen/order and commit consecutive status/version changes with actor/time history/outbox and stable retry responses. Scoped UUID reads feed fifteen-second frontend polling and direct details. Pending requests persist before submission and reuse their exact payload/key after uncertain responses or refresh. See [backend/ORDERS.md](backend/ORDERS.md). Durable notification delivery and collection verification remain Phases 9–10.
+Orders and fulfillment now use Express/PostgreSQL rather than browser records. Checkout locks user/cart/canteen/menu/category records and atomically commits immutable snapshots, permanent campus-day code allocation, initial history/outbox, cart clearing and actor-scoped idempotency response. Staff commands lock user/canteen/order and commit consecutive status/version changes with actor/time history/outbox and stable retry responses. Scoped UUID reads feed five-second visible/online frontend polling and direct details. Pending requests persist before submission and reuse their exact payload/key after uncertain responses or refresh. See [backend/ORDERS.md](backend/ORDERS.md). Phase 9 durable notification delivery/read state is implemented; Phase 10 collection verification uses a private READY code; see [backend/PICKUP.md](backend/PICKUP.md).
+
+## Admin reporting and maintenance
+
+Phase 11 reports aggregate complete PostgreSQL history separately from stable, filtered order pages. Admin resources poll while visible/online and refresh after writes, focus and reconnect, retaining confirmed records during outages. Versioned maintenance writes recheck locked actors and commit audit records atomically. Account/code changes revoke applicable sessions/challenges; disabling a canteen blocks new orders and sign-ins while allowing existing staff to finish orders. History and item snapshots survive maintenance and menu deletion. See [backend/ADMIN.md](backend/ADMIN.md).

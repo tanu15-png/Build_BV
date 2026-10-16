@@ -6,7 +6,7 @@ Checkout locks user, cart, canteen, sorted menu items and categories in that ord
 
 The completed actor/action/key response survives for the order lifetime. Identical retries return its exact original body/status before validating a now-empty/new cart, expired pickup or changed campus day. Different input with that key returns 409. No pending claims survive a rolled-back attempt.
 
-Campus pickup codes are three base-36 characters (46,656 per Asia/Kolkata day). Eight cryptographically random attempts use INSERT ON CONFLICT DO NOTHING against the unique order day/code constraint; collisions do not poison the transaction. A bounded fallback scans for free codes and still relies on the unique INSERT to win races. Exhaustion returns ORDER_CODE_CAPACITY_EXHAUSTED without consuming the cart. Prior allocations, including collected and previous-day orders, are never removed or reassigned.
+Public campus order references are three base-36 characters (46,656 per Asia/Kolkata day). Eight cryptographically random attempts use INSERT ON CONFLICT DO NOTHING against the unique order day/code constraint; collisions do not poison the transaction. A bounded fallback scans for free codes and still relies on the unique INSERT to win races. Exhaustion returns ORDER_CODE_CAPACITY_EXHAUSTED without consuming the cart. Prior allocations, including collected and previous-day orders, are never removed or reassigned.
 
 POST /orders/:id/accept, /prepare and /ready require an active owning-canteen session, CSRF, expected order version and Idempotency-Key. They lock user, canteen and scoped order, recheck membership, and permit only RECEIVED → ACCEPTED → PREPARING → READY. A stale or skipped action returns ORDER_STATE_CONFLICT with the current order. An exact command retry returns the original saved response without another history/outbox event, even if the order advanced later. Pausing incoming orders or a delayed pickup does not prevent fulfillment. Status/version, actor/time history, outbox and command response commit atomically.
 
@@ -14,7 +14,7 @@ GET /orders and GET /orders/:id enforce student ownership, canteen membership sc
 
 Frontend orders use API records, refresh every fifteen seconds and on focus/reconnect, and retain uncertain checkout/command requests in actor-scoped sessionStorage before sending. Exact payloads and keys survive page refresh and CSRF recovery. Definitive validation/conflict errors permit a new reviewed request. No order write falls back to browser records. Direct details work independently of the first list page.
 
-Outbox entries are committed, but the worker and durable notification/read APIs belong to Phase 9. Current notification previews derive from fetched order history. Pickup collection confirmation belongs to Phase 10; cancellation/refund/payment actions are absent.
+Outbox entries are processed by the separate Phase 9 worker into durable student notifications with scoped read APIs. See [NOTIFICATIONS.md](NOTIFICATIONS.md) for startup, leases, retries, recovery and synchronization. Phase 10 collection uses a separate student-only two-digit READY credential; see [PICKUP.md](PICKUP.md). Cancellation/refund/payment actions are absent.
 
 ## Verification
 

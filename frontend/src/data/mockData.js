@@ -10,7 +10,6 @@ export const cafes = [
   { id: "bella-bite", name: "Bella Bite" },
 ].map((cafe) => ({
   ...cafe,
-  location: "Banasthali Vidyapith · Collect at the canteen",
   status: "Open",
   categories: ["Snacks", "Meals", "Beverages"],
   preparationTime: "10–15 min",
