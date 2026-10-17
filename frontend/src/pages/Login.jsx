@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { cafes } from '../data/mockData';
+import { api } from '../services/api';
 
 export default function Login() {
   const auth = useAuth();
@@ -14,6 +14,8 @@ export default function Login() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [cafeId, setCafeId] = useState('');
+  const [directory, setDirectory] = useState({ items: [], loading: true, error: '' });
+  const [directoryRetry, setDirectoryRetry] = useState(0);
   const [canteenMode, setCanteenMode] = useState('login');
   const [secretCode, setSecretCode] = useState('');
   const [password, setPassword] = useState('');
@@ -27,6 +29,15 @@ export default function Login() {
   const [success, setSuccess] = useState(location.state?.message || '');
   const [now, setNow] = useState(Date.now);
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
+  useEffect(() => {
+    let active = true;
+    api('/canteens').then(({ canteens }) => {
+      if (active) setDirectory({ items: canteens, loading: false, error: '' });
+    }).catch(issue => {
+      if (active) setDirectory({ items: [], loading: false, error: issue.message });
+    });
+    return () => { active = false; };
+  }, [directoryRetry]);
   const signedInRole = auth.user?.role;
   useEffect(() => {
     if (!auth.loading && !auth.authError && signedInRole && !pending && !recovery) navigate(`/${signedInRole}`, { replace: true });
@@ -106,7 +117,8 @@ export default function Login() {
               {role === 'student' && <p className="text-sm text-gray-500">{reset ? 'We will email a verification code to your registered @banasthali.in address. Verify it to choose a new password.' : register ? 'Verify your @banasthali.in email with an OTP to finish signup and sign in. Use at least 12 characters for your password.' : 'Log in with your verified @banasthali.in email and password.'}</p>}
               {role === 'admin' && adminActivate && <p className="text-sm text-gray-500">Use the email and initial password supplied by your administrator. Verify your email, then return here to log in.</p>}
               {role === 'canteen' && <>
-                <label className="block text-sm font-bold">Your canteen<select required value={cafeId} onChange={event => { setCafeId(event.target.value); setSecretCode(''); }} className={inputStyle}><option value="">Select the canteen you represent</option>{cafes.map(cafe => <option key={cafe.id} value={cafe.id}>{cafe.name}</option>)}</select></label>
+                <label className="block text-sm font-bold">Your canteen<select required disabled={directory.loading || Boolean(directory.error)} value={cafeId} onChange={event => { setCafeId(event.target.value); setSecretCode(''); }} className={inputStyle}><option value="">{directory.loading ? 'Loading canteens…' : 'Select the canteen you represent'}</option>{directory.items.map(canteen => <option key={canteen.id} value={canteen.slug} disabled={!canteen.operational}>{canteen.name}{!canteen.operational ? ' (unavailable)' : ''}</option>)}</select></label>
+                {directory.error && <p role="alert" className="text-sm text-red-700">{directory.error} <button type="button" className="font-bold underline" onClick={() => { setDirectory({ items: [], loading: true, error: '' }); setDirectoryRetry(value => value + 1); }}>Retry loading canteens</button></p>}
                 {canteenMode === 'join' && <label className="block text-sm font-bold">Member access code<input type="password" required maxLength={256} autoComplete="off" value={secretCode} onChange={event => setSecretCode(event.target.value)} className={inputStyle} /></label>}
                 <p className="text-sm text-gray-500">{canteenMode === 'login' ? 'Already a member? Verify your email to log in. No access code needed.' : 'Enter the access code once to join, then verify your email. Next time, use Login.'}</p>
               </>}

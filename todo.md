@@ -206,16 +206,18 @@ Verified on 2026-10-16: 14 isolated PostgreSQL admin scenarios (15 tests includi
 - [x] Replace OrderContext local carts/orders/menus/availability with server records; add scoped paginated reads, UUID detail routes and persisted retry keys.
 - [x] Replace derived notification previews with the durable notification API/worker in Phase 9.
 - [x] Map canteen slugs/UUIDs for staff login and authenticated canteen identity.
-- [ ] Map remaining catalog/cart/order identifiers and convert frontend rupees to integer paise during the data cutover.
+- [x] Verify catalog/cart/order UUID mappings and integer-paise writes; rupee values are display/edit inputs converted by the shared price helper.
 - [x] Use order UUIDs in navigation/mutations; show allocation day/code, canteen and items on order cards, and pickup date/time in IST.
 - [x] Add order pending/loading/retry states and retain the exact request/key after uncertain checkout or fulfillment responses.
 - [x] Add notification read/unread UI backed by the notification endpoints.
 - [x] Implement and route MenuManagement.jsx for canteen-owned categories/items, editing/moving, archival/restoration, details and availability.
-- [ ] Implement and route CanteenSettings.jsx for supported canteen settings; it is currently an empty file.
+- [x] Remove the unused standalone settings page by product decision; keep supported details under Manage Menu and quick pause/resume on the dashboard.
 - [ ] Decide whether dedicated CanteenAnalytics.jsx is required; implement/route it if included. It is currently an empty file; basic dashboard counts already exist.
 - [x] Remove bundled canteen-code/demo-admin lookups from login and fail closed when auth APIs are unavailable.
-- [ ] Ensure the remaining ordering data cutover never silently falls back to local writes on API outages.
+- [x] Verify active ordering paths use server writes and report API failures; browser prototype records never become authoritative outage fallback data.
 - [ ] Verify all role flows across separate devices with persistent server state.
+
+Audit (2026-10-16): removed unused CanteenSettings.jsx; supported settings remain in Manage Menu. Login now loads current canteen names/slugs/status from `/canteens`, with loading/error/retry handling and disabled-canteen selection blocked. Active catalog/cart/order writes use UUIDs, integer paise, versions and server APIs; existing frontend tests cover price mapping, failed writes and uncertain retries. Saved menus, availability, carts, orders/history, private pickup credentials, memberships and notifications/read state persist in PostgreSQL. Browser cookies and Supabase proof/pending-request state are local to each browser; unsaved forms and unconfirmed queues do not synchronize. Sample frontend menus/access-code fixtures and old prototype helpers remain for historical tests, with no imports from active screens. Backend development seeds are opt-in and disabled in the current configuration. The configured API readiness check passed; the notification worker was started after finding it absent. Cross-device browser/email acceptance and production deployment/recovery/load qualification remain unchecked; the separate analytics screen still needs a scope decision.
 
 ## Phase 13 - Release readiness
 

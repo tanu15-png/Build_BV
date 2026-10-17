@@ -188,7 +188,7 @@ Confirmed removal locks the canteen and atomically revokes membership, scoped se
 
 Supabase PostgreSQL hosts application records, Supabase Auth manages passwords/email proofs, and Express owns application roles, memberships and opaque cookie sessions. Frontend/API/worker hosting is still an implementation decision. Follow [todo.md](todo.md), [backend/AUTH.md](backend/AUTH.md) and [scale.md](scale.md) for live acceptance and the unbenchmarked campus deployment.
 
-Authentication UI, cookie sessions, scoped member revocation and admin maintenance APIs are implemented and tested. Live SMTP/callback/browser acceptance remains pending. Ordering persistence and durable notification read state are implemented. The dedicated admin maintenance UI is implemented; remaining settings/analytics scope and browser acceptance belong to Phase 12. The session policy currently uses absolute expiry only; idle expiry is not implemented. Existing order/cart keys remain prototype compatibility identifiers; old identity keys and demo login credentials are not used.
+Authentication UI, cookie sessions, scoped member revocation and admin maintenance APIs are implemented and tested. Live SMTP/callback/browser acceptance remains pending. Ordering persistence and durable notification read state are implemented. The dedicated admin maintenance UI is implemented; standalone settings were removed, with supported details retained in Manage Menu; analytics scope and browser acceptance belong to Phase 12. The session policy currently uses absolute expiry only; idle expiry is not implemented. Existing order/cart keys remain prototype compatibility identifiers; old identity keys and demo login credentials are not used.
 
 ## Backend foundation — 2026-10-14
 
@@ -207,3 +207,7 @@ Orders and fulfillment now use Express/PostgreSQL rather than browser records. C
 ## Admin reporting and maintenance
 
 Phase 11 reports aggregate complete PostgreSQL history separately from stable, filtered order pages. Admin resources poll while visible/online and refresh after writes, focus and reconnect, retaining confirmed records during outages. Versioned maintenance writes recheck locked actors and commit audit records atomically. Account/code changes revoke applicable sessions/challenges; disabling a canteen blocks new orders and sign-ins while allowing existing staff to finish orders. History and item snapshots survive maintenance and menu deletion. See [backend/ADMIN.md](backend/ADMIN.md).
+
+## Frontend persistence audit — 2026-10-16
+
+Login uses the public server directory rather than the prototype canteen list. Active screens do not import the sample menu/access-code fixtures or browser-persistence hook. Catalog/cart/order UUID and paise mappings are implemented; errors do not create browser-only orders or replace failed writes with local records. Database-confirmed data survives refresh, browser storage clearing and sign-in from another browser. Unsaved drafts, in-memory queues, email proof context and uncertain-request retry keys remain browser-local. Cookie sessions are issued separately per browser; shared business data does not imply shared login. The separate notification worker must remain running to turn durable outbox events into notifications. Real browser/device acceptance and production qualification remain pending.
