@@ -1,5 +1,5 @@
 export function createNotificationFeed({ request, changed, unauthorized = () => {} }) {
-  let state = { items: [], nextCursor: null, unreadCount: 0, loading: false, error: '', readingIds: [] };
+  let state = { items: [], nextCursor: null, unreadCount: 0, initialized: false, loading: false, error: '', readingIds: [] };
   let pages = 1;
   let disposed = false;
   let suspended = false;
@@ -34,7 +34,7 @@ export function createNotificationFeed({ request, changed, unauthorized = () => 
         pages = more ? pages + 1 : fetched;
         const items = more ? [...state.items, ...rows] : rows;
         emit({ items: [...new Map(items.map(item => [item.id, item])).values()], nextCursor: page.nextCursor,
-          unreadCount: page.unreadCount, error: '' });
+          unreadCount: page.unreadCount, initialized: true, error: '' });
       } catch (error) { if (!disposed) failed(error); throw error; }
       finally {
         active = null;

@@ -28,7 +28,7 @@ export default function StudentDashboard() {
 
   const activeOrder = orders.find(
     (order) =>
-      order.status !== "COLLECTED"
+      !["COLLECTED", "REJECTED"].includes(order.status)
   );
 
   const handleLogout = async () => {

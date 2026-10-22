@@ -1,6 +1,6 @@
 # Admin oversight — Phase 11
 
-Implemented and verified on 2026-10-16. Admins use `/admin` for full-campus summaries, filtered orders and account/canteen maintenance. Existing staff fulfillment permissions remain enforced by the API.
+Implemented and verified on 2026-10-16. Admins use `/admin` for full-campus summaries, `/admin/orders` for filtered campus orders, `/admin/canteens` for canteen/menu/join-code maintenance, `/admin/accounts` for account status, and `/admin/memberships` for scoped access restoration/removal. Desktop and mobile navigation link to each protected page. Existing staff fulfillment permissions remain enforced by the API.
 
 ## Reports and synchronization
 
@@ -8,7 +8,7 @@ Implemented and verified on 2026-10-16. Admins use `/admin` for full-campus summ
 
 `GET /admin/orders` accepts `limit` (1–100, default 25), `cursor`, `canteenId`, `status`, `search`, `from`, `to`, `codeDay` and `orderCode`. Search covers the public reference, student name, canteen name and historical item names. Date ranges filter creation time; the UI converts inclusive IST calendar dates to UTC. Allocation day and exact three-character reference can be combined to distinguish reused references. Responses include `items`, `nextCursor` and the matching `totalCount`. Pagination sorts newest creation time, then UUID; invalid or filtered-out cursors are rejected.
 
-The dashboard refreshes all loaded pages while visible and online, and refreshes on focus, reconnect and writes. It discards responses from previous filters/accounts or reads started before a write. Offline failures retain confirmed records and show a retry action. Campus summaries are independent of order filters and page size. Admins use this feed rather than the student/staff order poller.
+The dashboard refreshes all loaded pages while visible and online, and refreshes on focus, reconnect and writes. It discards responses from previous filters/accounts or reads started before a write. Offline failures retain confirmed records and show a retry action. Campus summaries are independent of order filters and page size. Only the currently mounted admin pages fetch their lists. The first load shows a loading message; later background polls retain rows, filters and empty-state results without repeatedly showing a refresh message. Accounts and memberships also offer manual refresh controls. Memberships and their canteen selector use event-driven refresh only: initial open, filter changes, access writes, focus/visibility return, reconnect and manual refresh. They have no recurring timer. The selector reads the lightweight public directory rather than campus aggregates; active-order polling remains unchanged. Admins use this feed rather than the student/staff order poller.
 
 ## Maintenance
 

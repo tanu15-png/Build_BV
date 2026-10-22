@@ -7,6 +7,7 @@ import { createPrisma } from '../lib/prisma.js';
 import type { PrismaClient } from '../generated/prisma/client.js';
 import { hashSecret } from '../services/hash.js';
 import { cartSchema, orderSchema } from '../schemas/contracts.js';
+import { createOutboxWorker } from '../services/outbox.js';
 async function main() {
   const config = loadConfig();
   const db = createPrisma(config);
@@ -40,14 +41,15 @@ async function main() {
         await once(server, 'listening'); const address = server.address(); assert(address && typeof address !== 'string');
         const base = 'http://127.0.0.1:' + address.port + '/api/v1';
         let csrf = ''; let csrfCookie = '';
-        async function request(path: string, token: string, method = 'GET', body?: object, key?: string) {
+        async function request(path: string, token: string, method = 'GET', body?: object, key?: string, expectedStatus?: number) {
           const response = await fetch(base + path, { method, signal: AbortSignal.timeout(40000), headers: {
             Cookie: 'spoonate_session=' + token + (csrfCookie ? '; ' + csrfCookie : ''), Origin: config.FRONTEND_ORIGIN,
             ...(body ? { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf } : {}), ...(key ? { 'Idempotency-Key': key } : {}),
           }, ...(body ? { body: JSON.stringify(body) } : {}) });
           const data = await response.json();
           if (path === '/auth/csrf') { csrf = data.csrfToken; csrfCookie = response.headers.getSetCookie()[0]!.split(';')[0]!; }
-          assert(response.ok, 'API probe failed with HTTP ' + response.status + ' ' + (data.error?.code || 'UNKNOWN'));
+          if (expectedStatus) assert.equal(response.status, expectedStatus);
+          else assert(response.ok, 'API probe failed with HTTP ' + response.status + ' ' + (data.error?.code || 'UNKNOWN'));
           return data;
         }
         try {
@@ -68,13 +70,44 @@ async function main() {
           assert.equal(await tx.outboxEvent.count({ where: { event: { orderId: order.id } } }), 4);
           assert.equal(await tx.orderCodeAllocation.count({ where: { orderId: order.id } }), 1);
           assert.equal((await request('/orders/' + order.id, studentToken)).status, 'READY');
+          await request(`/orders/${order.id}/reject`, staffToken, 'POST', { expectedVersion: order.version }, randomUUID(), 409);
+          stage = 'rejection persistence, replay and notification delivery'; progress();
+          const empty = cartSchema.parse(await request('/cart', studentToken));
+          const refill = cartSchema.parse(await request('/cart/items', studentToken, 'POST', { expectedVersion: empty.version, menuItemId: item.id, quantity: 1 }));
+          const pending = orderSchema.parse(await request('/orders', studentToken, 'POST', { expectedVersion: refill.version, quote: refill.quote, pickupAt: new Date(Date.now() + 20 * 60000).toISOString() }, randomUUID()));
+          const rejectPath = `/orders/${pending.id}/reject`;
+          const rejectKey = randomUUID(); const rejectBody = { expectedVersion: pending.version };
+          await request(rejectPath, studentToken, 'POST', rejectBody, randomUUID(), 403);
+          const rejected = orderSchema.parse(await request(rejectPath, staffToken, 'POST', rejectBody, rejectKey));
+          assert.equal(rejected.status, 'REJECTED'); assert.equal(rejected.events.length, 2);
+          assert.equal((await tx.order.findUniqueOrThrow({ where: { id: pending.id } })).status, 'REJECTED');
+          assert.deepEqual(await request(rejectPath, staffToken, 'POST', rejectBody, rejectKey), rejected);
+          await request(`/orders/${pending.id}/accept`, staffToken, 'POST', { expectedVersion: rejected.version }, randomUUID(), 409);
+          assert.equal((await request(`/orders/${pending.id}`, studentToken)).status, 'REJECTED');
+          assert.equal((await request(`/orders/${pending.id}/pickup-code`, studentToken)).code, null);
+          const rejectionEvents = await tx.orderEvent.findMany({ where: { orderId: pending.id, newStatus: 'REJECTED' } });
+          assert.equal(rejectionEvents.length, 1);
+          const jobs = await tx.outboxEvent.findMany({ where: { eventId: rejectionEvents[0]!.id } });
+          assert.equal(jobs.length, 1);
+          const leaseOwner = randomUUID();
+          await tx.outboxEvent.update({ where: { id: jobs[0]!.id }, data: { state: 'PROCESSING', leaseOwner, leaseUntil: new Date(Date.now() + 60000) } });
+          const worker = createOutboxWorker(scoped, config);
+          const job = { id: jobs[0]!.id, leaseOwner, attempts: 1 };
+          assert.equal(await worker.deliver(job), true);
+          assert.equal(await worker.deliver(job), false);
+          const notices = await tx.notification.findMany({ where: { orderId: pending.id } });
+          assert.equal(notices.length, 1); assert.equal(notices[0]!.type, 'REJECTED');
+          assert.equal(notices[0]!.recipientId, student.id); assert.equal(notices[0]!.readAt, null);
+          assert.match(notices[0]!.message, /rejected order/);
+          const feed = await request('/notifications', studentToken);
+          assert(feed.items.some((notice: { id: string }) => notice.id === notices[0]!.id));
         } finally { await new Promise<void>(resolve => server.close(() => resolve())); }
         throw rollback;
       }, { maxWait: config.DB_TIMEOUT_MS, timeout: 180000 });
     } catch (error) { if (error !== rollback) throw error; }
     stage = 'rollback verification';
     assert.equal(await db.canteen.count({ where: { id: canteenId } }), 0);
-    console.log('PASS: live application-role checkout, stable retry, pickup allocation, scoped reads and accept/prepare/ready');
+    console.log('PASS: live checkout, stable retry, scoped reads, accept/prepare/ready, rejection and student notification delivery');
     console.log('PASS: all temporary users, sessions, menus, orders, histories and outbox entries rolled back; no email sent');
   } catch (error) {
     if (error instanceof Error && /^API probe failed with HTTP [0-9]{3} [A-Z_]+$/.test(error.message)) console.error(error.message);

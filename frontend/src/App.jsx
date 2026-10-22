@@ -14,6 +14,11 @@ import CanteenDashboard from "./pages/canteen/CanteenDashboard.jsx";
 import CanteenOrders from "./pages/canteen/CanteenOrders.jsx";
 import CanteenOrderDetails from "./pages/canteen/CanteenOrderDetails.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import AdminLayout from "./pages/admin/AdminLayout.jsx";
+import AdminOrders from "./pages/admin/AdminOrders.jsx";
+import AdminCanteens from "./pages/admin/AdminCanteens.jsx";
+import AdminMaintenance from "./pages/admin/AdminMaintenance.jsx";
+import AdminMemberships from "./pages/admin/AdminMemberships.jsx";
 import Login from "./pages/Login";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import CafePage from "./pages/student/CafePage";
@@ -173,13 +178,20 @@ function App() {
             <Route path="/canteen/orders/:orderId" element={<ProtectedRoute role="canteen"><CanteenOrderDetails /></ProtectedRoute>} />
 
             <Route
-              path="/admin/*"
+              path="/admin"
               element={
                 <ProtectedRoute role="admin">
-                  <AdminDashboard />
+                  <AdminLayout />
                 </ProtectedRoute>
               }
-            />
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="canteens" element={<AdminCanteens />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="accounts" element={<AdminMaintenance />} />
+              <Route path="memberships" element={<AdminMemberships />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Route>
 
             <Route
               path="*"

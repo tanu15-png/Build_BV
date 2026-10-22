@@ -55,7 +55,7 @@ export async function rotateCode(db: PrismaClient, config: Config, slug: string,
 export async function provisionAdmin(db: PrismaClient, email: string, name: string, password: string) {
   email = email.trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !name.trim() || name.length > 120) throw new Error('Valid email and name required');
-  if (password.length < 12 || password.length > 256 || password.toLowerCase() === 'admin123') throw new Error('Admin password must contain 12 to 256 characters; demo credentials are prohibited');
+  if (password.length < 8 || password.length > 256 || password.toLowerCase() === 'admin123') throw new Error('Admin password must contain 8 to 256 characters; demo credentials are prohibited');
   const passwordHash = await hashSecret(password);
   await db.$transaction(async tx => {
     // Existing accounts must be managed through an explicit reset/role management workflow.

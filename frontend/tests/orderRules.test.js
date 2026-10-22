@@ -3,9 +3,30 @@ import assert from "node:assert/strict";
 import { cafes, foods } from "../src/data/mockData.js";
 import { canteenAccessCodes } from "../src/data/canteenAccess.js";
 import { studentAccount, canteenMember, revokeCanteenMember, canteenSessionActive } from "../src/utils/authRules.js";
-import { addCartItem, buildOrder, generateOrderId, normalizeStudentEmail, transitionOrder, visibleOrders, orderNotifications, campusDay, pickupLabel } from "../src/utils/orderRules.js";
+import { addCartItem, buildOrder, generateOrderId, normalizeStudentEmail, transitionOrder, visibleOrders, orderNotifications, campusDay, pickupLabel, orderInSection } from "../src/utils/orderRules.js";
 
 const available = { pausedCafes: [], disabledFoods: [] };
+
+test('rejected orders appear only in the rejected section', () => {
+  for (const status of ['RECEIVED', 'ACCEPTED', 'PREPARING', 'READY', 'COLLECTED', 'REJECTED']) {
+    const expected = status === 'REJECTED' ? 'Rejected' : status === 'COLLECTED' ? 'Completed' : 'Active';
+    for (const section of ['Active', 'Completed', 'Rejected']) {
+      assert.equal(orderInSection({ status }, section), section === expected);
+    }
+  }
+});
+
+test('only awaiting orders may be rejected and rejected orders cannot advance', () => {
+  const order = makeOrder();
+  const rejected = transitionOrder(order, member, 'REJECTED');
+  assert.equal(rejected.status, 'REJECTED');
+  assert.equal(rejected.history.at(-1).status, 'REJECTED');
+  assert.match(orderNotifications([rejected])[0].message, /rejected order/);
+  for (const status of ['ACCEPTED', 'PREPARING', 'READY', 'COLLECTED', 'REJECTED']) {
+    assert.throws(() => transitionOrder({ ...order, status }, member, 'REJECTED'), /cannot move/);
+    assert.throws(() => transitionOrder(rejected, member, status), /cannot move/);
+  }
+});
 const student = { role: "student", name: "Test Student", email: "student@banasthali.in" };
 const food = foods[0];
 const secondCanteenFood = foods.find((item) => item.cafeId !== food.cafeId);

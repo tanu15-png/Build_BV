@@ -42,6 +42,21 @@ test('signup requires OTP, stores no password and signs in immediately after ser
   assert(!calls.some(([path]) => path === '/auth/session'));
   assert(!calls.some(([path]) => ['signout', 'password-login'].includes(path)));
 });
+test('signup and password reset accept eight characters and reject shorter or oversized passwords', async () => {
+  for (const flow of ['signup', 'reset']) {
+    const { actions, calls } = setup();
+    const submit = password => flow === 'signup'
+      ? actions.signup({ email: 's@banasthali.in', name: 'Student', password })
+      : actions.changePassword(password);
+    for (const password of ['Abc123!', 'x'.repeat(257)]) {
+      await assert.rejects(submit(password), /8–256 characters/);
+    }
+    assert.equal(calls.length, 0);
+    await submit('Abcd123!');
+    const passwordCall = calls.find(([path]) => path === (flow === 'signup' ? 'signup' : 'password-login'));
+    assert.equal(passwordCall[1].password, 'Abcd123!');
+  }
+});
 test('regular login uses email and password without requesting or verifying an OTP', async () => {
   const { actions, calls } = setup();
   const result = await actions.login({ email: 'S@banasthali.in', password: 'a long password', role: 'student' });

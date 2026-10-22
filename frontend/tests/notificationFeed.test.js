@@ -25,6 +25,18 @@ test('offline notifications recover from the server without browser storage and 
   next.requests[0].resolve({ items: [notification('durable-ready')], unreadCount: 1, nextCursor: null });
   await login; assert.equal(next.snapshot().items[0].id, 'durable-ready');
 });
+test('background failures retain initialized notifications and later success clears the error', async () => {
+  const { feed, requests, snapshot } = setup();
+  const first = feed.refresh(); assert.equal(snapshot().initialized, false);
+  requests[0].resolve({ items: [notification('ready')], unreadCount: 1, nextCursor: null }); await first;
+  const background = feed.refresh();
+  assert.equal(snapshot().initialized, true); assert.equal(snapshot().items[0].id, 'ready');
+  requests[1].reject(new Error('Timed out')); await assert.rejects(background, /Timed out/);
+  assert.equal(snapshot().initialized, true); assert.equal(snapshot().items[0].id, 'ready');
+  const retry = feed.refresh(); assert.equal(snapshot().initialized, true);
+  requests[2].resolve({ items: [notification('ready')], unreadCount: 1, nextCursor: null }); await retry;
+  assert.equal(snapshot().error, ''); assert.equal(snapshot().initialized, true);
+});
 test('pagination appends records and polls refresh all loaded pages including cross-device read state', async () => {
   const { feed, requests, snapshot } = setup();
   const first = feed.refresh(); requests[0].resolve({ items: [notification('new')], unreadCount: 2, nextCursor: 'new' }); await first;

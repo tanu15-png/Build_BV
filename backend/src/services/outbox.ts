@@ -9,7 +9,7 @@ export function deliveryError(error: unknown) {
   return typeof code === 'string' && /^[A-Z0-9_]{1,40}$/.test(code) ? `Delivery failed (${code}).` : 'Notification delivery failed.';
 }
 export function notificationData(event: Prisma.OrderEventGetPayload<{ include: { order: { include: { canteen: true } } } }>) {
-  if (event.newStatus !== 'ACCEPTED' && event.newStatus !== 'READY') return null;
+  if (event.newStatus !== 'ACCEPTED' && event.newStatus !== 'READY' && event.newStatus !== 'REJECTED') return null;
   const order = event.order;
   if (!order.orderCode) throw new Error('Order code missing');
   const reference = `${order.orderCode} (${order.codeDay.toISOString().slice(0, 10)})`;
@@ -17,7 +17,9 @@ export function notificationData(event: Prisma.OrderEventGetPayload<{ include: {
     createdAt: event.createdAt,
     message: event.newStatus === 'READY'
       ? `${order.canteen.name} has prepared order ${reference}. Open your order to see your private pickup code.`
-      : `${order.canteen.name} accepted order ${reference}.` };
+      : event.newStatus === 'REJECTED'
+        ? `${order.canteen.name} rejected order ${reference}. Please choose another canteen or place a new order.`
+        : `${order.canteen.name} accepted order ${reference}.` };
 }
 export function createOutboxWorker(db: PrismaClient, config: Pick<Config, 'DB_TIMEOUT_MS' | 'OUTBOX_LEASE_SECONDS' | 'OUTBOX_MAX_ATTEMPTS' | 'OUTBOX_BATCH_SIZE'>) {
   const txOptions = { maxWait: config.DB_TIMEOUT_MS, timeout: 15000 };

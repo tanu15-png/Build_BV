@@ -24,6 +24,7 @@ enum OrderStatus {
   PREPARING
   READY
   COLLECTED
+  REJECTED
 }
 enum ChallengePurpose {
   SIGNUP

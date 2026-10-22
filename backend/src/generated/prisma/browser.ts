@@ -6,7 +6,7 @@
 /*
  * This file should be your main import to use Prisma-related types and utilities in a browser. 
  * Use it to get access to models, enums, and input types.
- * 
+ *
  * This file does not contain a `PrismaClient` class, nor several other helpers that are intended as server-side only.
  * See `client.ts` for the standard, server-side entry point.
  *
@@ -19,62 +19,62 @@ export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
  * Model User
- * 
+ *
  */
 export type User = Prisma.UserModel
 /**
  * Model UserRole
- * 
+ *
  */
 export type UserRole = Prisma.UserRoleModel
 /**
  * Model Canteen
- * 
+ *
  */
 export type Canteen = Prisma.CanteenModel
 /**
  * Model CanteenAccessCode
- * 
+ *
  */
 export type CanteenAccessCode = Prisma.CanteenAccessCodeModel
 /**
  * Model CanteenMembership
- * 
+ *
  */
 export type CanteenMembership = Prisma.CanteenMembershipModel
 /**
  * Model AuthChallenge
- * 
+ *
  */
 export type AuthChallenge = Prisma.AuthChallengeModel
 /**
  * Model Session
- * 
+ *
  */
 export type Session = Prisma.SessionModel
 /**
  * Model MenuCategory
- * 
+ *
  */
 export type MenuCategory = Prisma.MenuCategoryModel
 /**
  * Model MenuItem
- * 
+ *
  */
 export type MenuItem = Prisma.MenuItemModel
 /**
  * Model Cart
- * 
+ *
  */
 export type Cart = Prisma.CartModel
 /**
  * Model CartItem
- * 
+ *
  */
 export type CartItem = Prisma.CartItemModel
 /**
  * Model Order
- * 
+ *
  */
 export type Order = Prisma.OrderModel
 /**
@@ -84,41 +84,41 @@ export type Order = Prisma.OrderModel
 export type PickupCredential = Prisma.PickupCredentialModel
 /**
  * Model OrderItem
- * 
+ *
  */
 export type OrderItem = Prisma.OrderItemModel
 /**
  * Model OrderEvent
- * 
+ *
  */
 export type OrderEvent = Prisma.OrderEventModel
 /**
  * Model OrderCodeAllocation
- * 
+ *
  */
 export type OrderCodeAllocation = Prisma.OrderCodeAllocationModel
 /**
  * Model Notification
- * 
+ *
  */
 export type Notification = Prisma.NotificationModel
 /**
  * Model OutboxEvent
- * 
+ *
  */
 export type OutboxEvent = Prisma.OutboxEventModel
 /**
  * Model IdempotencyKey
- * 
+ *
  */
 export type IdempotencyKey = Prisma.IdempotencyKeyModel
 /**
  * Model AuditLog
- * 
+ *
  */
 export type AuditLog = Prisma.AuditLogModel
 /**
  * Model RateLimit
- * 
+ *
  */
 export type RateLimit = Prisma.RateLimitModel

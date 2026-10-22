@@ -4,14 +4,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { ClipboardList, LogOut, Store } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useOrders } from "../../context/OrderContext";
-import { statusLabels } from "../../utils/orderRules";
+import OrderSectionTabs from "../../components/OrderSectionTabs";
+import { orderInSection, statusLabels } from "../../utils/orderRules";
 
 export default function CanteenDashboard() {
   const { user, logout } = useAuth();
   const { orders, cafes, toggleOrders, ordersLoading, loadMoreOrders } = useOrders();
   const navigate = useNavigate();
   const cafe = cafes.find((item) => item.id === user.cafeId);
-  const active = orders.filter((order) => order.status !== "COLLECTED")
+  const [section, setSection] = useState("Active");
+  const filtered = orders.filter((order) => orderInSection(order, section))
     .sort((a, b) => new Date(a.pickupAt) - new Date(b.pickupAt));
   const [error, setError] = useState("");
   const perform = async (action) => { try { await action(); setError(""); } catch (issue) { setError(issue.message); } };
@@ -28,13 +30,14 @@ export default function CanteenDashboard() {
         <div className="mx-auto max-w-7xl space-y-8 p-5 lg:p-10">
           <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-6 shadow-sm"><div><h2 className="flex items-center gap-2 text-xl font-black"><Store size={20} /> Incoming orders</h2><p className="mt-2 text-gray-500">{cafe?.status === "Paused" ? "New orders are paused. Continue fulfilling existing orders." : "Your canteen is accepting new orders."}</p></div><button onClick={() => perform(toggleOrders)} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{cafe?.status === "Paused" ? "Resume orders" : "Pause incoming orders"}</button></section>
           {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{[
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">{[
             ["Awaiting acceptance", orders.filter((order) => order.status === "RECEIVED").length],
             ["Preparing", orders.filter((order) => ["ACCEPTED", "PREPARING"].includes(order.status)).length],
             ["Ready for pickup", orders.filter((order) => order.status === "READY").length],
             ["Collected", orders.filter((order) => order.status === "COLLECTED").length],
+            ["Rejected", orders.filter((order) => order.status === "REJECTED").length],
           ].map(([label, value]) => <div key={label} className="rounded-2xl bg-white p-5 shadow-sm"><p className="text-sm text-gray-500">{label}</p><p className="mt-2 text-3xl font-black">{value}</p></div>)}</div>
-          <section><h2 className="text-2xl font-black">Active orders</h2>{ordersLoading && <p role="status">Refreshing orders…</p>}{loadMoreOrders && <button onClick={loadMoreOrders} className="mt-3 font-bold underline">Load more orders</button>}<p className="mt-2 text-gray-500">Sorted by the student's estimated pickup time.</p><div className="mt-5 space-y-4">{active.length === 0 ? <div className="rounded-2xl bg-white p-10 text-center"><ClipboardList className="mx-auto text-gray-300" size={36} /><p className="mt-4 font-bold">No active orders</p></div> : active.map((order) => <CanteenOrderCard key={order.id} order={order} />)}</div></section>
+          <section><OrderSectionTabs selected={section} onChange={setSection} /><h2 className="mt-5 text-2xl font-black">{section} orders</h2>{ordersLoading && <p role="status">Refreshing orders…</p>}{loadMoreOrders && <button onClick={loadMoreOrders} className="mt-3 font-bold underline">Load more orders</button>}<p className="mt-2 text-gray-500">Sorted by the student's estimated pickup time.</p><div className="mt-5 space-y-4">{filtered.length === 0 ? <div className="rounded-2xl bg-white p-10 text-center"><ClipboardList className="mx-auto text-gray-300" size={36} /><p className="mt-4 font-bold">No {section.toLowerCase()} orders</p></div> : filtered.map((order) => <CanteenOrderCard key={order.id} order={order} />)}</div></section>
 
         </div>
       </main>
@@ -54,7 +57,9 @@ export function CanteenOrderCard({ order }) {
   };
   return <article className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
     <div className="flex flex-wrap items-start justify-between gap-5"><div><Link to={`/canteen/orders/${order.id}`} className="text-3xl font-black tracking-widest text-[#075d50]">{orderCode(order)}</Link><p className="mt-2 text-sm text-gray-500">Day: {orderDay(order)} · {order.cafeName}</p><p className="mt-2 text-sm font-bold text-[#0f8f73]">{statusLabels[order.status]}</p><p className="mt-3 text-gray-600">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(" · ")}</p><p className="mt-2 text-sm text-gray-500">{order.studentName} · Estimated pickup {pickupLabel(order)}</p><p className="mt-2 font-bold">Order value: ₹{order.total}</p></div><div>
+      {order.status === "RECEIVED" && <button disabled={orderBusy} onClick={() => advance("REJECTED")} className="mr-3 rounded-xl border border-red-600 px-5 py-3 font-bold text-red-700 disabled:opacity-50">Reject order</button>}
       {next && <button disabled={orderBusy} onClick={() => advance(next[0])} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{next[1]}</button>}
+      {order.status === "REJECTED" && <p className="mt-3 font-bold text-red-700">Order rejected. The student will be notified.</p>}
       {(order.status === "READY" || retry) && <form className="mt-3 max-w-xs" onSubmit={async event => {
         event.preventDefault(); setError('');
         try { await collectOrder(order.id, pickupCode, order); setPickupCode(''); }

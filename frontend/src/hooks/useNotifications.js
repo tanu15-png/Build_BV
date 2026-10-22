@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../services/api';
 import { createNotificationFeed } from '../services/notificationFeed';
 import { pollingInterval, startVisiblePolling } from '../services/polling';
-const empty = { items: [], nextCursor: null, unreadCount: 0, loading: false, error: '', readingIds: [] };
+const empty = { items: [], nextCursor: null, unreadCount: 0, initialized: false, loading: false, error: '', readingIds: [] };
 export function useNotifications(user, refreshSession) {
   const owner = user?.role === 'student' ? user.id : '';
   const feed = useRef(null);
@@ -24,6 +24,8 @@ export function useNotifications(user, refreshSession) {
   return {
     notifications: visible.items, unreadNotificationCount: visible.unreadCount,
     notificationsLoading: Boolean(owner) && (state.owner !== owner || visible.loading), notificationsError: visible.error,
+    notificationsInitialized: visible.initialized,
+    notificationsInitialLoading: Boolean(owner) && !visible.initialized && !visible.error,
     readingNotificationIds: visible.readingIds, refreshNotifications,
     loadMoreNotifications: visible.nextCursor ? () => feed.current?.refresh(true).catch(() => {}) : null,
     markNotificationRead: id => feed.current?.owner === owner ? feed.current.markRead(id) : Promise.reject(new Error('Sign in to read your notifications.')),

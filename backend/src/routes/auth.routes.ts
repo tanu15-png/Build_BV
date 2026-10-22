@@ -105,7 +105,7 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
     const { email, password } = req.body as { email: string; password: string };
     await limit(req, 'admin-activate', email);
     const user = await db.user.findUnique({ where: { email }, include: { roles: true } });
-    if (!user || user.supabaseSubject || user.status !== 'ACTIVE' || !user.roles.some(role => role.role === 'ADMIN') || !user.passwordHash || !await verifySecret(password, user.passwordHash)) throw new AppError(401, 'ADMIN_DENIED', 'Incorrect provisioned admin credentials or account already activated.');
+    if (!user || user.supabaseSubject || user.status !== 'ACTIVE' || !user.roles.some(role => role.role === 'ADMIN') || !user.passwordHash || !await verifySecret(password, user.passwordHash)) throw new AppError(401, 'ADMIN_DENIED', 'Activation requires an unactivated admin account and its initial password. If you already verified your email, use Back to login and sign in with your current password, or use Forgot password.');
     await auth.activateAdmin(email, password, user.name);
     res.json({ ok: true });
   });

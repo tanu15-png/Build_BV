@@ -79,6 +79,26 @@ test('durable notifications, leased worker recovery, scoped pagination and read 
       assert.deepEqual(page.body.items.map((row: { type: string }) => row.type).sort(), ['ACCEPTED', 'READY']);
       assert.equal(page.body.unreadCount, 2);
     });
+    await t.test('rejection persists and delivers one unread notification to its student', async () => {
+      const item = await db.menuItem.findFirstOrThrow({ where: { canteenId: canteen.id } });
+      const cart = (await student.browser.request('/cart')).body;
+      const filled = (await student.browser.request('/cart/items', 'POST', { expectedVersion: cart.version, menuItemId: item.id, quantity: 1 })).body;
+      const placed = await student.browser.request('/orders', 'POST', { expectedVersion: filled.version, quote: filled.quote, pickupAt: new Date(Date.now() + 1200000).toISOString() }, randomUUID());
+      assert.equal(placed.status, 201);
+      const path = `/orders/${placed.body.id}/reject`; const key = randomUUID(); const body = { expectedVersion: 1 };
+      const rejected = await staff.browser.request(path, 'POST', body, key);
+      assert.equal(rejected.status, 200); assert.equal(rejected.body.status, 'REJECTED');
+      assert.deepEqual((await staff.browser.request(path, 'POST', body, key)).body, rejected.body);
+      await worker.runBatch();
+      await worker.runBatch();
+      assert.equal(await db.notification.count({ where: { orderId: placed.body.id } }), 1);
+      const page = await student.browser.request('/notifications');
+      contracts['GET /notifications']!.response.parse(page.body);
+      const message = page.body.items.find((row: { orderId: string }) => row.orderId === placed.body.id);
+      assert.equal(message.type, 'REJECTED'); assert.equal(message.readAt, null);
+      assert.match(message.message, /rejected order/);
+      assert.equal(await db.notification.count({ where: { orderId: placed.body.id, recipientId: other.user.id } }), 0);
+    });
     await t.test('two workers claim a row once and fencing prevents an expired worker from delivering it', async () => {
       const created = await job();
       const workers = [createOutboxWorker(db, config), createOutboxWorker(db, config)];

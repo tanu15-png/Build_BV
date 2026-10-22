@@ -53,3 +53,20 @@ test('an offline admin resource retains confirmed records and recovers on refres
   const recovered = resource.refresh(); requests[2].resolve({ items: [{ id: 'order', status: 'READY' }], nextCursor: null }); await recovered;
   assert.equal(state().error, ''); assert.equal(state().items[0].status, 'READY');
 });
+test('background polling keeps initialized records, including empty membership lists, ready for display', async () => {
+  const { resource, requests, state } = setup();
+  const first = resource.refresh();
+  assert.equal(state().initialized, false);
+  requests[0].resolve({ items: [], nextCursor: null }); await first;
+  assert.equal(state().initialized, true);
+  const background = resource.refresh();
+  assert.equal(state().loading, true);
+  assert.equal(state().initialized, true);
+  assert.deepEqual(state().items, []);
+  requests[1].resolve({ items: [{ id: 'member', status: 'ACTIVE' }], nextCursor: null }); await background;
+  const next = resource.refresh();
+  assert.equal(state().initialized, true);
+  assert.equal(state().items[0].id, 'member');
+  requests[2].resolve({ items: [{ id: 'member', status: 'REVOKED' }], nextCursor: null }); await next;
+  assert.equal(state().items[0].status, 'REVOKED');
+});

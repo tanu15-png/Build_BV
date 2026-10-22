@@ -1,6 +1,6 @@
 # Phase 9: durable notifications and synchronization
 
-Acceptance and ready transitions already commit an `order_events` row and an `outbox_events` row in the order transaction. A separate worker now creates PostgreSQL notification records for the owning student. The browser reads those records; order history and browser storage are not notification delivery sources. No email or push is sent by this worker.
+Acceptance, rejection and ready transitions already commit an `order_events` row and an `outbox_events` row in the order transaction. A separate worker now creates PostgreSQL notification records for the owning student. The browser reads those records; order history and browser storage are not notification delivery sources. No email or push is sent by this worker.
 
 ## Run
 
@@ -29,7 +29,7 @@ Worker settings (defaults):
 
 Claims use an atomic PostgreSQL `UPDATE` with `FOR UPDATE SKIP LOCKED`. Due `PENDING` work and expired `PROCESSING` leases are eligible. Each claim receives a fresh fencing token and increments attempts. Before delivery, the worker locks the row and verifies that its token and lease are still valid. An old worker cannot complete or reschedule a new worker's claim.
 
-The worker reads the immutable source event and its owning order, rather than trusting a recipient supplied in the JSON payload. Only `ACCEPTED` and `READY` events create student messages. Other status events are completed without a message. Notification insertion and outbox completion commit in the same transaction. The unique `(recipient_id, source_event_id, type)` key prevents duplicates even if multiple outbox rows reference the same event.
+The worker reads the immutable source event and its owning order, rather than trusting a recipient supplied in the JSON payload. Only `ACCEPTED`, `REJECTED` and `READY` events create student messages. Other status events are completed without a message. Notification insertion and outbox completion commit in the same transaction. The unique `(recipient_id, source_event_id, type)` key prevents duplicates even if multiple outbox rows reference the same event.
 
 A crash before commit leaves the job reclaimable after lease expiry, with no partial delivery. A crash after commit leaves both the notification and completed job durable. An attempt that crashes at the retry limit remains reclaimable; the next delivery failure can mark it failed. Transient failures use exponential backoff from one second to five minutes. `last_error` stores a generic message and a bounded error code, without database/provider messages or credentials. Order transitions stay committed during delivery outages.
 

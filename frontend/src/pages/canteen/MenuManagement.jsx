@@ -75,7 +75,7 @@ export default function MenuManagement() {
   };
   const activeCategories = menu?.categories.filter(c => !c.archived) || [];
   return <div className="min-h-screen bg-[#f6f8f7] p-5 lg:p-10"><main className="mx-auto max-w-5xl">
-    <Link to={user.role === 'admin' ? '/admin' : '/canteen'} className="font-bold text-[#075d50]">← {user.role === 'admin' ? 'Admin dashboard' : 'Canteen dashboard'}</Link>
+    <Link to={user.role === 'admin' ? '/admin/canteens' : '/canteen'} className="font-bold text-[#075d50]">← {user.role === 'admin' ? 'Campus canteens' : 'Canteen dashboard'}</Link>
     <header className="my-7 flex flex-wrap items-center justify-between gap-4"><div><h1 className="text-3xl font-black">{menu?.canteen.name || 'Your canteen'} menu</h1><p className="mt-2 text-gray-600">Create categories, then add dishes inside them.</p></div><button onClick={() => { setError(''); load().catch(issue => setError(issue.message)); }} className="rounded-xl border px-4 py-2 font-bold">Refresh menu</button></header>
     {error && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
     {pendingMenuSaves > 0 && <p role="status" className="mb-5 text-sm text-gray-500">Saving {pendingMenuSaves === 1 ? 'change' : `${pendingMenuSaves} changes`} in the background. You can keep editing.</p>}

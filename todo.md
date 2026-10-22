@@ -201,7 +201,7 @@ Verified on 2026-10-16: 14 isolated PostgreSQL admin scenarios (15 tests includi
 - [x] Add frontend/src/services/api.js using fetch, credentials, CSRF headers and consistent error handling.
 - [x] Replace AuthContext local identity with Supabase signup/login/reset, server session restoration and canteen email challenges.
 - [x] Connect the canteen member panel to paginated member/count/removal APIs and revalidate sessions after removal.
-- [x] Add dedicated admin-only account/membership restoration, canteen/menu maintenance and join-code rotation UI with audited backend authorization.
+- [x] Add separate protected admin overview, campus orders, canteen maintenance, accounts/access and membership pages with sidebar/mobile navigation; retain audited writes and silent background list synchronization.
 - [x] Add student/canteen email-code entry, callback and recovery screens with resend cooldown, expiry, errors and pending states; backend proof establishes identity.
 - [x] Replace OrderContext local carts/orders/menus/availability with server records; add scoped paginated reads, UUID detail routes and persisted retry keys.
 - [x] Replace derived notification previews with the durable notification API/worker in Phase 9.

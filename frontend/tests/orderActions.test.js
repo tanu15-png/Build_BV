@@ -41,6 +41,19 @@ test('staff commands reuse their original expected version and key after an unce
   assert.equal(calls[1].path, '/orders/order/accept'); assert.deepEqual(calls[0].body, calls[1].body); assert.equal(calls[1].body.expectedVersion, 1);
   assert.throws(() => actions.transition({ id: 'order', version: 3 }, 'COLLECTED'), /pickup verification/);
 });
+test('rejection retries preserve the version and key after a lost response', async () => {
+  const { storage } = fixture(); const calls = [];
+  const actions = createOrderActions({ storage, actorId: 'staff', uuid: () => 'reject-key', api: async (path, options) => {
+    calls.push({ path, ...options });
+    if (calls.length === 1) throw new Error('offline');
+    return { id: 'order', status: 'REJECTED' };
+  } });
+  await assert.rejects(actions.transition({ id: 'order', version: 1 }, 'REJECTED'));
+  assert.equal((await actions.transition({ id: 'order', version: 2 }, 'REJECTED')).status, 'REJECTED');
+  assert.equal(calls[1].path, '/orders/order/reject');
+  assert.deepEqual(calls[1].body, { expectedVersion: 1 });
+  assert.equal(calls[0].idempotencyKey, calls[1].idempotencyKey);
+});
 test('pending checkout requests are isolated by authenticated actor', async () => {
   const { storage } = fixture();
   const a = createOrderActions({ api: async () => { throw new Error('offline'); }, storage, actorId: 'one', uuid: () => 'key' });

@@ -86,7 +86,11 @@ Build_BV/
 | `/canteen` | Canteen | Selected canteen's queue, acceptance, preparation, ready notification, availability, pickup, member list/removal |
 | `/canteen/orders` | Canteen | Selected canteen's order history |
 | `/canteen/orders/:orderId` | Canteen | Details and permitted status action for own order |
-| `/admin/*` | Admin | Database-wide overview, paginated order search and audited account/membership/canteen/code maintenance |
+| `/admin` | Admin | Database-wide overview totals |
+| `/admin/orders` | Admin | Paginated campus order search and filters |
+| `/admin/canteens` | Admin | Audited canteen/menu/join-code maintenance |
+| `/admin/accounts` | Admin | Account status maintenance |
+| `/admin/memberships` | Admin | Scoped canteen access restoration/removal |
 | `/admin/canteens/:canteenId/menu` | Admin | Shared versioned category/item maintenance with audit records |
 
 `ProtectedRoute` reads the active auth context. `OrderContext` loads student or selected-canteen orders; admin reports use a dedicated paginated feed and PostgreSQL aggregates. Express checks session, role and canteen ownership on every protected request. Admin reports do not authorize fulfillment or private pickup-code retrieval.

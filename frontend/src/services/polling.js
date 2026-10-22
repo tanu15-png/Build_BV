@@ -2,7 +2,7 @@ export function pollingInterval(value) {
   const number = Number(value);
   return Number.isFinite(number) && number >= 1000 && number <= 60000 ? number : 5000;
 }
-// Poll only while visible and online; returning to the app always revalidates.
+// Poll only while visible and online. A null interval refreshes only on open/wake/manual actions.
 export function startVisiblePolling({ refresh, intervalMs = 5000, windowTarget = window, documentTarget = document,
   online = () => navigator.onLine !== false, schedule = setTimeout, cancel = clearTimeout }) {
   let stopped = false;
@@ -10,7 +10,7 @@ export function startVisiblePolling({ refresh, intervalMs = 5000, windowTarget =
   let running = false;
   let again = false;
   const eligible = () => documentTarget.visibilityState !== 'hidden' && online();
-  const scheduleNext = () => { if (!stopped) timer = schedule(() => { void run(); }, intervalMs); };
+  const scheduleNext = () => { if (!stopped && intervalMs !== null) timer = schedule(() => { void run(); }, intervalMs); };
   async function run() {
     if (stopped) return;
     if (running) { again = true; return; }

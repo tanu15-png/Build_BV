@@ -78,7 +78,7 @@ export function createOrdersRouter(config: Config, db: PrismaClient, options: Or
     res.status(result.status).json(result.body);
   });
 
-  const transitions = { accept: ['RECEIVED', 'ACCEPTED'], prepare: ['ACCEPTED', 'PREPARING'], ready: ['PREPARING', 'READY'] } as const;
+  const transitions = { accept: ['RECEIVED', 'ACCEPTED'], reject: ['RECEIVED', 'REJECTED'], prepare: ['ACCEPTED', 'PREPARING'], ready: ['PREPARING', 'READY'] } as const;
   for (const [action, [before, after]] of Object.entries(transitions)) {
     router.post('/orders/:id/' + action, ...route('POST /orders/:id/' + action), async (req, res) => {
       const { actor } = await current(req);

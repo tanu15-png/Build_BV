@@ -215,6 +215,30 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
       const c = await db.canteen.findUniqueOrThrow({ where: { id: canteen.id } });
       await staff.browser.request('/canteens/' + canteen.id + '/availability', 'PATCH', { expectedVersion: c.version, acceptingOrders: true });
     });
+    await t.test('rejection is scoped, durable, idempotent and terminal', async () => {
+      const placed = await student.browser.request('/orders', 'POST', bodyFor(await fill()), randomUUID());
+      assert.equal(placed.status, 201);
+      const path = `/orders/${placed.body.id}/reject`;
+      const body = { expectedVersion: 1 }; const key = randomUUID();
+      assert.equal((await student.browser.request(path, 'POST', body, randomUUID())).status, 403);
+      assert.equal((await otherStaff.browser.request(path, 'POST', body, randomUUID())).status, 404);
+      assert.equal((await staff.browser.request(path, 'POST', { expectedVersion: 2 }, randomUUID())).status, 409);
+      const results = await Promise.all([staff.browser.request(path, 'POST', body, key), staffTwo.browser.request(path, 'POST', body, randomUUID())]);
+      assert.deepEqual(results.map(result => result.status).sort(), [200, 409]);
+      const rejected = results.find(result => result.status === 200)!.body;
+      assert.equal(rejected.status, 'REJECTED'); assert.equal(rejected.version, 2);
+      assert.equal((await db.order.findUniqueOrThrow({ where: { id: rejected.id } })).status, 'REJECTED');
+      const winner = results[0]!.status === 200 ? staff.browser : staffTwo.browser;
+      const winnerKey = (await db.idempotencyKey.findFirstOrThrow({ where: { orderId: rejected.id, action: 'ORDER_REJECT' } })).key;
+      assert.deepEqual((await winner.request(path, 'POST', body, winnerKey)).body, rejected);
+      assert.equal(await db.orderEvent.count({ where: { orderId: rejected.id, newStatus: 'REJECTED' } }), 1);
+      assert.equal(await db.outboxEvent.count({ where: { event: { orderId: rejected.id, newStatus: 'REJECTED' } } }), 1);
+      assert.equal((await student.browser.request(`/orders/${rejected.id}`)).body.status, 'REJECTED');
+      for (const action of ['accept', 'reject', 'prepare', 'ready']) {
+        assert.equal((await staff.browser.request(`/orders/${rejected.id}/${action}`, 'POST', { expectedVersion: 2 }, randomUUID())).status, 409);
+      }
+      assert.equal((await student.browser.request(`/orders/${rejected.id}/pickup-code`)).body.code, null);
+    });
     await t.test('campus midnight permits next-day code reuse while lost-response retries keep their original day', async () => {
       now = new Date('2026-11-01T18:29:50.000Z');
       const body = bodyFor(await fill()); const key = randomUUID();

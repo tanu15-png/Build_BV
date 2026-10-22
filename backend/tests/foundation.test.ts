@@ -105,7 +105,9 @@ test('frontend fixtures enforce identity, quantity, campus domain, paise, status
     assert.equal(contracts[route]!.body.safeParse({}).success, false);
     assert.equal(contracts[route]!.body.safeParse({ expectedVersion: 1, canteenId: id }).success, false);
   }
-  assert.equal(Object.keys(contracts).length, 50);
+  contracts['POST /orders/:id/reject']!.body.parse({ expectedVersion: 1 });
+  assert.equal(contracts['POST /orders/:id/reject']!.body.safeParse({}).success, false);
+  assert.equal(Object.keys(contracts).length, 51);
 });
 test('validation handles body, params and parsed query with stable 422 envelope', async () => {
   const app = express(); app.use(requestId); app.use(express.json());

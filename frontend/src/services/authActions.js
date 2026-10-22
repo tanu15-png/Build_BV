@@ -34,7 +34,7 @@ export function createAuthActions({ auth, api, storage, origin }) {
     async signup({ email, name, password }) {
       ready(); email = studentEmail(email);
       if (!name.trim() || name.trim().length > 120) throw new Error('Enter your name (up to 120 characters).');
-      if (password.length < 12 || password.length > 256) throw new Error('Use a password with 12–256 characters.');
+      if (password.length < 8 || password.length > 256) throw new Error('Use a password with 8–256 characters.');
       const data = check(await auth.signUp({ email, password, options: { data: { name: name.trim() }, emailRedirectTo: redirect('signup') } }));
       if (data.session) { await auth.signOut({ scope: 'local' }); throw new Error('Email confirmation must be enabled in Supabase before signup can be used.'); }
       if (data.user?.identities?.length === 0) {
@@ -115,7 +115,7 @@ export function createAuthActions({ auth, api, storage, origin }) {
     },
     async changePassword(password, role = pending()?.role || 'student') {
       ready();
-      if (password.length < 12 || password.length > 256) throw new Error('Use a password with 12–256 characters.');
+      if (password.length < 8 || password.length > 256) throw new Error('Use a password with 8–256 characters.');
       const { session } = check(await auth.getSession());
       if (!session) throw new Error('Request a new password reset email.');
       const email = session.user?.email || pending()?.email;

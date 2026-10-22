@@ -39,7 +39,8 @@ export const OrderStatus = {
   ACCEPTED: 'ACCEPTED',
   PREPARING: 'PREPARING',
   READY: 'READY',
-  COLLECTED: 'COLLECTED'
+  COLLECTED: 'COLLECTED',
+  REJECTED: 'REJECTED'
 } as const
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]

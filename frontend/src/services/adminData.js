@@ -11,7 +11,7 @@ export function adminOrderQuery({ search = '', status = 'ALL', canteenId = 'ALL'
 }
 // Keep pages contiguous during polling and discard reads that predate an admin write.
 export function createAdminResource({ path, request, changed, unauthorized = () => {} }) {
-  let state = { items: [], nextCursor: null, meta: {}, loading: false, error: '' };
+  let state = { items: [], nextCursor: null, meta: {}, initialized: false, loading: false, error: '' };
   let pages = 1; let revision = 0; let active = null; let reload = false; let disposed = false; let suspended = false;
   const emit = patch => { if (!disposed) { state = { ...state, ...patch }; changed(state); } };
   async function refresh(more = false) {
@@ -31,7 +31,7 @@ export function createAdminResource({ path, request, changed, unauthorized = () 
         if (started !== revision) { reload = true; return; }
         pages = more ? pages + 1 : fetched;
         const items = more ? [...state.items, ...rows] : rows;
-        emit({ items: [...new Map(items.map(item => [item.id, item])).values()], nextCursor: page.nextCursor, meta, error: '' });
+        emit({ items: [...new Map(items.map(item => [item.id, item])).values()], nextCursor: page.nextCursor, meta, initialized: true, error: '' });
       } catch (error) {
         if (!disposed) { emit({ error: error.message }); if ([401, 403].includes(error.status)) { suspended = true; unauthorized(); } }
         throw error;

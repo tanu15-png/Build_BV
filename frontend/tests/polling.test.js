@@ -44,3 +44,18 @@ test('poll intervals default to five seconds and reject invalid values', () => {
   assert.equal(pollingInterval(undefined), 5000); assert.equal(pollingInterval('5000'), 5000);
   assert.equal(pollingInterval('10000'), 10000); assert.equal(pollingInterval('0'), 5000); assert.equal(pollingInterval('bad'), 5000);
 });
+test('event-driven refresh loads once with no recurring timer and refreshes on wake/manual actions', async () => {
+  const env = environment(); let requests = 0;
+  const polling = startVisiblePolling({ ...env, intervalMs: null, refresh: async () => { requests++; } });
+  await env.fire(); assert.equal(requests, 1); assert.equal(env.timers.size, 0);
+  env.windowTarget.dispatchEvent(new Event('focus')); await setImmediate();
+  assert.equal(requests, 2); assert.equal(env.timers.size, 0);
+  env.documentTarget.visibilityState = 'hidden';
+  env.documentTarget.dispatchEvent(new Event('visibilitychange')); await setImmediate(); assert.equal(requests, 2);
+  env.documentTarget.visibilityState = 'visible';
+  env.documentTarget.dispatchEvent(new Event('visibilitychange')); await setImmediate(); assert.equal(requests, 3);
+  env.connect(false); await polling.refresh(); assert.equal(requests, 3); assert.equal(env.timers.size, 0);
+  env.connect(true); env.windowTarget.dispatchEvent(new Event('online')); await setImmediate(); assert.equal(requests, 4);
+  await polling.refresh(); assert.equal(requests, 5); assert.equal(env.timers.size, 0);
+  polling.stop(); env.windowTarget.dispatchEvent(new Event('focus')); await setImmediate(); assert.equal(requests, 5);
+});

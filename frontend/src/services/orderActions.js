@@ -26,7 +26,7 @@ export function createOrderActions({ api, storage, actorId, uuid = () => crypto.
     collect: (order, code) => execute('spoonateOrderCommand:' + actorId + ':' + order.id + ':collect',
       '/orders/' + order.id + '/collect', { expectedVersion: order.version, code: code.trim() }, true),
     transition(order, nextStatus) {
-      const action = { ACCEPTED: 'accept', PREPARING: 'prepare', READY: 'ready' }[nextStatus];
+      const action = { REJECTED: 'reject', ACCEPTED: 'accept', PREPARING: 'prepare', READY: 'ready' }[nextStatus];
       if (!action) throw new Error('Use pickup verification to collect an order.');
       return execute('spoonateOrderCommand:' + actorId + ':' + order.id + ':' + action,
         '/orders/' + order.id + '/' + action, { expectedVersion: order.version });

@@ -12,7 +12,10 @@ export async function api(path, { method = 'GET', body, token, signal, idempoten
         ...(method !== 'GET' ? { 'X-CSRF-Token': csrfToken } : {}), ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     });
-  } catch { throw new ApiError('Unable to reach SpoonAte. Check your connection and retry.', 503, 'NETWORK_ERROR'); }
+  } catch (issue) {
+    if (issue?.name === 'TimeoutError') throw new ApiError('SpoonAte took too long to respond. Please retry.', 504, 'REQUEST_TIMEOUT');
+    throw new ApiError('Unable to reach SpoonAte. Check your connection and retry.', 503, 'NETWORK_ERROR');
+  }
   const result = await response.json().catch(() => null);
   if (result?.error?.code === 'CSRF_INVALID' && retry) {
     csrfToken = undefined;

@@ -19,7 +19,7 @@ export async function adminOverview(tx: Prisma.TransactionClient) {
     const value = metrics.get(row.canteenId) ?? { totalOrders: 0, activeOrders: 0, collectedOrders: 0, collectedValuePaise: 0 };
     value.totalOrders += row._count._all;
     if (row.status === 'COLLECTED') { value.collectedOrders += row._count._all; value.collectedValuePaise += row._sum.totalPaise ?? 0; }
-    else value.activeOrders += row._count._all;
+    else if (row.status !== 'REJECTED') value.activeOrders += row._count._all;
     metrics.set(row.canteenId, value);
   }
   const rows = canteens.map(canteen => ({ ...canteen,

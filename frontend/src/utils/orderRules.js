@@ -5,7 +5,15 @@ export const statusLabels = {
   PREPARING: "Preparing",
   READY: "Ready for pickup",
   COLLECTED: "Collected",
+  REJECTED: "Rejected",
 };
+
+export const orderSections = ["Active", "Completed", "Rejected"];
+export function orderInSection(order, section) {
+  if (section === "Completed") return order.status === "COLLECTED";
+  if (section === "Rejected") return order.status === "REJECTED";
+  return orderStatuses.slice(0, -1).includes(order.status);
+}
 
 export function visibleOrders(orders, user) {
   return orders.filter((order) =>
@@ -17,15 +25,17 @@ export function visibleOrders(orders, user) {
 
 export function orderNotifications(orders) {
   return orders.flatMap((order) => (order.history || [])
-    .filter((event) => ["ACCEPTED", "READY"].includes(event.status))
+    .filter((event) => ["ACCEPTED", "READY", "REJECTED"].includes(event.status))
     .map((event) => ({
       id: `${order.id}-${event.status}`,
       orderId: order.id,
       at: event.at,
-      title: event.status === "READY" ? "Ready for pickup" : "Order accepted",
+      title: event.status === "READY" ? "Ready for pickup" : event.status === "REJECTED" ? "Order rejected" : "Order accepted",
       message: event.status === "READY"
         ? `${order.cafeName} has prepared order ${orderCode(order)} (${orderDay(order)}). Show your dated order card at pickup.`
-        : `${order.cafeName} accepted order ${orderCode(order)} (${orderDay(order)}).`,
+        : event.status === "REJECTED"
+          ? `${order.cafeName} rejected order ${orderCode(order)} (${orderDay(order)}). Please choose another canteen or place a new order.`
+          : `${order.cafeName} accepted order ${orderCode(order)} (${orderDay(order)}).`,
     }))).sort((a, b) => new Date(b.at) - new Date(a.at));
 }
 
@@ -128,7 +138,8 @@ export function transitionOrder(order, user, nextStatus, pickupCode = "", now = 
     throw new Error("You can only manage orders for your selected canteen.");
   }
   const index = orderStatuses.indexOf(order.status);
-  if (index < 0 || orderStatuses[index + 1] !== nextStatus) throw new Error("This order cannot move to that status.");
+  const rejecting = order.status === "RECEIVED" && nextStatus === "REJECTED";
+  if (!rejecting && (index < 0 || orderStatuses[index + 1] !== nextStatus)) throw new Error("This order cannot move to that status.");
   if (nextStatus === "COLLECTED" && pickupCode.trim().toUpperCase() !== orderCode(order)) {
     throw new Error("The pickup code does not match this order.");
   }
