@@ -40,14 +40,17 @@ async function main() {
         const server = createApp({ ...config, LOG_LEVEL: 'silent' }, scoped, () => {}).listen(0, '127.0.0.1');
         await once(server, 'listening'); const address = server.address(); assert(address && typeof address !== 'string');
         const base = 'http://127.0.0.1:' + address.port + '/api/v1';
-        let csrf = ''; let csrfCookie = '';
+        const csrfByPortal = new Map<string, { token: string; cookie: string }>();
         async function request(path: string, token: string, method = 'GET', body?: object, key?: string, expectedStatus?: number) {
-          const response = await fetch(base + path, { method, signal: AbortSignal.timeout(40000), headers: {
-            Cookie: 'spoonate_session=' + token + (csrfCookie ? '; ' + csrfCookie : ''), Origin: config.FRONTEND_ORIGIN,
-            ...(body ? { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf } : {}), ...(key ? { 'Idempotency-Key': key } : {}),
+          const portal = token === staffToken ? 'canteen' : 'student';
+          if (method !== 'GET' && !csrfByPortal.has(portal)) await request('/auth/csrf', token);
+          const csrf = csrfByPortal.get(portal);
+          const response = await fetch(base + '/' + portal + path, { method, signal: AbortSignal.timeout(40000), headers: {
+            Cookie: `spoonate_${portal}_session=` + token + (csrf ? '; ' + csrf.cookie : ''), Origin: portal === 'student' ? config.FRONTEND_ORIGIN : config.CANTEEN_ORIGIN,
+            ...(body ? { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf?.token || '' } : {}), ...(key ? { 'Idempotency-Key': key } : {}),
           }, ...(body ? { body: JSON.stringify(body) } : {}) });
           const data = await response.json();
-          if (path === '/auth/csrf') { csrf = data.csrfToken; csrfCookie = response.headers.getSetCookie()[0]!.split(';')[0]!; }
+          if (path === '/auth/csrf') { csrfByPortal.set(portal, { token: data.csrfToken, cookie: response.headers.getSetCookie()[0]!.split(';')[0]! }); }
           if (expectedStatus) assert.equal(response.status, expectedStatus);
           else assert(response.ok, 'API probe failed with HTTP ' + response.status + ' ' + (data.error?.code || 'UNKNOWN'));
           return data;

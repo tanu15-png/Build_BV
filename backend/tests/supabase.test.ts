@@ -47,3 +47,12 @@ test('signup verification submits the numeric OTP and maps rejected or expired c
   const rejected = supabaseAuth(config, (async () => new Response('{}', { status: 401 })) as typeof fetch);
   await assert.rejects(rejected.verifySignup('s@banasthali.in', '000000'), e => e instanceof AppError && e.code === 'OTP_INVALID');
 });
+
+
+test('admin activation email returns to the admin website', async () => {
+  const gateway = supabaseAuth(config, (async (url) => {
+    assert.equal(new URL(String(url)).searchParams.get('redirect_to'), `${config.ADMIN_ORIGIN}/auth/callback?flow=admin-signup`);
+    return Response.json({});
+  }) as typeof fetch);
+  await gateway.activateAdmin('admin@example.edu', 'a long password', 'Admin');
+});

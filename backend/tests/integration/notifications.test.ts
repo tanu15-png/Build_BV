@@ -26,9 +26,10 @@ test('durable notifications, leased worker recovery, scoped pagination and read 
   await once(server, 'listening'); const port = server.address(); assert(port && typeof port !== 'string');
   const base = `http://127.0.0.1:${port.port}/api/v1`;
   class Browser {
+    constructor(readonly target = base, readonly portal = 'student') {}
     jar = new Map<string, string>(); csrf = '';
     async request(path: string, method = 'GET', body?: object, key?: string) {
-      const response = await fetch(base + path, { method, headers: { Origin: config.FRONTEND_ORIGIN,
+      const response = await fetch(this.target + '/' + this.portal + path, { method, headers: { Origin: this.portal === 'student' ? config.FRONTEND_ORIGIN : this.portal === 'canteen' ? config.CANTEEN_ORIGIN : config.ADMIN_ORIGIN,
         Cookie: [...this.jar].map(([name, value]) => `${name}=${value}`).join('; '),
         ...(body ? { 'Content-Type': 'application/json' } : {}), ...(method !== 'GET' ? { 'X-CSRF-Token': this.csrf } : {}),
         ...(key ? { 'Idempotency-Key': key } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
@@ -43,7 +44,7 @@ test('durable notifications, leased worker recovery, scoped pagination and read 
     const token = randomBytes(32).toString('hex');
     const session = await db.session.create({ data: { userId: user.id, role, canteenId, membershipId: membership?.id,
       tokenHash: createHmac('sha256', config.SESSION_SECRET).update(`session:${token}`).digest('hex'), expiresAt: new Date(Date.now() + 3600000) } });
-    const browser = await new Browser().prepare(); browser.jar.set('spoonate_session', token);
+    const browser = await new Browser(base, role.toLowerCase()).prepare(); browser.jar.set(`spoonate_${browser.portal}_session`, token);
     return { user, session, browser };
   }
   const student = await fixture('STUDENT', 'notifications@banasthali.in');
@@ -73,7 +74,7 @@ test('durable notifications, leased worker recovery, scoped pagination and read 
       assert.equal((await db.order.findUniqueOrThrow({ where: { id: order.id } })).status, 'READY');
       assert.equal(await worker.runBatch(), 4);
       assert.equal(await db.notification.count({ where: { recipientId: student.user.id } }), 2);
-      const reconnect = await new Browser().prepare(); reconnect.jar.set('spoonate_session', student.browser.jar.get('spoonate_session')!);
+      const reconnect = await new Browser().prepare(); reconnect.jar.set('spoonate_student_session', student.browser.jar.get('spoonate_student_session')!);
       const page = await reconnect.request('/notifications'); assert.equal(page.status, 200);
       contracts['GET /notifications']!.response.parse(page.body);
       assert.deepEqual(page.body.items.map((row: { type: string }) => row.type).sort(), ['ACCEPTED', 'READY']);
@@ -217,7 +218,7 @@ test('durable notifications, leased worker recovery, scoped pagination and read 
       const id = [...ids][0]!;
       const [a, b] = await Promise.all([student.browser.request(`/notifications/${id}/read`, 'PATCH', {}), student.browser.request(`/notifications/${id}/read`, 'PATCH', {})]);
       assert.equal(a.status, 200); assert.deepEqual(a.body, b.body); assert(a.body.readAt);
-      const device = await new Browser().prepare(); device.jar.set('spoonate_session', student.browser.jar.get('spoonate_session')!);
+      const device = await new Browser().prepare(); device.jar.set('spoonate_student_session', student.browser.jar.get('spoonate_student_session')!);
       const saved = await device.request('/notifications');
       assert.equal(saved.body.unreadCount, expected - 1);
       assert.equal(saved.body.items.find((row: { id: string }) => row.id === id).readAt, a.body.readAt);

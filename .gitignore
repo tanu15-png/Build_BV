@@ -1,0 +1,12 @@
+node_modules/
+node_modules.windows-backup-*/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+.npm-cache/
+**/.runtime-deps-*/
+
+tmp/
+backend/.import-backups/

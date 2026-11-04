@@ -20,7 +20,7 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
   assert.equal(migration.status, 0, migration.stderr);
   const config = loadConfig({ DATABASE_URL: url, APP_ENV: 'test', NODE_ENV: 'test', FRONTEND_ORIGIN: 'http://localhost:5173',
     SESSION_SECRET: 's'.repeat(32), OTP_SECRET: 'o'.repeat(32), SEED_DEVELOPMENT_DATA: 'true', LOG_LEVEL: 'silent', DB_TIMEOUT_MS: '10000',
-    SUPABASE_URL: 'https://auth-test.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_fake_test_123456' });
+    ADMIN_ACCESS_PASSWORD: 'test-team-password', SUPABASE_URL: 'https://auth-test.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_fake_test_123456' });
   const db = createPrisma(config);
   const identities = new Map<string, object>();
   const adminPassword = 'unique test admin password';
@@ -52,9 +52,10 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
   await once(server, 'listening'); const serverAddress = server.address(); assert(serverAddress && typeof serverAddress !== 'string');
   const base = `http://127.0.0.1:${serverAddress.port}/api/v1`;
   class Browser {
+    constructor(readonly portal = 'student') {}
     jar = new Map<string, string>(); csrf = '';
     async request(path: string, method = 'GET', body?: object, bearer?: string, headers: Record<string, string> = {}) {
-      const response = await fetch(base + path, { method, headers: { Origin: config.FRONTEND_ORIGIN,
+      const response = await fetch(base + '/' + this.portal + path, { method, headers: { Origin: this.portal === 'student' ? config.FRONTEND_ORIGIN : this.portal === 'canteen' ? config.CANTEEN_ORIGIN : config.ADMIN_ORIGIN,
         Cookie: [...this.jar].map(([key, value]) => `${key}=${value}`).join('; '),
         ...(body ? { 'Content-Type': 'application/json' } : {}), ...(method !== 'GET' ? { 'X-CSRF-Token': this.csrf } : {}),
         ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}), ...headers }, ...(body ? { body: JSON.stringify(body) } : {}) });
@@ -63,8 +64,8 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
     }
     async prepare() { this.csrf = (await this.request('/auth/csrf')).body.csrfToken; return this; }
   }
-  const student = await new Browser().prepare(); const a = await new Browser().prepare();
-  const b = await new Browser().prepare(); const bOther = await new Browser().prepare(); const administrator = await new Browser().prepare();
+  const student = await new Browser().prepare(); const a = await new Browser('canteen').prepare();
+  const b = await new Browser('canteen').prepare(); const bOther = await new Browser('canteen').prepare(); const administrator = await new Browser('admin').prepare();
   let challengeA: string; let challengeB: string; let memberB: string;
   try {
     await t.test('CSRF and origin checks reject forged and cross-origin session requests', async () => {
@@ -99,13 +100,16 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
       assert.equal(await db.userRole.count({ where: { role: 'ADMIN' } }), 1);
       assert.equal((await student.request('/auth/session', 'POST', { role: 'STUDENT' }, token({ ...students, id: randomUUID() }))).status, 403);
     });
-    await t.test('provisioned admin activates by password and links only after verified email', async () => {
-      assert.equal((await administrator.request('/auth/admin/activate', 'POST', { email: admin.email, password: 'wrong password' })).status, 401);
-      assert.equal((await administrator.request('/auth/admin/activate', 'POST', { email: admin.email, password: adminPassword })).status, 200);
-      assert.equal((await administrator.request('/auth/admin/confirm', 'POST', {}, token(admin, 'email/signup'))).status, 200);
+    await t.test('team admin enters with the password alone and has no email activation flow', async () => {
+      assert.equal((await administrator.request('/auth/admin/activate', 'POST', { email: admin.email, password: adminPassword })).status, 410);
+      assert.equal((await administrator.request('/auth/admin/confirm', 'POST', {}, token(admin, 'email/signup'))).status, 410);
+      assert.equal((await administrator.request('/auth/admin/password', 'POST', { password: 'wrong password' })).status, 401);
       assert.equal((await administrator.request('/auth/me')).status, 401);
-      assert.equal((await administrator.request('/auth/session', 'POST', { role: 'ADMIN' }, token(admin))).status, 200);
-      assert.equal((await db.user.findUniqueOrThrow({ where: { email: admin.email } })).passwordHash, null);
+      const result = await administrator.request('/auth/admin/password', 'POST', { password: config.ADMIN_ACCESS_PASSWORD });
+      assert.equal(result.status, 200); assert.equal(result.body.role, 'ADMIN');
+      assert.equal((await administrator.request('/auth/me')).body.id, result.body.id);
+      const user = await db.user.findUniqueOrThrow({ where: { id: result.body.id } });
+      assert.equal(user.supabaseSubject, null); assert.equal(user.name, 'Admin team');
     });
     await t.test('staff code gate binds email/canteen and rejects stale authentication and replay', async () => {
       assert.equal((await a.request('/auth/canteen/returning', 'POST', { email: staffA.email, canteenId: canteen.id })).status, 403);
@@ -192,9 +196,9 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
       assert.equal(last, 429);
     });
     await t.test('logout revokes the stored session and cookie', async () => {
-      const cookie = administrator.jar.get('spoonate_session');
+      const cookie = administrator.jar.get('spoonate_admin_session');
       assert.equal((await administrator.request('/auth/logout', 'POST', {})).status, 200);
-      administrator.jar.set('spoonate_session', cookie!);
+      administrator.jar.set('spoonate_admin_session', cookie!);
       assert.equal((await administrator.request('/auth/me')).status, 401);
     });
   } finally {

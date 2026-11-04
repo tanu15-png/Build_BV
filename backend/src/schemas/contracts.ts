@@ -21,9 +21,9 @@ const challenge = z.object({ challengeId: uuid, expiresAt: date, resendAfter: da
 const success = z.object({ ok: z.literal(true) }).strict();
 const line = z.object({ id: uuid, menuItemId: uuid, name: z.string(), quantity, unitPricePaise: money }).strict();
 export const cartSchema = z.object({ id: uuid, canteenId: uuid.nullable(), version, items: z.array(line.extend({ canteenId: uuid, categoryId: uuid, category: z.string(), description: z.string().nullable(), imageRef: z.string().nullable(), menuVersion: version, available: z.boolean(), archived: z.boolean() })), totalPaise: z.number().int().nonnegative().max(99000000000), available: z.boolean(), quote: z.string(), quoteExpiresAt: date }).strict();
-export const orderSchema = z.object({ id: uuid, canteenId: uuid, studentId: uuid, status, executionMode: z.literal('TEST'), paymentStatus: z.literal('NOT_REQUIRED_TEST'), totalPaise: money, pickupAt: date, codeDay: day, orderCode: code, version, createdAt: date, canteenName: z.string(), studentName: z.string(), events: z.array(z.object({ id: uuid, previousStatus: status.nullable(), newStatus: status, actorId: uuid, createdAt: date }).strict()), items: z.array(line.extend({ menuItemId: uuid.nullable() })), collectedAt: date.nullable(), pickupVerifiedBy: uuid.nullable() }).strict();
+export const orderSchema = z.object({ id: uuid, canteenId: uuid, studentId: uuid, status, executionMode: z.literal('TEST'), paymentStatus: z.literal('NOT_REQUIRED_TEST'), totalPaise: money, pickupAt: date, codeDay: day, orderCode: code, version, createdAt: date, canteenName: z.string(), studentName: z.string().optional(), events: z.array(z.object({ id: uuid, previousStatus: status.nullable(), newStatus: status, actorId: uuid, createdAt: date }).strict()), items: z.array(line.extend({ menuItemId: uuid.nullable() })), collectedAt: date.nullable(), pickupVerifiedBy: uuid.nullable() }).strict();
 const notification = z.object({ id: uuid, orderId: uuid, type: z.enum(['ACCEPTED', 'READY', 'REJECTED']), message: z.string(), createdAt: date, readAt: date.nullable() }).strict();
-const member = z.object({ id: uuid, email, status: z.enum(['ACTIVE', 'REVOKED']), version, sessionCount: z.number().int().nonnegative() }).strict();
+const member = z.object({ id: uuid, email, name: z.string().optional(), userId: uuid.optional(), status: z.enum(['ACTIVE', 'REVOKED']), version, sessionCount: z.number().int().nonnegative() }).strict();
 const list = <T extends z.ZodType>(schema: T) => z.object({ items: z.array(schema), nextCursor: uuid.nullable() }).strict();
 const expected = z.object({ expectedVersion: version }).strict();
 const menuWrite = z.object({ name: z.string().trim().min(1).max(120), description: z.string().max(2000).nullable().optional(), categoryId: uuid, pricePaise: money.max(10000000), imageRef: z.url({ protocol: /^https$/ }).max(2000).nullable().optional() }).strict();
@@ -31,7 +31,7 @@ const filters = pageQuery.extend({ canteenId: uuid.optional(), status: status.op
 const safeCount = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const adminCanteen = canteenSchema.extend({ totalOrders: safeCount, activeOrders: safeCount, collectedOrders: safeCount,
   collectedValuePaise: safeCount, menuItemCount: safeCount, activeCodeVersion: version.nullable() });
-const overview = z.object({ totalOrders: safeCount, activeOrders: safeCount, collectedOrders: safeCount, collectedValuePaise: safeCount,
+const overview = z.object({ day, totalOrders: safeCount, activeOrders: safeCount, collectedOrders: safeCount, collectedValuePaise: safeCount,
   totalCanteens: safeCount, operationalCanteens: safeCount, acceptingCanteens: safeCount, canteens: z.array(adminCanteen) }).strict();
 const adminUser = z.object({ id: uuid, email, name: z.string(), status: z.enum(['ACTIVE', 'DISABLED']), roles: z.array(z.enum(['STUDENT', 'CANTEEN', 'ADMIN'])), createdAt: date, updatedAt: date }).strict();
 const adminMember = z.object({ id: uuid, userId: uuid, canteenId: uuid, email, userName: z.string(), accountStatus: z.enum(['ACTIVE', 'DISABLED']), canteenName: z.string(), status: z.enum(['ACTIVE', 'REVOKED']), version, requiresAccessCode: z.boolean() }).strict();
@@ -39,6 +39,8 @@ const adminMember = z.object({ id: uuid, userId: uuid, canteenId: uuid, email, u
 export const contracts: Record<string, { body: z.ZodType; response: z.ZodType; params: z.ZodType; query: z.ZodType }> = {};
 function register(route: string, body: z.ZodType, response: z.ZodType, params: z.ZodType = empty, query: z.ZodType = empty) { contracts[route] = { body, response, params, query }; }
 register('POST /auth/student/signup', z.object({ name: z.string().trim().min(1).max(120), email: email.refine(v => /^[^@\s]+@banasthali\.in$/.test(v)), password }).strict(), challenge);
+register('POST /auth/admin/password', z.object({ password: z.string().min(1).max(256) }).strict(), identity);
+register('POST /auth/canteen/access', z.object({ name: z.string().trim().min(1).max(120), accessCode: z.string().trim().min(4).max(256) }).strict(), identity);
 for (const role of ['student', 'admin']) register(`POST /auth/${role}/login`, z.object({ email, password: z.string().min(1).max(256) }).strict(), identity);
 register('POST /auth/student/password-reset', z.object({ email }).strict(), challenge);
 register('POST /auth/student/password-reset/complete', z.object({ challengeId: uuid, code: otp, password }).strict(), success);
@@ -70,19 +72,19 @@ register('PATCH /cart/items/:id', expected.extend({ quantity }), cartSchema, idP
 register('DELETE /cart/items/:id', expected, cartSchema, idParams);
 register('DELETE /cart', expected, cartSchema);
 register('POST /cart/review', expected.extend({ quote: z.string().min(1).max(2048) }), cartSchema);
-register('POST /orders', expected.extend({ pickupAt: z.iso.datetime({ offset: true }), quote: z.string().min(1).max(2048) }), orderSchema);
+register('POST /orders', expected.extend({ pickupAt: z.iso.datetime({ offset: true }).optional(), quote: z.string().min(1).max(2048) }), orderSchema);
 register('GET /orders', empty, list(orderSchema), empty, filters);
 register('GET /orders/:id', empty, orderSchema, idParams);
 for (const action of ['accept', 'reject', 'prepare', 'ready']) register(`POST /orders/:id/${action}`, expected, orderSchema, idParams);
-register('GET /orders/:id/pickup-code', empty, z.object({ code: z.string().regex(/^(?:[1-9][0-9]?|100)$/).nullable() }).strict(), idParams);
-register('POST /orders/:id/collect', expected.extend({ code: z.string().trim().regex(/^(?:[1-9][0-9]?|100)$/) }), orderSchema, idParams);
+register('GET /orders/:id/pickup-code', empty, z.object({ code: z.null() }).strict(), idParams);
+register('POST /orders/:id/collect', expected, orderSchema, idParams);
 register('GET /notifications', empty, list(notification).extend({ unreadCount: z.number().int().nonnegative() }), empty, pageQuery);
 register('PATCH /notifications/:id/read', empty, notification, idParams);
-register('GET /admin/overview', empty, overview);
+register('GET /admin/overview', empty, overview, empty, z.object({ day: day.optional() }).strict());
 register('GET /admin/orders', empty, list(orderSchema).extend({ totalCount: safeCount }), empty, filters.extend({ codeDay: day.optional(), orderCode: code.optional() }));
 register('GET /admin/users', empty, list(adminUser), empty, pageQuery.extend({ search: z.string().max(120).optional(), status: z.enum(['ACTIVE', 'DISABLED']).optional(), role: z.enum(['STUDENT', 'CANTEEN', 'ADMIN']).optional() }));
 register('GET /admin/memberships', empty, list(adminMember), empty, pageQuery.extend({ search: z.string().max(120).optional(), status: z.enum(['ACTIVE', 'REVOKED']).optional(), canteenId: uuid.optional() }));
 register('PATCH /admin/canteens/:id', expected.extend({ name: z.string().trim().min(1).max(120).optional(), hours: z.string().trim().max(240).nullable().optional(), operational: z.boolean().optional(), acceptingOrders: z.boolean().optional() }).refine(value => Object.keys(value).length > 1, 'Provide a canteen change'), canteenSchema, idParams);
-register('POST /admin/canteens/:id/access-code', z.object({ accessCode: z.string().min(12).max(256), expectedCodeVersion: z.number().int().nonnegative().optional() }).strict(), success, idParams);
+register('POST /admin/canteens/:id/access-code', z.object({ accessCode: z.string().trim().min(4).max(256), expectedCodeVersion: z.number().int().nonnegative().optional() }).strict(), success, idParams);
 register('PATCH /admin/memberships/:id', expected.extend({ status: z.enum(['ACTIVE', 'REVOKED']) }), success, idParams);
 register('PATCH /admin/users/:id', z.object({ status: z.enum(['ACTIVE', 'DISABLED']), expectedUpdatedAt: date.optional() }).strict(), success, idParams);

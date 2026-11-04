@@ -30,9 +30,10 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
   await once(server, 'listening'); const port = server.address(); assert(port && typeof port !== 'string');
   const base = 'http://127.0.0.1:' + port.port + '/api/v1';
   class Browser {
+    constructor(readonly target = base, readonly portal = 'student') {}
     jar = new Map<string, string>(); csrf = '';
     async request(path: string, method = 'GET', body?: object, key?: string) {
-      const response = await fetch(base + path, { method, headers: { Origin: config.FRONTEND_ORIGIN,
+      const response = await fetch(this.target + '/' + this.portal + path, { method, headers: { Origin: this.portal === 'student' ? config.FRONTEND_ORIGIN : this.portal === 'canteen' ? config.CANTEEN_ORIGIN : config.ADMIN_ORIGIN,
         Cookie: [...this.jar].map(([name, value]) => name + '=' + value).join('; '),
         ...(body ? { 'Content-Type': 'application/json' } : {}), ...(method !== 'GET' ? { 'X-CSRF-Token': this.csrf } : {}),
         ...(key ? { 'Idempotency-Key': key } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
@@ -47,7 +48,7 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
     const token = randomBytes(32).toString('hex');
     const session = await db.session.create({ data: { userId: user.id, role, canteenId, membershipId: membership?.id,
       tokenHash: createHmac('sha256', config.SESSION_SECRET).update('session:' + token).digest('hex'), expiresAt: new Date(Date.now() + 3600000) } });
-    const browser = await new Browser().prepare(); browser.jar.set('spoonate_session', token);
+    const browser = await new Browser(base, role.toLowerCase()).prepare(); browser.jar.set(`spoonate_${browser.portal}_session`, token);
     return { user, session, browser };
   }
   const student = await fixture('STUDENT', 'orders@banasthali.in');
@@ -89,6 +90,19 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
       assert.equal((await cart()).items.length, 0); assert.equal((await cart()).canteenId, null);
       assert.equal((await student.browser.request('/orders', 'POST', { ...body, pickupAt: new Date(now.getTime() + 30 * 60000).toISOString() }, key)).body.error.code, 'IDEMPOTENCY_CONFLICT');
     });
+    await t.test('unscheduled checkout uses server receipt time and safely replays without an estimate', async () => {
+      const value = await fill();
+      const body = { expectedVersion: value.version, quote: value.quote };
+      const key = randomUUID();
+      const placed = await student.browser.request('/orders', 'POST', body, key);
+      assert.equal(placed.status, 201);
+      assert.equal(placed.body.pickupAt, now.toISOString());
+      assert.equal(placed.body.createdAt, now.toISOString());
+      assert.deepEqual((await student.browser.request('/orders', 'POST', body, key)).body, placed.body);
+      const staffView = await staff.browser.request('/orders/' + placed.body.id);
+      assert.equal(staffView.status, 200);
+      assert(!('studentName' in staffView.body));
+    });
     await t.test('different keys racing for the same cart produce one order, without a partial loser', async () => {
       const value = await fill(); const body = bodyFor(value); const before = await db.order.count();
       assert.equal((await student.browser.request('/orders', 'POST', originalBody, originalKey)).body.id, first.id);
@@ -114,6 +128,23 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
       assert.equal((await staff.browser.request('/orders?canteenId=' + other.id)).status, 403);
       assert.equal((await student.browser.request('/orders?canteenId=' + other.id)).body.items.length, 0);
       assert.equal((await admin.browser.request('/orders')).body.items.length, await db.order.count());
+    });
+    await t.test('canteen pagination returns newest receipts first with stable timestamp ties', async () => {
+      const ids = [1, 2, 3].map(index => `00000000-1000-4000-8000-${String(index).padStart(12, '0')}`);
+      await db.order.createMany({ data: ids.map((id, index) => ({ id, studentId: student.user.id, canteenId: canteen.id,
+        totalPaise: 100, pickupAt: now, codeDay: new Date('2030-01-01'), orderCode: `Y0${index}`,
+        createdAt: new Date(index === 0 ? '2030-01-01T10:00:00Z' : '2030-01-01T11:00:00Z') })) });
+      try {
+        const path = '/orders?limit=1&from=2030-01-01T00:00:00Z&to=2030-01-02T00:00:00Z';
+        const seen: string[] = []; let cursor: string | null = null;
+        for (let index = 0; index < ids.length; index++) {
+          const result = await staff.browser.request(path + (cursor ? '&cursor=' + cursor : ''));
+          assert.equal(result.status, 200); assert.equal(result.body.items.length, 1);
+          seen.push(result.body.items[0].id); cursor = result.body.nextCursor;
+        }
+        assert.deepEqual(seen, [ids[2], ids[1], ids[0]]);
+        assert.equal(cursor, null);
+      } finally { await db.order.deleteMany({ where: { id: { in: ids } } }); }
     });
     await t.test('changed menu/category prices and stale carts reject checkout with a fresh summary', async () => {
       const value = await fill(); const body = bodyFor(value);

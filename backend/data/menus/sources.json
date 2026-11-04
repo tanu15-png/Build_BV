@@ -1,0 +1,32 @@
+{
+  "spicy-bites": {
+    "file": "Spicy Bite .pdf",
+    "pages": 8,
+    "sha256": "c0a5846bfd49c1aa276f67e034c7f33f490fcb00ead1787dc13ba1c4c388ae53"
+  },
+  "desi-jayka": {
+    "file": "Dessi Zayaka.pdf",
+    "pages": 8,
+    "sha256": "6f45b3a97fa35805042b7756d103fee932e51d786184e41500c68e91a84fd3a9"
+  },
+  "bella-bite": {
+    "file": "Bella Bite.pdf",
+    "pages": 9,
+    "sha256": "248ebdca803cad4956aa9031a59ffa43666d52adfb0e14e00b5974aaf7cbe44b"
+  },
+  "shanu": {
+    "file": "Shanus.pdf",
+    "pages": 12,
+    "sha256": "96f213a9a92ed16ff4e56b574d4b3c057198a9c3b593d52d2290c2c0969cc3f6"
+  },
+  "fun-n-frolic": {
+    "file": "Fun n Frolic.pdf",
+    "pages": 10,
+    "sha256": "e5d252a24642085ef32fdb5f4055aa5390621d1ca6e2f071fbc322ded98f538c"
+  },
+  "mukteshwari": {
+    "file": "Mukteshwari.pdf",
+    "pages": 11,
+    "sha256": "9bbd63d40f6c1eb3628d6ea6d587f625b6fe950492bf1153ca71706a74bdf3d1"
+  }
+}

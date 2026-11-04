@@ -16,7 +16,7 @@ export function notificationData(event: Prisma.OrderEventGetPayload<{ include: {
   return { recipientId: order.studentId, sourceEventId: event.id, orderId: order.id, type: event.newStatus,
     createdAt: event.createdAt,
     message: event.newStatus === 'READY'
-      ? `${order.canteen.name} has prepared order ${reference}. Open your order to see your private pickup code.`
+      ? `${order.canteen.name} has prepared order ${reference}. Your food is ready to collect.`
       : event.newStatus === 'REJECTED'
         ? `${order.canteen.name} rejected order ${reference}. Please choose another canteen or place a new order.`
         : `${order.canteen.name} accepted order ${reference}.` };

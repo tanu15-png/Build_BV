@@ -1,6 +1,10 @@
 # SpoonAte backend
 
-Phase 1 foundation, Phase 2 database/provisioning and Supabase Auth integration are implemented. See [AUTH.md](AUTH.md) for verified signup, password login/reset, staff email challenges, cookie sessions, member removal and admin authorization. Catalog, carts, test orders, fulfillment, notifications, pickup verification and admin oversight are implemented; the feature documents below record their verification and deployment steps. `/api/v1/canteens` exposes a safe directory; `/health/live` checks the process and `/health/ready` checks the database within a deadline. Unimplemented business routes return the standard 404 envelope.
+> Admin access uses a shared server-side `ADMIN_ACCESS_PASSWORD`, without Supabase email or verification. Set it in backend/.env (local) or hosting secrets (deployed); no VITE variable or database migration is needed. Existing admin email-activation instructions are superseded by this team-password entry.
+
+> Portal routing: website apps now live in `apps/student`, `apps/canteen` and `apps/admin`. API paths below are relative to `/api/v1/<portal>`; use the matching portal and origin. See [deployment instructions](../DEPLOYMENT.md) for the three website environments, proxy and callback configuration.
+
+Phase 1 foundation, Phase 2 database/provisioning and Supabase Auth integration are implemented. See [AUTH.md](AUTH.md) for verified signup, password login/reset, staff email challenges, cookie sessions, member removal and admin authorization. Catalog, carts, test orders, fulfillment, notifications, canteen-controlled collection and admin oversight are implemented; the feature documents below record their verification and deployment steps. `/api/v1/canteens` exposes a safe directory; `/health/live` checks the process and `/health/ready` checks the database within a deadline. Unimplemented business routes return the standard 404 envelope.
 
 Requires Node.js 24+ and PostgreSQL 17 (or Supabase PostgreSQL). For the connected development project, private credential locations, verification commands and remaining operator work, see [SUPABASE.md](SUPABASE.md).
 
@@ -79,7 +83,7 @@ See [CATALOG.md](CATALOG.md) for the implemented Phase 5–6 APIs, migration, me
 
 ## Transactional test orders and fulfillment
 
-Phases 7–8 implement persistent checkout and scoped accept/prepare/ready commands. See [ORDERS.md](ORDERS.md) for locking, idempotency, daily-code allocation, API contracts and verification. Run test:orders against a fresh local ORDER_TEST_DATABASE_URL; orders:check performs a rolled-back live database/handler probe. Phase 9 durable notification processing is implemented; Phase 10 collection verification is implemented with a separate private numeric READY code. See [PICKUP.md](PICKUP.md) for migration, attempt limits, APIs and verification. See [NOTIFICATIONS.md](NOTIFICATIONS.md) for worker startup, scoped APIs, read state and crash/retry verification.
+Phases 7–8 implement persistent checkout and scoped accept/prepare/ready commands. See [ORDERS.md](ORDERS.md) for locking, idempotency, daily-code allocation, API contracts and verification. Run test:orders against a fresh local ORDER_TEST_DATABASE_URL; orders:check performs a rolled-back live database/handler probe. Phase 9 durable notification processing is implemented; Phase 10 collection verification is implemented with a canteen-controlled Collected action. See [PICKUP.md](PICKUP.md) for collection rules, APIs and verification. See [NOTIFICATIONS.md](NOTIFICATIONS.md) for worker startup, scoped APIs, read state and crash/retry verification.
 
 ## Admin oversight
 

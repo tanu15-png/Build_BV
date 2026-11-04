@@ -5,9 +5,11 @@ import { loadConfig } from '../config/env.js';
 async function main() {
   const config = loadConfig();
   assert(config.SUPABASE_URL && config.SUPABASE_PUBLISHABLE_KEY, 'Supabase Auth settings missing');
-  const frontend = parseEnv(readFileSync('../frontend/.env', 'utf8'));
-  assert.equal(frontend.VITE_SUPABASE_URL, config.SUPABASE_URL, 'Frontend and backend must use the same project');
-  assert.equal(frontend.VITE_SUPABASE_PUBLISHABLE_KEY, config.SUPABASE_PUBLISHABLE_KEY, 'Publishable keys differ');
+  for (const portal of ['student', 'canteen']) {
+    const frontend = parseEnv(readFileSync(`../apps/${portal}/.env`, 'utf8'));
+    assert.equal(frontend.VITE_SUPABASE_URL, config.SUPABASE_URL, `${portal} and backend must use the same project`);
+    assert.equal(frontend.VITE_SUPABASE_PUBLISHABLE_KEY, config.SUPABASE_PUBLISHABLE_KEY, `${portal} publishable key differs`);
+  }
   const response = await fetch(`${config.SUPABASE_URL}/auth/v1/settings`, {
     headers: { apikey: config.SUPABASE_PUBLISHABLE_KEY }, signal: AbortSignal.timeout(15000), redirect: 'error',
   });

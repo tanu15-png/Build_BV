@@ -26,9 +26,10 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
   await once(server, 'listening'); const port = server.address(); assert(port && typeof port !== 'string');
   const base = `http://127.0.0.1:${port.port}/api/v1`;
   class Browser {
+    constructor(readonly target = base, readonly portal = 'student') {}
     jar = new Map<string, string>(); csrf = '';
     async request(path: string, method = 'GET', body?: object) {
-      const response = await fetch(base + path, { method, headers: { Origin: config.FRONTEND_ORIGIN, Cookie: [...this.jar].map(([key, value]) => `${key}=${value}`).join('; '), ...(body ? { 'Content-Type': 'application/json' } : {}), ...(method !== 'GET' ? { 'X-CSRF-Token': this.csrf } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
+      const response = await fetch(this.target + '/' + this.portal + path, { method, headers: { Origin: this.portal === 'student' ? config.FRONTEND_ORIGIN : this.portal === 'canteen' ? config.CANTEEN_ORIGIN : config.ADMIN_ORIGIN, Cookie: [...this.jar].map(([key, value]) => `${key}=${value}`).join('; '), ...(body ? { 'Content-Type': 'application/json' } : {}), ...(method !== 'GET' ? { 'X-CSRF-Token': this.csrf } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
       for (const cookie of response.headers.getSetCookie()) { const [name, value] = cookie.split(';')[0]!.split('='); this.jar.set(name!, value!); }
       return { status: response.status, body: await response.json() };
     }
@@ -39,14 +40,14 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
     const membership = canteenId ? await db.canteenMembership.create({ data: { userId: user.id, canteenId, codeVersion: 1 } }) : null;
     const token = randomBytes(32).toString('hex');
     const session = await db.session.create({ data: { userId: user.id, role, canteenId, membershipId: membership?.id, tokenHash: createHmac('sha256', config.SESSION_SECRET).update(`session:${token}`).digest('hex'), expiresAt: new Date(Date.now() + 3600000) } });
-    const browser = await new Browser().prepare(); browser.jar.set('spoonate_session', token);
+    const browser = await new Browser(base, role.toLowerCase()).prepare(); browser.jar.set(`spoonate_${browser.portal}_session`, token);
     return { user, session, browser };
   }
   const staff = await fixture('CANTEEN', 'menu-staff@example.edu', canteen.id);
   const otherStaff = await fixture('CANTEEN', 'other-staff@example.edu', other.id);
   const student = await fixture('STUDENT', 'cart-student@banasthali.in');
   const second = await fixture('STUDENT', 'second@banasthali.in');
-  const device = await new Browser().prepare(); device.jar.set('spoonate_session', student.browser.jar.get('spoonate_session')!);
+  const device = await new Browser().prepare(); device.jar.set('spoonate_student_session', student.browser.jar.get('spoonate_student_session')!);
   let categoryId: string, categoryVersion: number, itemId: string;
   const fresh = async (browser = student.browser) => { const r = await browser.request('/cart'); assert.equal(r.status, 200); return cartSchema.parse(r.body); };
   const add = async (id: string, quantity = 1) => student.browser.request('/cart/items', 'POST', { expectedVersion: (await fresh()).version, menuItemId: id, quantity });

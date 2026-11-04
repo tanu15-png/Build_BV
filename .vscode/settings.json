@@ -1,0 +1,11 @@
+{
+  "remote.autoForwardPorts": false,
+  "remote.restoreForwardedPorts": false,
+  "remote.forwardOnOpen": false,
+  "remote.portsAttributes": {
+    "4000": { "label": "SpoonAte API", "requireLocalPort": true, "onAutoForward": "ignore" },
+    "5173": { "label": "SpoonAte Student", "requireLocalPort": true, "onAutoForward": "ignore" },
+    "5174": { "label": "SpoonAte Canteen", "requireLocalPort": true, "onAutoForward": "ignore" },
+    "5175": { "label": "SpoonAte Admin", "requireLocalPort": true, "onAutoForward": "ignore" }
+  }
+}

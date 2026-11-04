@@ -1,3 +1,6 @@
+import { adminTeamEmail } from '../services/adminTeam.js';
+import { signInCanteenMember } from '../services/canteenAccess.js';
+import { sessionCookie, csrfCookie, requestPortal, portalOrigin, requirePortalRole } from '../services/portal.js';
 import { requireAdmin } from '../services/admin.js';
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { Router, type Request, type Response } from 'express';
@@ -12,39 +15,45 @@ import { createSessionReader, cookies, type Actor } from '../services/session.js
 import { verifySecret } from '../services/hash.js';
 import { rotateCode } from '../services/provision.js';
 
-const sessionCookie = 'spoonate_session';
-const csrfCookie = 'spoonate_csrf';
 type Tx = Prisma.TransactionClient;
 export function createAuthRouter(config: Config, db: PrismaClient, fetcher: typeof fetch = fetch) {
   const router = Router();
   const auth = supabaseAuth(config, fetcher);
   const hash = (value: string) => createHmac('sha256', config.SESSION_SECRET).update(value).digest('hex');
   const same = (a: string, b: string) => { const left = Buffer.from(a); const right = Buffer.from(b); return left.length === right.length && timingSafeEqual(left, right); };
-  const secure = config.FRONTEND_ORIGIN.startsWith('https://');
-  const options = { httpOnly: true, secure, sameSite: 'lax' as const, path: '/api/v1' };
+  const options = (req: Request) => ({ httpOnly: true, secure: portalOrigin(config, requestPortal(req)).startsWith('https://'), sameSite: 'lax' as const, path: `/api/v1/${requestPortal(req)}` });
   const txOptions = { maxWait: config.DB_TIMEOUT_MS, timeout: 15000 };
   const bearer = (req: Request) => {
     const token = req.get('authorization')?.match(/^Bearer ([A-Za-z0-9._-]{20,8192})$/)?.[1];
     if (!token) throw new AppError(401, 'AUTH_REQUIRED', 'Sign in to continue.');
     return token;
   };
-  function validCsrf(value: string) {
+  function validCsrf(req: Request, value: string) {
     const [nonce, signature] = value.split('.');
-    return Boolean(nonce && signature && /^[a-f0-9]{64}$/.test(nonce) && same(signature, hash(`csrf:${nonce}`)));
+    return Boolean(nonce && signature && /^[a-f0-9]{64}$/.test(nonce) && same(signature, hash(`csrf:${requestPortal(req)}:${nonce}`)));
   }
   router.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
   router.get('/auth/csrf', (req, res) => {
-    let token = cookies(req)[csrfCookie] ?? '';
-    if (!validCsrf(token)) { const nonce = randomBytes(32).toString('hex'); token = `${nonce}.${hash(`csrf:${nonce}`)}`; }
-    res.cookie(csrfCookie, token, { ...options, maxAge: config.SESSION_TTL_SECONDS * 1000 });
+    let token = cookies(req)[csrfCookie(req)] ?? '';
+    if (!validCsrf(req, token)) { const nonce = randomBytes(32).toString('hex'); token = `${nonce}.${hash(`csrf:${requestPortal(req)}:${nonce}`)}`; }
+    res.cookie(csrfCookie(req), token, { ...options(req), maxAge: config.SESSION_TTL_SECONDS * 1000 });
     res.json({ csrfToken: token });
   });
   router.use((req, _res, next) => {
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
-    const cookie = cookies(req)[csrfCookie] ?? '';
+    const cookie = cookies(req)[csrfCookie(req)] ?? '';
     const header = req.get('x-csrf-token') ?? '';
-    if (!validCsrf(cookie) || !same(cookie, header)) return next(new AppError(403, 'CSRF_INVALID', 'Refresh the page and try again.'));
+    if (!validCsrf(req, cookie) || !same(cookie, header)) return next(new AppError(403, 'CSRF_INVALID', 'Refresh the page and try again.'));
     next();
+  });
+  router.use((req, _res, next) => {
+    try {
+      const path = req.path.toLowerCase().replace(/\/+$/, '');
+      if (path === '/auth/confirm-signup') requirePortalRole(req, 'STUDENT');
+      if (path.startsWith('/auth/admin/')) requirePortalRole(req, 'ADMIN');
+      if (path.startsWith('/auth/canteen/')) requirePortalRole(req, 'CANTEEN');
+      next();
+    } catch (error) { next(error); }
   });
   async function rate(key: string, limit: number) {
     const rows = await db.$queryRaw<Array<{ count: number }>>`INSERT INTO rate_limits (key, window_ends_at, count)
@@ -91,33 +100,48 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
     const remote = await auth.verify(await auth.verifySignup(email, code));
     if (remote.email !== email) throw new AppError(401, 'OTP_INVALID', 'This code belongs to a different account.');
     const token = randomBytes(32).toString('hex');
-    const previous = cookies(req)[sessionCookie];
+    const previous = cookies(req)[sessionCookie(req)];
     const actor = await db.$transaction(async tx => {
       const user = await localUser(tx, remote, true);
-      if (previous) await tx.session.updateMany({ where: { tokenHash: hash(`session:${previous}`), revokedAt: null }, data: { revokedAt: new Date() } });
+      if (previous) await tx.session.updateMany({ where: { tokenHash: hash(`session:${previous}`), role: requestPortal(req).toUpperCase() as Actor['role'], revokedAt: null }, data: { revokedAt: new Date() } });
       await tx.session.create({ data: { tokenHash: hash(`session:${token}`), userId: user.id, role: 'STUDENT', expiresAt: new Date(Date.now() + config.SESSION_TTL_SECONDS * 1000) } });
       return { id: user.id, email: user.email, name: user.name, role: 'STUDENT', canteenId: null };
     }, txOptions);
-    res.cookie(sessionCookie, token, { ...options, maxAge: config.SESSION_TTL_SECONDS * 1000 });
+    res.cookie(sessionCookie(req), token, { ...options(req), maxAge: config.SESSION_TTL_SECONDS * 1000 });
     res.json(actor);
   });
-  router.post('/auth/admin/activate', validate(contracts['POST /auth/admin/login']!.body), async (req, res) => {
-    const { email, password } = req.body as { email: string; password: string };
-    await limit(req, 'admin-activate', email);
-    const user = await db.user.findUnique({ where: { email }, include: { roles: true } });
-    if (!user || user.supabaseSubject || user.status !== 'ACTIVE' || !user.roles.some(role => role.role === 'ADMIN') || !user.passwordHash || !await verifySecret(password, user.passwordHash)) throw new AppError(401, 'ADMIN_DENIED', 'Activation requires an unactivated admin account and its initial password. If you already verified your email, use Back to login and sign in with your current password, or use Forgot password.');
-    await auth.activateAdmin(email, password, user.name);
-    res.json({ ok: true });
-  });
-  router.post('/auth/admin/confirm', async (req, res) => {
-    const remote = await auth.verify(bearer(req));
-    await limit(req, 'admin-confirm', remote.email);
-    await db.$transaction(async tx => {
-      const admin = await tx.user.findUnique({ where: { email: remote.email }, include: { roles: true } });
-      if (!admin?.roles.some(role => role.role === 'ADMIN')) throw new AppError(403, 'ADMIN_DENIED', 'Your admin account must be provisioned.');
-      await localUser(tx, remote, false);
+  router.post('/auth/admin/password', validate(contracts['POST /auth/admin/password']!.body), async (req, res) => {
+    await rate(`admin-password:${req.ip}`, 20);
+    if (!config.ADMIN_ACCESS_PASSWORD) throw new AppError(503, 'ADMIN_UNAVAILABLE', 'Team access is not configured.');
+    if (!same(hash(`admin-password:${req.body.password}`), hash(`admin-password:${config.ADMIN_ACCESS_PASSWORD}`))) throw new AppError(401, 'ADMIN_PASSWORD_INVALID', 'Incorrect team password.');
+    const token = randomBytes(32).toString('hex');
+    const previous = cookies(req)[sessionCookie(req)];
+    const actor = await db.$transaction(async tx => {
+      // Serialize first sign-ins so nested principal/role creation cannot race.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${adminTeamEmail}, 0))`;
+      const user = await tx.user.upsert({ where: { email: adminTeamEmail },
+        create: { email: adminTeamEmail, name: 'Admin team', roles: { create: { role: 'ADMIN' } } },
+        update: {}, include: { roles: true } });
+      if (user.status !== 'ACTIVE' || user.supabaseSubject || !user.roles.some(role => role.role === 'ADMIN')) throw new AppError(403, 'ADMIN_DENIED', 'Team access is unavailable.');
+      if (previous) await tx.session.updateMany({ where: { tokenHash: hash(`session:${previous}`), role: 'ADMIN', revokedAt: null }, data: { revokedAt: new Date() } });
+      await tx.session.create({ data: { tokenHash: hash(`session:${token}`), userId: user.id, role: 'ADMIN', expiresAt: new Date(Date.now() + config.SESSION_TTL_SECONDS * 1000) } });
+      await tx.auditLog.create({ data: { actorId: user.id, action: 'ADMIN_TEAM_LOGIN', target: user.id, requestId: res.locals.requestId } });
+      return { id: user.id, email: user.email, name: user.name, role: 'ADMIN', canteenId: null };
     }, txOptions);
-    res.json({ ok: true });
+    res.cookie(sessionCookie(req), token, { ...options(req), maxAge: config.SESSION_TTL_SECONDS * 1000 });
+    res.json(actor);
+  });
+  router.post(['/auth/admin/activate', '/auth/admin/confirm'], (_req, _res, next) => {
+    next(new AppError(410, 'ADMIN_PASSWORD_REQUIRED', 'Use the team password to enter the admin dashboard.'));
+  });
+  router.post('/auth/canteen/access', validate(contracts['POST /auth/canteen/access']!.body), async (req, res) => {
+    await rate(`canteen-access:${req.ip}`, 20);
+    const token = randomBytes(32).toString('hex');
+    const previous = cookies(req)[sessionCookie(req)];
+    const actor = await signInCanteenMember(db, config, { name: req.body.name, accessCode: req.body.accessCode,
+      tokenHash: hash(`session:${token}`), ...(previous ? { previousTokenHash: hash(`session:${previous}`) } : {}), requestId: res.locals.requestId });
+    res.cookie(sessionCookie(req), token, { ...options(req), maxAge: config.SESSION_TTL_SECONDS * 1000 });
+    res.json(actor);
   });
   async function canteenChallenge(email: string, canteenId: string, accessCodeVersion: number) {
     return db.$transaction(async tx => {
@@ -151,27 +175,24 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
     const selected = await db.canteen.findUnique({ where: { id: canteenId }, select: { operational: true } });
     if (selected?.operational === false) throw new AppError(403, 'CANTEEN_DISABLED', 'This canteen is not accepting new sign-ins.');
     const code = await db.canteenAccessCode.findFirst({ where: { canteenId, active: true } });
-    if (!code || !await verifySecret(accessCode, code.codeHash)) throw new AppError(401, 'ACCESS_CODE_INVALID', 'Incorrect canteen or access code.');
+    if (!code || (!await verifySecret(accessCode, code.codeHash) && !await verifySecret(accessCode.trim().toLowerCase().replace(/\s+/g, '-'), code.codeHash))) throw new AppError(401, 'ACCESS_CODE_INVALID', 'Incorrect canteen or access code.');
     const membership = await db.canteenMembership.findFirst({ where: { canteenId, user: { email } } });
     if (membership?.status === 'REVOKED') throw new AppError(403, 'MEMBERSHIP_REVOKED', 'Your access was removed. Contact an administrator.');
     res.json(await canteenChallenge(email, canteenId, code.version));
   });
   router.post('/auth/session', validate(z.object({ role: z.enum(['STUDENT', 'CANTEEN', 'ADMIN']), challengeId: z.uuid().optional() }).strict()), async (req, res) => {
-    const remote = await auth.verify(bearer(req));
     const { role, challengeId } = req.body as { role: Actor['role']; challengeId?: string };
+    requirePortalRole(req, role);
+    if (role === 'ADMIN') throw new AppError(403, 'ADMIN_PASSWORD_REQUIRED', 'Use the team password to enter the admin dashboard.');
+    const remote = await auth.verify(bearer(req));
     await limit(req, 'session', remote.email);
     if (role === 'STUDENT') studentEmail(remote.email);
     if (role !== 'CANTEEN' && !remote.authenticationMethods.some(method => method.method === 'password' && method.timestamp >= Math.floor(Date.now() / 1000) - 300)) {
       throw new AppError(401, 'PASSWORD_LOGIN_REQUIRED', 'Log in with your email and password.');
     }
     const token = randomBytes(32).toString('hex');
-    const previous = cookies(req)[sessionCookie];
+    const previous = cookies(req)[sessionCookie(req)];
     const actor = await db.$transaction(async tx => {
-      // Admin roles always come from provisioning, never Supabase user metadata.
-      if (role === 'ADMIN') {
-        const admin = await tx.user.findUnique({ where: { email: remote.email }, include: { roles: true } });
-        if (!admin?.roles.some(r => r.role === 'ADMIN')) throw new AppError(403, 'ADMIN_DENIED', 'An administrator must provision your account.');
-      }
       const user = await localUser(tx, remote, role === 'STUDENT');
       let canteenId: string | null = null;
       let membershipId: string | null = null;
@@ -194,23 +215,23 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
         await tx.authChallenge.update({ where: { id: challengeId }, data: { consumedAt: new Date() } });
         canteenId = initial.canteenId; membershipId = member.id;
       }
-      if (previous) await tx.session.updateMany({ where: { tokenHash: hash(`session:${previous}`), revokedAt: null }, data: { revokedAt: new Date() } });
+      if (previous) await tx.session.updateMany({ where: { tokenHash: hash(`session:${previous}`), role: requestPortal(req).toUpperCase() as Actor['role'], revokedAt: null }, data: { revokedAt: new Date() } });
       await tx.session.create({ data: { tokenHash: hash(`session:${token}`), userId: user.id, role, canteenId, membershipId, expiresAt: new Date(Date.now() + config.SESSION_TTL_SECONDS * 1000) } });
       return { id: user.id, email: user.email, name: user.name, role, canteenId };
     }, txOptions);
-    res.cookie(sessionCookie, token, { ...options, maxAge: config.SESSION_TTL_SECONDS * 1000 });
+    res.cookie(sessionCookie(req), token, { ...options(req), maxAge: config.SESSION_TTL_SECONDS * 1000 });
     res.json(actor);
   });
   router.post('/auth/logout', async (req, res) => {
-    const token = cookies(req)[sessionCookie];
-    if (token) await db.session.updateMany({ where: { tokenHash: hash(`session:${token}`), revokedAt: null }, data: { revokedAt: new Date() } });
-    res.clearCookie(sessionCookie, options); res.json({ ok: true });
+    const token = cookies(req)[sessionCookie(req)];
+    if (token) await db.session.updateMany({ where: { tokenHash: hash(`session:${token}`), role: requestPortal(req).toUpperCase() as Actor['role'], revokedAt: null }, data: { revokedAt: new Date() } });
+    res.clearCookie(sessionCookie(req), options(req)); res.json({ ok: true });
   });
   router.post('/auth/revoke-sessions', async (req, res) => {
     const remote = await auth.verify(bearer(req));
     await limit(req, 'reset', remote.email);
     await db.session.updateMany({ where: { user: { supabaseSubject: remote.id }, revokedAt: null }, data: { revokedAt: new Date() } });
-    res.clearCookie(sessionCookie, options); res.json({ ok: true });
+    res.clearCookie(sessionCookie(req), options(req)); res.json({ ok: true });
   });
 
   async function canteenActor(req: Request, res: Response) {
@@ -224,12 +245,12 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
     const result = await db.$transaction(async tx => {
       const code = await tx.canteenAccessCode.findFirstOrThrow({ where: { canteenId: actor.canteenId!, active: true } });
       const rows = await tx.canteenMembership.findMany({ where: { canteenId: actor.canteenId! }, orderBy: { id: 'asc' },
-        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}), take: size + 1, include: { user: { select: { email: true, status: true } },
+        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}), take: size + 1, include: { user: { select: { email: true, name: true, status: true } },
           sessions: { where: { revokedAt: null, expiresAt: { gt: new Date() } }, select: { id: true } } } });
       const accessWhere = { canteenId: actor.canteenId!, status: 'ACTIVE' as const, codeVersion: code.version, user: { status: 'ACTIVE' as const } };
       const membersWithAccess = await tx.canteenMembership.count({ where: accessWhere });
       const sessions = await tx.session.findMany({ where: { canteenId: actor.canteenId!, role: 'CANTEEN', revokedAt: null, expiresAt: { gt: new Date() }, user: { status: 'ACTIVE' }, membership: accessWhere }, select: { userId: true } });
-      return { items: rows.slice(0, size).map(row => ({ id: row.id, email: row.user.email, status: row.status, version: row.version,
+      return { items: rows.slice(0, size).map(row => ({ id: row.id, email: row.user.email, name: row.user.name, userId: row.userId, status: row.status, version: row.version,
         sessionCount: row.status === 'ACTIVE' && row.user.status === 'ACTIVE' && row.codeVersion === code.version ? row.sessions.length : 0 })),
         nextCursor: rows.length > size ? rows[size - 1]!.id : null, membersWithAccess, signedInPeople: new Set(sessions.map(s => s.userId)).size, sessionCount: sessions.length };
     }, { ...txOptions, isolationLevel: 'RepeatableRead' });
@@ -242,7 +263,7 @@ export function createAuthRouter(config: Config, db: PrismaClient, fetcher: type
       // Removal and sign-in both lock this canteen, so pending challenges cannot restore access.
       const caller = await tx.canteenMembership.findUnique({ where: { userId_canteenId: { userId: actor.id, canteenId: actor.canteenId! } } });
       const activeCode = await tx.canteenAccessCode.findFirst({ where: { canteenId: actor.canteenId!, active: true } });
-      const activeSession = await tx.session.findUnique({ where: { tokenHash: hash(`session:${cookies(req)[sessionCookie] ?? ''}`) } });
+      const activeSession = await tx.session.findUnique({ where: { tokenHash: hash(`session:${cookies(req)[sessionCookie(req)] ?? ''}`) } });
       if (caller?.status !== 'ACTIVE' || caller.codeVersion !== activeCode?.version || !activeSession || activeSession.revokedAt || activeSession.expiresAt <= new Date()) throw new AppError(403, 'MEMBERSHIP_REVOKED', 'Your canteen access has ended.');
       const member = await tx.canteenMembership.findFirst({ where: { id: res.locals.params.memberId, canteenId: actor.canteenId! } });
       if (!member) throw new AppError(404, 'MEMBER_NOT_FOUND', 'Member not found.');

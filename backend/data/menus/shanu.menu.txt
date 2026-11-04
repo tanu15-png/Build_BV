@@ -1,0 +1,302 @@
+# shanu | Shanus.pdf
+@2|Pizza
+Margherita Pizza|160|Regular size.
+Onion Pizza|160|Regular size.
+Farm Fresh Pizza|170|Regular size; onion, capsicum and tomato.
+Schezwan Pizza|180|Regular size; spicy treat.
+Exotica Delight Pizza|200|Regular size; corn, olives and mushroom.
+Cheese Burst Pizza|220|Regular size.
+Cheese Overloaded Pizza|260|Regular size.
+Corn and Cheese Pizza|230|Regular size.
+Chilli Baby Corn Pizza|250|Regular size.
+Italian Pizza|240|Regular size.
+Baby Corn Pizza|230|Regular size.
+Shanu's Special Pizza|280|Regular size.
+@2|Burgers
+Veggie Burger|80
+Spicy Burger|80
+Cheese Veggie Burger|100
+Crunchy Corn Burger|90
+Mexican Burger|90
+Great Veggie Cheese Burger|110
+Paneer Burger|110
+Mushroom Cheese Burger|120
+Cheese Blast Burger|130
+@2|Pasta
+Arrabiata Pasta|130
+Arrabiata Pasta Baked with Cheese|160
+Creamy Mushroom Pasta|160|White sauce.
+Mix Sauce Pasta|160
+Pink Sauce Pasta|160
+Tandoori Pasta|160
+@3|Sandwiches
+Mumbainya Sandwich|80
+Masala Sandwich|90
+Coleslaw Grilled Sandwich|100
+Veg Cheese Grilled Sandwich|110
+Russian Sandwich|100
+Spicy Italian Sandwich|110
+Tandoori Paneer Sandwich|140
+Veggie Delight Cheese Sandwich|140
+@3|Rolls & Wraps
+Aloo Masala Roll|60
+Spring Roll|120
+Cheese Roll|80
+Cheese Corn Roll|90
+Afghani Chaap Roll|90
+Masala Chaap Roll|90
+Mix Veg Roll|70
+Paneer Bhurji Roll|100
+Paneer Tikka Roll|100
+Tortilla Wrap|140
+Masala Paneer Wrap|150
+@3|Healthy Bites & Subs
+Moong Dal Chilla|70
+Hot Garlic Chilla|80
+Paneer Chilla|90
+Cheese Chilla|110
+Mushroom Cheese Chilla|120
+Vegetable Sub|120
+Tandoori Paneer Sub|150
+Paneer Lababdar Sub|150
+@4|Garlic Bread
+Garlic Sticks|70
+Garlic Sticks with Cheese Dip|90
+Plain Garlic Bread|110
+Garlic Bread with Cheese|160
+Garlic Bread Supreme|170
+@4|Fries & Bites
+Plain French Fries|90
+Masala Fries|100
+Piri Piri Fries|120
+Tandoori Fries|100
+Potato Pops (12 pcs)|90
+Cheese Shots (10 pcs)|100
+@4|Maggi
+Plain Maggi|50
+Mix Veg Maggi|60
+Chilli Garlic Maggi|70
+Cheese Maggi|80
+Tadka Maggi|100
+@4|Appetizers
+Samosa|25
+Bread Pakoda|35
+Spiral Roll|40
+Aloo Patties|20
+Paneer Patties|25
+Cheese Patties|40
+Golu Molu|90
+@5|Soups
+Hot and Sour Soup (300 ml)|70
+Lemon Coriander Soup (300 ml)|70
+Tomato Soup (300 ml)|80
+Manchow Soup (300 ml)|90
+@5|Thali
+Small Thali|130
+Special Thali|180|1 sabji, dal, pickle, rice, 4 rotis, salad, dahi and sweet.
+Exclusive Thali|200|2 sabji, dal, pickle, rice, 4 rotis, salad, dahi and sweet.
+@5|Paratha & More
+Plain Roti|15
+Butter Roti|20
+Aloo Paratha (1 pc)|90
+Onion Paratha (1 pc)|100
+Paneer Paratha (1 pc)|110
+Lachha Paratha with Dal Makhni|130
+Lachha Paratha with Shahi Paneer|130
+Lachha Paratha with Chhola|110
+Chola Bhatura|110
+Butter Masala Pav Bhaji|90
+Kulcha Chhola|70
+Sabji Puri|90
+@5|Chaat
+Vada Pav|50
+Papdi Chaat|70
+Dahi Puri|70
+Samosa Chaat|70
+Pindi Masala Aloo Tikki|80
+Dahi Bhalla|90
+Bhalla Papdi Chaat|90
+Raj Kachori|100
+Golu Molu Chaat|100
+@6|South Indian
+Idli Sambar|80
+Plain Dosa|100
+Masala Dosa|120
+Onion Dosa|120
+Cheese Dosa|150
+Paneer Dosa|150
+Onion Uttapam|110
+Tomato Uttapam|110
+Mix Veg Uttapam|120
+Rava Masala Dosa|120
+Mysore Masala Dosa|130
+Onion Rava Dosa|130
+Rava Paneer Dosa|140
+Shanu's Special Dosa|140
+@6|Chinese
+Veg Fried Rice|110
+Chilli Garlic Fried Rice|130
+Mushroom Fried Rice|140
+Paneer Fried Rice|140
+Hakka Fried Rice|150
+Chinese Bhel|90
+Chilli Potato|120
+Honey Chilli Potato|140
+Veg Noodles|120
+Chilli Garlic Noodles|130
+Hakka Noodles|150
+Chilli Paneer (Dry)|180
+Chilli Paneer (Gravy)|180
+Singapore Noodles|150
+Veg Manchurian (Dry)|160
+Veg Manchurian (Gravy)|160
+Chilli Mushroom Dry|180
+Crispy Baby Corn|180
+@7|Crushers
+Mango Crusher|70
+Strawberry Crusher|70
+Black Currant Crusher|70
+Orange Fizz|70
+@7|Waffles
+White Fantasy Waffle|70
+Mix Chocolate Waffle|70
+KitKat Waffle|70
+Nutella Waffle|80
+Belgian Dark Chocolate Waffle|100
+Red Velvet Waffle|70
+Oreo KitKat Waffle|100
+Oreo Waffle|90
+Chocolate Overloaded Waffle|100
+Triple Chocolate Waffle|110
+Biscoff Waffle|120
+@7|Shakes
+Papaya Shake|60
+Banana Shake|60
+Mango Shake|100
+Pineapple Shake|90
+Strawberry Shake|90
+Bubblegum Shake|90
+Badam Shake|100
+Black Currant Shake|100
+Butterscotch Shake|100
+Pan and Thandai Shake|100
+Choco Shake|100
+Choco Nut Shake|120|Mixed with cashew.
+Choco Mud Shake|120|Mixed with brownie and dry cake.
+Irish Choco Shake|120
+KitKat Shake|120
+Oreo Shake|120
+Mix Berries Shake|150
+Red Berry Shake|150
+Strawberry Bubblegum Shake|150
+@8|Tandoori Breads
+Tandoori Plain Roti|15
+Tandoori Butter Roti|20
+Butter Naan|45
+Plain Naan|35
+Missi Roti|35
+Chur Chur Naan|130
+Kasturi Roti|30
+Mirchi Paratha|50
+Garlic Naan|50
+Tandoori Aloo Paratha|90
+Tandoori Paneer Paratha|130
+Tandoori Gobhi Paratha|100
+Tandoori Mix Paratha|120
+Tandoori Onion Paratha|100
+Lachha Paratha|130
+@8|Cold Coffee
+Iced Cold Coffee|60
+Cafe Frappe|100
+Choco Cafe Frappe|110
+Cafe Milky|120
+Frappe Choco Delight|120
+Frappe Caramel|130
+Frappe Irish|130
+Frappe Hazelnut|130
+Frappe Mocha|130
+@8|Hot Coffee & Milk
+Espresso|30
+Cappuccino|40
+Cafe Latte|40
+Plain Milk|50
+Hot Chocolate Milk|60
+Hot Badam Milk|60
+@9|Mocktails
+Lemon Virgin Mojito|100
+Blue Ocean|100
+Strawberry Lemonade|100
+Kachcha Aam Mojito|100
+Peach Blast|120
+Litchi Blast|120
+@9|Smoothies
+Mango Smoothie|100
+Passion Fruit Smoothie|120
+Strawberry Smoothie|120
+@9|Lassi
+Plain Lassi|60
+Mango Lassi|70
+Strawberry Lassi|70
+@9|Tea
+Tea|10
+Tea (Big)|15
+Kulhad Tea|15
+Lemon Iced Tea|60
+@9|Tandoori Starters
+Paneer Tikka|130
+Malai Tikka|150
+Soya Chaap|130
+Hara Bhara Kabab|140
+Dahi Kabab|140
+Basic Kabab|130
+Malai Soya Chaap|140
+@9|Sabji
+Paneer Bhurji|200
+Paneer Butter Masala|200
+Malai Kofta|200
+Shahi Paneer|200
+Dal Fry|150
+Dal Tadka|150
+Mix Veg Sabji|200
+Besan Gatta|180
+Kadhai Paneer|200
+Chola Sabji|160
+@10|Sodas
+Lemon Soda|60
+Jeera Masala Soda|80
+Lemon Masala Soda|80
+Green Mint Soda|100
+Green Apple Soda|100
+Salty Cucumber Soda|100
+Salty Watermelon Soda|100
+@10|Brownies & Pastries
+Pineapple Pastry|50
+Strawberry Pastry|60
+Butterscotch Pastry|60
+Light Chocolate Pastry|70
+Chocolate Truffle Pastry|80
+Chocolate Truffle with Ice Cream|100
+Doughnut (Any Flavour)|70
+Choco Lava Cake|75
+Choco Truffle Box|80
+Choco Delight Box|150
+@10|Cakes
+Economic Cake - Pineapple (500 g)|300|Eggless; listed base price, design-dependent.
+Economic Cake - Vanilla (500 g)|300|Eggless; listed base price, design-dependent.
+Economic Cake - Chocolate (500 g)|300|Eggless; listed base price, design-dependent.
+Chocolate Truffle Cake (500 g)|450|Eggless; listed base price, design-dependent.
+Fancy Cake (500 g)|400|Eggless; choose flavour with canteen; listed base price, design-dependent.
+Fondant Cake (500 g)|1000|Eggless; listed base price, design-dependent.
+@11|Combos
+Farm Fresh Pizza Combo|200|Farm Fresh pizza, masala fries and Coke.
+Cheese Veggie Burger Combo|160|Cheese veggie burger, masala fries and Coke.
+Veg Cheese Grilled Sandwich Combo|160|Veg cheese grilled sandwich, masala fries and Coke.
+Roll and Coke Combo|100|Any roll and Coke; confirm the roll with the canteen.
+South Indian Platter|170|Masala dosa, uttapam and idli.
+@11|Waffle Combos
+Mix Chocolate Waffle Combo|200|Mixed chocolate waffle, peri peri fries and a cold drink.
+Belgian Dark Chocolate Waffle Combo|220|Belgian dark chocolate waffle, garlic bread and a cold drink.
+Oreo KitKat Waffle Combo|220|Oreo KitKat waffle, spiral roll and strawberry crusher.
+Triple Chocolate Waffle Combo|220|Triple chocolate waffle, 6 cheese shots and black currant crusher.
+@12|Thali
+Basic Thali (4 rotis)|120|Sabji, pickle, dahi, 4 rotis and salad; separately listed on the thali sheet.

@@ -26,6 +26,7 @@ test('configuration rejects unsafe deployed settings without exposing secrets', 
     assert.throws(() => loadConfig({ ...configInput, APP_ENV: 'production', ...override }));
   }
   assert.throws(() => loadConfig({ ...configInput, PORT: '70000' }));
+  assert.throws(() => loadConfig({ ...configInput, ADMIN_ORIGIN: configInput.FRONTEND_ORIGIN }));
 });
 test('connection pool budget is configurable and bounded', () => {
   assert.equal(loadConfig(configInput).DB_POOL_MAX, 10);
@@ -42,8 +43,8 @@ test('HTTP health, errors, origins, bounds and redacted logs', async () => {
       const res = await fetch(`${base}/health/${route}`); assert.equal(res.status, 200); healthResponseSchema.parse(await res.json()); assert(res.headers.get('x-request-id'));
     }
     const missing = await fetch(`${base}/nope?password=DO_NOT_LOG`); assert.equal(missing.status, 404); errorSchema.parse(await missing.json());
-    assert.equal((await fetch(`${base}/api/v1/canteens`, { headers: { origin: 'https://evil.example' } })).status, 403);
-    const allowed = await fetch(`${base}/api/v1/canteens`, { headers: { origin: config.FRONTEND_ORIGIN } }); assert.equal(allowed.headers.get('access-control-allow-origin'), config.FRONTEND_ORIGIN);
+    assert.equal((await fetch(`${base}/api/v1/student/canteens`, { headers: { origin: 'https://evil.example' } })).status, 403);
+    const allowed = await fetch(`${base}/api/v1/student/canteens`, { headers: { origin: config.FRONTEND_ORIGIN } }); assert.equal(allowed.headers.get('access-control-allow-origin'), config.FRONTEND_ORIGIN);
     assert.equal((await fetch(`${base}/missing`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"password":"DO_NOT_LOG",' })).status, 422);
     assert.equal((await fetch(`${base}/missing`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: 'x'.repeat(110000) }) })).status, 413);
     const untrusted = await fetch(`${base}/health/live`, { headers: { 'x-request-id': 'secret/invalid' } }); assert.notEqual(untrusted.headers.get('x-request-id'), 'secret/invalid');
@@ -54,16 +55,16 @@ test('development loopback origins work for session requests without allowing ot
   const db = {} as PrismaClient;
   await serve(createApp(config, db), async base => {
     for (const origin of [config.FRONTEND_ORIGIN, 'http://127.0.0.1:5173', 'http://[::1]:5173']) {
-      const preflight = await fetch(`${base}/api/v1/auth/session`, { method: 'OPTIONS', headers: { Origin: origin } });
+      const preflight = await fetch(`${base}/api/v1/student/auth/session`, { method: 'OPTIONS', headers: { Origin: origin } });
       assert.equal(preflight.status, 204);
       assert.equal(preflight.headers.get('access-control-allow-origin'), origin);
       assert.equal(preflight.headers.get('access-control-allow-credentials'), 'true');
-      const response = await fetch(`${base}/api/v1/auth/session`, { method: 'POST', headers: { Origin: origin } });
+      const response = await fetch(`${base}/api/v1/student/auth/session`, { method: 'POST', headers: { Origin: origin } });
       assert.equal(response.status, 403);
       assert.equal((await response.json()).error.code, 'CSRF_INVALID');
     }
     for (const origin of ['http://localhost:5174', 'https://localhost:5173', 'http://localhost.evil.example:5173', 'null']) {
-      const response = await fetch(`${base}/api/v1/auth/session`, { method: 'POST', headers: { Origin: origin } });
+      const response = await fetch(`${base}/api/v1/student/auth/session`, { method: 'POST', headers: { Origin: origin } });
       assert.equal(response.status, 403);
       assert.equal((await response.json()).error.code, 'ORIGIN_DENIED');
       assert.equal(response.headers.get('access-control-allow-origin'), null);
@@ -71,10 +72,10 @@ test('development loopback origins work for session requests without allowing ot
   });
   for (const override of [{ APP_ENV: 'staging' as const }, { APP_ENV: 'production' as const }, { NODE_ENV: 'production' as const }]) {
     await serve(createApp({ ...config, ...override }, db), async base => {
-      const response = await fetch(`${base}/api/v1/auth/session`, { method: 'OPTIONS', headers: { Origin: 'http://127.0.0.1:5173' } });
+      const response = await fetch(`${base}/api/v1/student/auth/session`, { method: 'OPTIONS', headers: { Origin: 'http://127.0.0.1:5173' } });
       assert.equal(response.status, 403);
       assert.equal((await response.json()).error.code, 'ORIGIN_DENIED');
-      assert.equal((await fetch(`${base}/api/v1/auth/session`, { method: 'OPTIONS', headers: { Origin: config.FRONTEND_ORIGIN } })).status, 204);
+      assert.equal((await fetch(`${base}/api/v1/student/auth/session`, { method: 'OPTIONS', headers: { Origin: config.FRONTEND_ORIGIN } })).status, 204);
     });
   }
 });
@@ -107,7 +108,7 @@ test('frontend fixtures enforce identity, quantity, campus domain, paise, status
   }
   contracts['POST /orders/:id/reject']!.body.parse({ expectedVersion: 1 });
   assert.equal(contracts['POST /orders/:id/reject']!.body.safeParse({}).success, false);
-  assert.equal(Object.keys(contracts).length, 51);
+  assert.equal(Object.keys(contracts).length, 53);
 });
 test('validation handles body, params and parsed query with stable 422 envelope', async () => {
   const app = express(); app.use(requestId); app.use(express.json());
@@ -123,7 +124,7 @@ test('validation handles body, params and parsed query with stable 422 envelope'
 });
 
 test('shared frontend API fixtures match backend request and response contracts', () => {
-  const fixtures = JSON.parse(readFileSync('../frontend/tests/fixtures/api-contracts.json', 'utf8'));
+  const fixtures = JSON.parse(readFileSync('../packages/portal/tests/fixtures/api-contracts.json', 'utf8'));
   for (const fixture of fixtures) {
     assert(contracts[fixture.route], fixture.route);
     contracts[fixture.route]!.body.parse(fixture.body);

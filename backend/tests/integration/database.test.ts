@@ -35,12 +35,12 @@ test('migrations, repeatable seeds, constraints, provisioning and safe catalog',
     assert.equal((await db.menuItem.findUniqueOrThrow({ where: { id: item.id } })).pricePaise, 1234);
     assert.equal((await db.canteen.findUniqueOrThrow({ where: { id: canteen.id } })).acceptingOrders, false);
     const firstCode = await db.canteenAccessCode.findFirstOrThrow({ where: { canteenId: canteen.id, active: true } });
-    assert(await verifySecret('Bella Bite', firstCode.codeHash));
+    assert(await verifySecret('bella-bite', firstCode.codeHash));
     await rotateCode(db, config, 'bella-bite', 'new strong operator code');
     await seed(db, config);
     const active = await db.canteenAccessCode.findFirstOrThrow({ where: { canteenId: canteen.id, active: true } });
     assert.equal(active.version, 2); assert(await verifySecret('new strong operator code', active.codeHash));
-    await assert.rejects(() => rotateCode(db, { ...config, SEED_DEVELOPMENT_DATA: false }, 'bella-bite', "Mukteshwari's Canteen"));
+    await assert.rejects(() => rotateCode(db, { ...config, SEED_DEVELOPMENT_DATA: false }, 'bella-bite', 'mukteshwari'), { status: 409 });
     await assert.rejects(() => provisionAdmin(db, 'admin@example.edu', 'Admin', 'admin123'));
     await provisionAdmin(db, 'admin@example.edu', 'Admin', 'unique operator password');
     const admin = await db.user.findUniqueOrThrow({ where: { email: 'admin@example.edu' }, include: { roles: true } });
@@ -65,7 +65,7 @@ test('migrations, repeatable seeds, constraints, provisioning and safe catalog',
     const server = createApp(config, db).listen(0, '127.0.0.1'); await once(server, 'listening');
     try {
       const address = server.address(); assert(address && typeof address !== 'string');
-      const response = await fetch(`http://127.0.0.1:${address.port}/api/v1/canteens`); assert.equal(response.status, 200);
+      const response = await fetch(`http://127.0.0.1:${address.port}/api/v1/student/canteens`); assert.equal(response.status, 200);
       const text = await response.text(); assert.equal(JSON.parse(text).canteens.length, 8);
       assert(!text.includes('scrypt')); assert(!text.includes('codeHash')); assert(!text.includes('password'));
       assert.equal((await fetch(`http://127.0.0.1:${address.port}/health/ready`)).status, 200);

@@ -1,3 +1,4 @@
+import { portals, portalOrigin, setPortal, type Portal } from './services/portal.js';
 import { createAdminRouter } from './routes/admin.routes.js';
 import { createCatalogEvents } from './services/catalogEvents.js';
 import { createNotificationsRouter } from './routes/notifications.routes.js';
@@ -12,17 +13,24 @@ import { createHealthRouter } from './routes/health.routes.js';
 import { AppError, errorHandler } from './middleware/errorHandler.js';
 import { canteenSchema } from './schemas/contracts.js';
 import { createAuthRouter } from './routes/auth.routes.js';
-function allowsOrigin(origin: string, config: Config): boolean {
-  if (origin === config.FRONTEND_ORIGIN) return true;
+function allowsOrigin(origin: string, config: Config, portal?: Portal): boolean {
+  const allowed = portal ? [portalOrigin(config, portal)] : portals.map(value => portalOrigin(config, value));
+  if (allowed.includes(origin)) return true;
   if (config.APP_ENV !== 'development' || config.NODE_ENV !== 'development') return false;
   const loopbackHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
   try {
     const candidate = new URL(origin);
-    const configured = new URL(config.FRONTEND_ORIGIN);
-    return candidate.origin === origin && loopbackHosts.has(candidate.hostname) &&
-      loopbackHosts.has(configured.hostname) && candidate.protocol === configured.protocol &&
-      candidate.port === configured.port;
+    return allowed.some(value => {
+      const configured = new URL(value);
+      return candidate.origin === origin && loopbackHosts.has(candidate.hostname) &&
+        loopbackHosts.has(configured.hostname) && candidate.protocol === configured.protocol && candidate.port === configured.port;
+    });
   } catch { return false; }
+}
+function originDenied(config: Config, portal?: Portal) {
+  return new AppError(403, 'ORIGIN_DENIED', portal
+    ? `This page address is not allowed. Open ${portalOrigin(config, portal)} for the ${portal} website.`
+    : 'Origin is not allowed.');
 }
 export function createApp(config: Config, db: PrismaClient,
   log: (entry: object) => void = entry => console.log(JSON.stringify(entry)), authFetch: typeof fetch = fetch, orderOptions: OrderOptions = {}) {
@@ -34,7 +42,8 @@ export function createApp(config: Config, db: PrismaClient,
     res.on('finish', () => { if (config.LOG_LEVEL !== 'silent') log({ requestId: res.locals.requestId,
       method: req.method, status: res.statusCode, durationMs: Date.now() - started }); });
     const origin = req.get('origin');
-    if (origin && !allowsOrigin(origin, config)) return next(new AppError(403, 'ORIGIN_DENIED', 'Origin is not allowed.'));
+    const segment = req.path.match(/^\/api\/v1\/(student|canteen|admin)(?:\/|$)/)?.[1] as Portal | undefined;
+    if (origin && !allowsOrigin(origin, config, segment)) return next(originDenied(config, segment));
     if (origin) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -62,7 +71,15 @@ export function createApp(config: Config, db: PrismaClient,
   api.use(createAdminRouter(config, db, catalogEvents));
   api.use(createNotificationsRouter(config, db));
   api.use(createOrdersRouter(config, db, orderOptions));
-  app.use('/api/v1', api);
+  app.use('/api/v1/:portal', (req, _res, next) => {
+    const portal = req.params.portal as Portal;
+    if (!portals.includes(portal)) return next(new AppError(404, 'PORTAL_REQUIRED', 'Use a portal API address.'));
+    // Validate the decoded router parameter as well as the raw path (encoded aliases must not bypass origin scoping).
+    const origin = req.get('origin');
+    if (origin && !allowsOrigin(origin, config, portal)) return next(originDenied(config, portal));
+    setPortal(req, portal);
+    next();
+  }, api);
   app.use((_req, _res, next) => next(new AppError(404, 'NOT_FOUND', 'Resource not found.')));
   app.use(errorHandler);
   return app;

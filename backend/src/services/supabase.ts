@@ -53,7 +53,7 @@ export function supabaseAuth(config: Config, fetcher: typeof fetch = fetch) {
       return { ...parsed.data, email: parsed.data.email.toLowerCase(), authenticationMethods: claims.amr };
     },
     async activateAdmin(email: string, password: string, name: string) {
-      await request(`/signup?redirect_to=${encodeURIComponent(`${config.FRONTEND_ORIGIN}/auth/callback?flow=admin-signup`)}`, {
+      await request(`/signup?redirect_to=${encodeURIComponent(`${config.ADMIN_ORIGIN}/auth/callback?flow=admin-signup`)}`, {
         method: 'POST', body: JSON.stringify({ email, password, data: { name } }),
       });
     },

@@ -15,7 +15,9 @@ export function campusDay(now: Date) {
   const part = (type: string) => parts.find(p => p.type === type)!.value;
   return part('year') + '-' + part('month') + '-' + part('day');
 }
-export function pickupTime(value: string, now: Date) {
+export function pickupTime(value: string | undefined, now: Date) {
+  // Unscheduled orders use the receipt timestamp to satisfy the existing non-null DB column.
+  if (value === undefined) return now;
   const pickup = new Date(value);
   if (!Number.isFinite(pickup.getTime()) || pickup <= now || pickup.getTime() - now.getTime() > 60 * 60 * 1000) {
     throw new AppError(422, 'PICKUP_INVALID', 'Choose a future pickup time within the next 60 minutes.');
@@ -67,7 +69,7 @@ export async function allocateOrder(tx: Prisma.TransactionClient,
           FROM generate_series(0, 46655) AS n
         ) c WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.code_day = ${day}::date AND o.order_code = c.code)
         LIMIT 1`;
-      if (!free) throw new AppError(409, 'ORDER_CODE_CAPACITY_EXHAUSTED', 'All pickup codes for today have been allocated. Please try again on the next campus day.');
+      if (!free) throw new AppError(409, 'ORDER_CODE_CAPACITY_EXHAUSTED', 'All order references for today have been allocated. Please try again on the next campus day.');
       code = free.code;
     }
     const inserted = await tx.$queryRaw<Array<{ id: string }>>`

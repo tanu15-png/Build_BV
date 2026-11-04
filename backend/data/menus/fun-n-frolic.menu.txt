@@ -1,0 +1,354 @@
+# fun-n-frolic | Fun n Frolic.pdf | Main booklet and legible handwritten corrections preferred over duplicate chart.
+@2|Mini Meals
+Pav Bhaji|100
+Chole Bhature|110
+Chhole Kulche|100
+Aloo Pyaz Paratha|90
+Paneer Paratha|120
+Cheese Paneer Paratha|140
+Mix Paratha|120
+Gobhi Paratha|100
+Mooli Paratha|100
+Poha|60
+@2|Maggi
+Masala Maggi|60
+Veg Maggi|70
+Cheese Maggi|90
+Chilli Garlic Maggi|70
+Paneer Maggi|90
+Mushroom Maggi|90
+@2|Pizza
+Onion Capsicum Pizza|160
+Margherita Pizza|180
+Extra Veganza Pizza|200
+Mushroom Pizza|200
+Paneer Pizza|230
+Farm Fresh Pizza|240
+@2|Pasta
+Red Sauce Pasta|130
+White Sauce Pasta|170
+Pink Sauce Pasta|180
+@2|Combos
+Chilli Paneer with Rice Combo|180
+Chilli Paneer with Noodles Combo|180
+Veg Manchurian with Rice Combo|180
+Veg Manchurian with Noodles Combo|180
+Chinese Platter|340|Manchurian, rice, noodles, spring roll, French fries and soft drink.
+Paneer Makhni Combo|180|2 lachha parathas.
+Dal Makhni Combo|160|2 lachha parathas.
+@2|Snacks
+Samosa|20
+Dal Kachori|20
+Pyaz Kachori|30
+Bread Pakoda|30
+Bread Roll|20
+@2|Chaat
+Patasi|30
+Papdi Chaat|60
+Tikki Chaat|60
+Dahi Bhalla|60
+Raj Kachori|100
+Sev Puri|70
+Bhel Puri|60
+Bhalla Papdi Chaat|70
+Samosa Chaat|60
+Chole Tikki Chaat|100
+Chole Samosa Chaat|80
+@3|Chinese
+Chinese Bhel|80
+Chilli Mushroom|170
+Mushroom Fried Rice|150
+Chilli Paneer (Dry, 8 pcs)|200
+Crispy Baby Corn|180
+Chilli Paneer Gravy|200
+Fried Rice|120
+Paneer Fried Rice|160
+French Rice|150
+Schezwan Fried Rice|140
+Veg Chowmein|120
+Veg Hakka Noodles|120
+Schezwan Noodles|150
+Chilli Garlic Noodles|130
+Veg Manchurian (Dry)|180
+Veg Manchurian (Gravy)|180
+Chilli Potato|140
+Honey Chilli Potato|160
+Spring Roll|140
+Tandoori Masala Mushroom|120
+Tandoori Afghani Mushroom|140
+Tandoori Achari Mushroom|120
+Tandoori Malai Mushroom|160
+@3|Soups
+Tomato Soup|70
+Hot and Sour Soup|70
+Veg Manchow Soup|70
+Sweet Corn Soup|70
+@3|Lassi
+Sweet Lassi|60
+Mango Lassi|70
+Strawberry Lassi|70
+Rose Lassi|70
+Masala Lassi|70
+Mix Lassi|70
+Pudina Lassi|70
+Coconut Lassi|80
+Kesar Pista Lassi|90
+Fun 'N' Frolic Lassi|100
+@3|Fries
+Peri Peri Fries|120
+French Fries|110
+@3|Sandwiches
+Veg Paneer Cheese Grilled Sandwich|150
+Coleslaw Sandwich|100
+Veg Cheese Grilled Sandwich|120
+Veg Masala Cheese Grilled Sandwich|140
+Bombay Sandwich|80
+Bombay Cheese Grilled Sandwich|100
+@3|Burgers
+Veg Burger|70
+Veg Cheese Burger|80
+Veg Paneer Burger|90
+Veg Paneer Cheese Burger|100
+Hot Veg Cheese Burger|100
+@4|Kathi Rolls
+Aloo Roll|50
+Cheese Roll|80
+Tandoori Aloo Roll|70
+Mix Veg Roll|70
+Paneer Roll|80
+Veg Paneer Roll|80
+Paneer Tikka Roll|90
+Paneer Kathi Roll|90
+Afghani Chaap Roll|90
+Masala Chaap Roll|90
+Cheese Corn Roll|90
+Paneer Korma Roll|100
+Tandoori Chaap Roll|100
+Paneer Butter Roll|100
+Paneer Bhurji Roll|100
+@4|Extras
+Extra Butter|10
+Extra Cheese|20
+Extra Mayonnaise|10
+@5|Mojitos & Coolers
+Fresh Lime Soda|70
+Virgin Mojito|80
+Blue Lagoon|80
+Lemon Iced Tea|80
+Peach Iced Tea|80
+Mini Mojito|80
+Orange Mojito|80
+Strawberry Mojito|80
+Mango Mojito|80
+Blue Curacao|90
+Summer Drink|70
+Nimbu Shikanji|70
+Black Currant Cooler|70
+Pink Cola|70
+@5|Pastries
+Brownie with Ice Cream Pastry|120
+Chocolate Pastry|80
+Black Forest Pastry|70
+Blueberry Pastry|50
+Pineapple Pastry|80
+Dark Chocolate Pastry|70
+Red Velvet Pastry|80
+Cheese Biscoff Pastry|120
+Belgian Pastry|100
+Swiss Roll|60
+Chocolate Cupcake|60
+Choco Lava Cupcake|50
+Light Chocolate Pastry Box|80
+Strawberry Pastry|70
+Butterscotch Pastry|70
+Brownie Box|100
+Cheese Blueberry Pastry|150
+@5|Softy & Cups
+Vanilla Softy / Cup|30
+Strawberry Softy / Cup|30
+Butterscotch Softy / Cup|30
+Chocolate Softy / Cup|30
+Mango Softy / Cup|30
+Pineapple Softy / Cup|30
+Black Currant Softy / Cup|30
+Cassata Cup|30
+Pan Gulkand Softy / Cup|30
+Shahi Gulab Softy / Cup|30
+Kesar Pista Softy / Cup|30
+@5|Shakes
+Cold Coffee|80
+Vanilla Shake|80
+Butterscotch Shake|80
+Mango Shake|80
+Pineapple Shake|80
+Black Currant Shake|90
+Pan Gulkand Shake|90
+Shahi Gulab Shake|90
+Oreo Shake|90
+KitKat Shake|90
+Kesar Pista Shake|90
+@6|Tandoori Breads
+Tandoori Plain Roti|20
+Tandoori Butter Roti|25
+Tandoori Plain Naan|40
+Tandoori Butter Naan|50
+Tandoori Missi Roti|40
+Tandoori Chilli Missi Roti|50|Plain or butter as printed.
+Tandoori Aloo Paratha|120
+Tandoori Aloo Pyaz Paratha|130
+Tandoori Onion Paratha|120
+Tandoori Paneer Paratha|150
+Tandoori Mix Paratha|140
+Tandoori Aloo Kulcha|150
+Tandoori Amritsari Paneer Paratha|170
+Amritsari Chur Chur Naan with Chhola|180
+Amritsari Chur Chur Naan with Dal Makhni|200
+Tandoori Gobhi Paratha|120
+Tandoori Mooli Paratha|110
+@6|Tikka
+Paneer Tikka|140
+Afghani Paneer Tikka|160
+Achari Paneer Tikka|140
+Malai Paneer Tikka|170
+Extra Gravy for Tikka|30|Add-on per plate.
+@6|Soya Chaap
+Masala Soya Chaap|150
+Malai Soya Chaap|170
+Achari Soya Chaap|140
+Afghani Soya Chaap|150
+Extra Gravy for Soya Chaap|30|Add-on per plate.
+@6|Breads
+Plain Tawa Chapati|12
+Butter Tawa Chapati|15
+@6|Paneer Preparation
+Palak Paneer|220
+Paneer Butter Masala (140 option)|140|Serving size is not specified; confirm with the canteen.
+Paneer Butter Masala (260 option)|260|Serving size is not specified; confirm with the canteen.
+Handi Paneer (150 option)|150|Serving size is not specified; confirm with the canteen.
+Handi Paneer (270 option)|270|Serving size is not specified; confirm with the canteen.
+Shahi Paneer (140 option)|140|Serving size is not specified; confirm with the canteen.
+Shahi Paneer (260 option)|260|Serving size is not specified; confirm with the canteen.
+Paneer Lababdar (160 option)|160|Serving size is not specified; confirm with the canteen.
+Paneer Lababdar (300 option)|300|Serving size is not specified; confirm with the canteen.
+Kadhai Paneer (140 option)|140|Serving size is not specified; confirm with the canteen.
+Kadhai Paneer (270 option)|270|Serving size is not specified; confirm with the canteen.
+Paneer Do Pyaza (140 option)|140|Serving size is not specified; confirm with the canteen.
+Paneer Do Pyaza (260 option)|260|Serving size is not specified; confirm with the canteen.
+Paneer Bhurji (130 option)|130|Serving size is not specified; confirm with the canteen.
+Paneer Bhurji (250 option)|250|Serving size is not specified; confirm with the canteen.
+@6|Indian Food
+Jeera Aloo|90
+Mix Vegetables|180
+Chana Masala (120 option)|120|Serving size is not specified; confirm with the canteen.
+Chana Masala (220 option)|220|Serving size is not specified; confirm with the canteen.
+Matar Mushroom (130 option)|130|Serving size is not specified; confirm with the canteen.
+Matar Mushroom (250 option)|250|Serving size is not specified; confirm with the canteen.
+Malai Kofta|250
+Corn Palak|200
+Dal Tadka (80 option)|80|Serving size is not specified; confirm with the canteen.
+Dal Tadka (150 option)|150|Serving size is not specified; confirm with the canteen.
+Dal Makhni (120 option)|120|Serving size is not specified; confirm with the canteen.
+Dal Makhni (230 option)|230|Serving size is not specified; confirm with the canteen.
+Rajma Rice|110
+Kadhi Rice|100
+Plain Rice|70
+Jeera Rice|80
+Veg Pulao|120
+Veg Dum Biryani|160
+Matar Paneer|240
+Aloo Do Pyaza|180
+Kashmiri Dum Aloo|240
+Soya Chaap Gravy (130 option)|130|Serving size is not specified; confirm with the canteen.
+Soya Chaap Gravy (250 option)|250|Serving size is not specified; confirm with the canteen.
+Executive Thali|219|Dal, paneer, seasonal veg, raita, pulao, salad, 4 chapatis and Frooti (Rs 10).
+@7|Raita
+Plain Raita|60
+Mix Veg Raita|80
+Boondi Raita|70
+Pineapple Raita|90
+@7|Salad & Papad
+Green Salad|60
+Masala Onion Papad|50
+Masala Papad|30
+Plain Papad|20
+@7|Sizzlers
+Chinese Sizzler|300
+Indian Sizzler|290
+@7|Tea
+Tea|10
+Masala Tea|20
+Kulhad Tea|15
+Pudina Tea|30
+Tulsi Tea|40
+Lemon Tea|30
+@7|Coffee
+Hot Coffee (Big)|40
+Hot Coffee (Small)|30
+Cappuccino|30
+Hazelnut Latte|50
+Caramel Latte|50
+Caramel Cappuccino|40
+Hot Chocolate|50
+Irish Latte|40
+Black Coffee|40
+@7|South Indian
+Idli Sambar|70
+Fried Idli|100
+Vada Sambar|80
+Plain Dosa|90
+Masala Dosa|100
+Onion Masala Dosa|110
+Cheese Dosa|150
+Paneer Dosa|150
+Mysore Masala Dosa|140
+Rava Masala Dosa|140
+Onion Rava Masala Dosa|150
+Rava Paneer Dosa|170
+Special Dosa|250
+@7|Uttapam & Platters
+Veg Uttapam|130
+Onion Uttapam|120
+Tomato Uttapam|120
+Paneer Uttapam|150
+Cheese Garlic Uttapam|150
+Special Uttapam|200
+Curd Rice|120
+South Indian Platter|250|1 idli, 1 vada, mini uttapam and mini dosa.
+@8|Tandoor Combos
+Lachha Paratha with Paneer Butter Masala|220|2 lachha parathas.
+Lachha Paratha with Dal Makhani|200|2 lachha parathas.
+Butter Naan with Handi Paneer|200|1 butter naan.
+Butter Naan with Kadhai Paneer|200|1 butter naan.
+Tandoori Kulcha with Handi Paneer|220|1 tandoori kulcha.
+Tandoori Kulcha with Kadhai Paneer|220|1 tandoori kulcha.
+Tandoori Kulcha with Paneer Butter Masala|200|1 tandoori kulcha.
+Special Tandoori Thali|300|Kadhai paneer, dal makhani, mix veg, pulao, papad, salad, raita, pickle, sweet, 1 butter roti, 1 butter naan and 1 lachha paratha.
+@8|Specials
+Paneer Tikka Butter Masala|300
+Paneer Pasanda|270
+Kaju Masala|270
+Paneer Patiala|260
+Corn Palak Paneer|250
+American Chopsi|150
+Special Red Pasta|150
+Special White Pasta|220
+Singapore Noodles|150
+Crispy Corn|190
+@8|Indian Gravy Soya Chaap
+Soya Chaap Masala|220
+Soya Chaap Kadhai|250
+Afghani Soya Chaap Gravy|280
+@8|Tandoori Breads
+Garlic Naan|50
+Garlic Butter Naan|60
+Stuffed Aloo Naan|100
+Stuffed Paneer Naan|120
+Pudina Lachha Paratha|50
+Chilli Roti|25
+Chilli Butter Roti|30
+@8|Sweets
+Gulab Jamun (1 pc)|20
+Rasgulla (1 pc)|20
+@10|Mini Meals
+Lachha Paratha|30
+Gulab Jamun (2 pcs)|40

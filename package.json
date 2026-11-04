@@ -1,0 +1,23 @@
+{
+  "name": "spoonate",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:student": "npm run dev --workspace=@spoonate/student",
+    "dev:canteen": "npm run dev --workspace=@spoonate/canteen",
+    "dev:admin": "npm run dev --workspace=@spoonate/admin",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspace=@spoonate/portal",
+    "test:dev": "node --test scripts/*.test.mjs",
+    "lint": "eslint apps packages scripts",
+    "setup": "npm ci && npm --prefix backend ci",
+    "dev:api": "npm --prefix backend run dev",
+    "dev:worker": "npm --prefix backend run worker:dev"
+  },
+  "type": "module"
+}

@@ -1,0 +1,54 @@
+# HTTP routing behind your HTTPS load balancer/TLS terminator.
+# Replace these illustrative hostnames and /srv/spoonate paths.
+upstream spoonate_api { server 127.0.0.1:4000; }
+
+server {
+    listen 80;
+    server_name students.example.edu;
+    root /srv/spoonate/apps/student/dist;
+    index index.html;
+    location /api/ {
+        proxy_pass http://spoonate_api;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+    }
+    location / { try_files $uri $uri/ /index.html; }
+}
+
+server {
+    listen 80;
+    server_name canteen.example.edu;
+    root /srv/spoonate/apps/canteen/dist;
+    index index.html;
+    location /api/ {
+        proxy_pass http://spoonate_api;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+    }
+    location / { try_files $uri $uri/ /index.html; }
+}
+
+server {
+    listen 80;
+    server_name admin.example.edu;
+    root /srv/spoonate/apps/admin/dist;
+    index index.html;
+    location /api/ {
+        proxy_pass http://spoonate_api;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+    }
+    location / { try_files $uri $uri/ /index.html; }
+}

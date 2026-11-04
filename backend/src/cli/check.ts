@@ -102,12 +102,12 @@ async function main() {
     const address = server.address();
     assert(address && typeof address !== 'string');
     const base = `http://127.0.0.1:${address.port}`;
-    for (const path of ['/health/live', '/health/ready', '/api/v1/canteens', '/api/v1/catalog']) {
+    for (const path of ['/health/live', '/health/ready', '/api/v1/student/canteens', '/api/v1/student/catalog']) {
       const response = await fetch(base + path, { signal: AbortSignal.timeout(config.DB_TIMEOUT_MS + 2000) });
       assert.equal(response.status, 200, path);
       const body = await response.json();
-      if (path === '/api/v1/canteens') contracts['GET /canteens']!.response.parse(body);
-      else if (path === '/api/v1/catalog') contracts['GET /catalog']!.response.parse(body);
+      if (path === '/api/v1/student/canteens') contracts['GET /canteens']!.response.parse(body);
+      else if (path === '/api/v1/student/catalog') contracts['GET /catalog']!.response.parse(body);
       else assert.equal(body.ok, true);
     }
     console.log('PASS: Express liveness, database readiness and directory/catalog response contracts');

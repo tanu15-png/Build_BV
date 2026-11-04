@@ -32,9 +32,9 @@ test('admin oversight, campus aggregates and audited maintenance', { skip: !url 
   const base = `http://127.0.0.1:${port.port}/api/v1`;
   class Browser {
     jar = new Map<string, string>(); csrf = '';
-    constructor(readonly target = base) {}
+    constructor(readonly target = base, readonly portal = 'student') {}
     async request(path: string, method = 'GET', body?: object, key?: string, proof?: string) {
-      const response = await fetch(this.target + path, { method, headers: { Origin: config.FRONTEND_ORIGIN,
+      const response = await fetch(this.target + '/' + this.portal + path, { method, headers: { Origin: this.portal === 'student' ? config.FRONTEND_ORIGIN : this.portal === 'canteen' ? config.CANTEEN_ORIGIN : config.ADMIN_ORIGIN,
         Cookie: [...this.jar].map(([name, value]) => `${name}=${value}`).join('; '),
         ...(body ? { 'Content-Type': 'application/json' } : {}), ...(method !== 'GET' ? { 'X-CSRF-Token': this.csrf } : {}),
         ...(key ? { 'Idempotency-Key': key } : {}), ...(proof ? { Authorization: `Bearer ${proof}` } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
@@ -49,7 +49,7 @@ test('admin oversight, campus aggregates and audited maintenance', { skip: !url 
     const token = randomBytes(32).toString('hex');
     const session = await db.session.create({ data: { userId: user.id, role, canteenId, membershipId: membership?.id,
       tokenHash: createHmac('sha256', config.SESSION_SECRET).update(`session:${token}`).digest('hex'), expiresAt: new Date(Date.now() + 3600000) } });
-    const browser = await new Browser().prepare(); browser.jar.set('spoonate_session', token);
+    const browser = await new Browser(base, role.toLowerCase()).prepare(); browser.jar.set(`spoonate_${browser.portal}_session`, token);
     return { user, session, browser, membership };
   }
   const student = await fixture('STUDENT', 'admin-student@banasthali.in');
@@ -96,16 +96,21 @@ test('admin oversight, campus aggregates and audited maintenance', { skip: !url 
       assert.equal((await student.browser.request(`/canteens/${otherCanteen.id}/menu/manage`)).status, 403);
       assert.equal((await staff.browser.request(`/canteens/${otherCanteen.id}/menu/manage`)).status, 403);
     });
-    await t.test('campus summaries include all pages, retain large test values and match PostgreSQL totals', async () => {
-      const result = await admin.browser.request('/admin/overview'); assert.equal(result.status, 200);
+    await t.test('daily campus summaries include all matching pages and retain large test values', async () => {
+      const result = await admin.browser.request('/admin/overview?day=2026-10-16'); assert.equal(result.status, 200);
       contracts['GET /admin/overview']!.response.parse(result.body); safe(result.body);
-      assert.equal(result.body.totalOrders, 107); assert.equal(result.body.activeOrders, 104); assert.equal(result.body.collectedOrders, 3);
+      assert.equal(result.body.totalOrders, 106); assert.equal(result.body.activeOrders, 103); assert.equal(result.body.collectedOrders, 3);
       assert.equal(result.body.collectedValuePaise, 3000000000); assert.equal(result.body.totalCanteens, 8);
-      assert.equal(result.body.canteens.reduce((sum: number, row: { totalOrders: number }) => sum + row.totalOrders, 0), 107);
+      assert.equal(result.body.canteens.reduce((sum: number, row: { totalOrders: number }) => sum + row.totalOrders, 0), 106);
       const empty = result.body.canteens.find((row: { id: string }) => row.id !== canteen.id && row.id !== otherCanteen.id);
       assert.equal(empty.totalOrders, 0); assert(empty.menuItemCount > 0);
       const filtered = await admin.browser.request('/admin/orders?status=COLLECTED&limit=1'); assert.equal(filtered.body.items.length, 1); assert.equal(filtered.body.totalCount, 3);
-      assert.equal((await admin.browser.request('/admin/overview')).body.totalOrders, 107);
+      assert.equal((await admin.browser.request('/admin/overview?day=2026-10-16')).body.totalOrders, 106);
+      const nextDay = await admin.browser.request('/admin/overview?day=2026-10-17');
+      assert.equal(nextDay.body.totalOrders, 1); assert.equal(nextDay.body.collectedValuePaise, 0);
+      const emptyDay = await admin.browser.request('/admin/overview?day=2026-10-18');
+      assert.equal(emptyDay.body.totalOrders, 0); assert.equal(emptyDay.body.canteens.length, 8);
+      assert.equal((await admin.browser.request('/admin/overview?day=2026-02-30')).status, 422);
       assert(!('revenue' in result.body));
     });
     await t.test('order pagination is stable for tied timestamps and all server filters compose', async () => {
@@ -185,7 +190,6 @@ test('admin oversight, campus aggregates and audited maintenance', { skip: !url 
     await t.test('canteen disabling blocks new orders/sign-ins, consumes challenges and preserves existing fulfillment', async () => {
       const pending = await staff.browser.request('/auth/canteen/returning', 'POST', { email: staff.user.email, canteenId: canteen.id }); assert.equal(pending.status, 200);
       const ready = seeded.find(row => row.status === 'READY' && row.canteenId === canteen.id && row.studentId === student.user.id) ?? await db.order.create({ data: { studentId: student.user.id, canteenId: canteen.id, status: 'READY', totalPaise: 1000, pickupAt: new Date(), codeDay: new Date('2026-10-18'), orderCode: 'A01' } });
-      const code = (await student.browser.request(`/orders/${ready.id}/pickup-code`)).body.code;
       const current = await db.canteen.findUniqueOrThrow({ where: { id: canteen.id } });
       const disabled = await admin.browser.request(`/admin/canteens/${canteen.id}`, 'PATCH', { expectedVersion: current.version, operational: false }); assert.equal(disabled.status, 200); assert.equal(disabled.body.acceptingOrders, false);
       assert.equal((await staff.browser.request('/auth/canteen/returning', 'POST', { email: staff.user.email, canteenId: canteen.id })).status, 403);
@@ -194,7 +198,7 @@ test('admin oversight, campus aggregates and audited maintenance', { skip: !url 
       const cart = (await student.browser.request('/cart')).body;
       assert.equal((await student.browser.request('/cart/items', 'POST', { expectedVersion: cart.version, menuItemId: menu.id, quantity: 1 })).status, 409);
       assert.equal((await staff.browser.request('/auth/me')).status, 200);
-      assert.equal((await staff.browser.request(`/orders/${ready.id}/collect`, 'POST', { expectedVersion: ready.version, code }, randomUUID())).status, 200);
+      assert.equal((await staff.browser.request(`/orders/${ready.id}/collect`, 'POST', { expectedVersion: ready.version }, randomUUID())).status, 200);
       assert.equal((await admin.browser.request(`/admin/canteens/${canteen.id}`, 'PATCH', { expectedVersion: current.version, operational: true })).status, 409);
       const enabled = await admin.browser.request(`/admin/canteens/${canteen.id}`, 'PATCH', { expectedVersion: disabled.body.version, operational: true, acceptingOrders: true, hours: '9 AM–8 PM' }); assert.equal(enabled.status, 200);
       assert.equal(await db.order.count({ where: { id: ready.id, status: 'COLLECTED' } }), 1);
@@ -245,14 +249,14 @@ test('admin oversight, campus aggregates and audited maintenance', { skip: !url 
       assert.equal((await admin.browser.request(`/orders/${order.id}/collect`, 'POST', { expectedVersion: order.version, code: '42' }, randomUUID())).status, 403);
       assert.equal((await admin.browser.request(`/orders/${order.id}/pickup-code`)).status, 403);
       assert.equal((await admin.browser.request(`/admin/orders/${order.id}`, 'DELETE', {})).status, 404);
-      const expected = await db.order.count(); assert.equal((await admin.browser.request('/admin/overview')).body.totalOrders, expected);
+      const expected = await db.order.count({ where: { codeDay: new Date('2026-10-16') } }); assert.equal((await admin.browser.request('/admin/overview?day=2026-10-16')).body.totalOrders, expected);
     });
     await t.test('application-role RLS supports admin reads and audited directory updates; expired admins are denied', async () => {
       const role = 'phase11_app_' + randomBytes(6).toString('hex'); await db.$executeRawUnsafe(`CREATE ROLE ${role} LOGIN NOSUPERUSER NOBYPASSRLS`);
       const grants = spawnSync('psql', ['-h', address.hostname, '-p', address.port || '5432', '-U', decodeURIComponent(address.username), '-d', address.pathname.slice(1), '-v', `app_role=${role}`, '-f', 'prisma/application-role.sql'], { env: { ...process.env, PGPASSWORD: decodeURIComponent(address.password) }, encoding: 'utf8', timeout: 30000 }); assert.equal(grants.status, 0, grants.stderr);
       const appUrl = new URL(url); appUrl.username = role; appUrl.password = ''; const appDb = createPrisma({ ...config, DATABASE_URL: appUrl.toString() });
       const appServer = createApp(config, appDb, () => {}, authFetch).listen(0, '127.0.0.1'); await once(appServer, 'listening'); const appAddress = appServer.address(); assert(appAddress && typeof appAddress !== 'string');
-      const device = new Browser(`http://127.0.0.1:${appAddress.port}/api/v1`); device.jar = new Map(admin.browser.jar); device.csrf = admin.browser.csrf;
+      const device = new Browser(`http://127.0.0.1:${appAddress.port}/api/v1`, 'admin'); device.jar = new Map(admin.browser.jar); device.csrf = admin.browser.csrf;
       try {
         assert.equal((await device.request('/admin/overview')).status, 200); assert.equal((await device.request('/admin/users')).status, 200);
         assert.equal((await device.request('/admin/orders')).status, 200); assert.equal((await device.request('/admin/memberships')).status, 200);

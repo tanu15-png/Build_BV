@@ -9,9 +9,9 @@ export async function requireAdmin(req: Request, config: Config, db: PrismaClien
   if (actor.role !== 'ADMIN') throw new AppError(403, 'ADMIN_DENIED', 'Administrator access required.');
   return actor;
 }
-export async function adminOverview(tx: Prisma.TransactionClient) {
+export async function adminOverview(tx: Prisma.TransactionClient, day: string) {
   const canteens = await tx.canteen.findMany({ orderBy: { slug: 'asc' } });
-  const counts = await tx.order.groupBy({ by: ['canteenId', 'status'], _count: { _all: true }, _sum: { totalPaise: true } });
+  const counts = await tx.order.groupBy({ by: ['canteenId', 'status'], where: { codeDay: new Date(`${day}T00:00:00Z`) }, _count: { _all: true }, _sum: { totalPaise: true } });
   const menus = await tx.menuItem.groupBy({ by: ['canteenId'], where: { archived: false, category: { archived: false } }, _count: { _all: true } });
   const codes = await tx.canteenAccessCode.findMany({ where: { active: true }, select: { canteenId: true, version: true } });
   const metrics = new Map<string, { totalOrders: number; activeOrders: number; collectedOrders: number; collectedValuePaise: number }>();
@@ -31,7 +31,7 @@ export async function adminOverview(tx: Prisma.TransactionClient) {
     activeOrders: sum.activeOrders + row.activeOrders, collectedOrders: sum.collectedOrders + row.collectedOrders,
     collectedValuePaise: sum.collectedValuePaise + row.collectedValuePaise }), { totalOrders: 0, activeOrders: 0, collectedOrders: 0, collectedValuePaise: 0 });
   if (!Number.isSafeInteger(summary.collectedValuePaise)) throw new AppError(500, 'SUMMARY_OVERFLOW', 'The collected order value exceeds the supported summary range.');
-  return { ...summary, totalCanteens: rows.length, operationalCanteens: rows.filter(row => row.operational).length,
+  return { day, ...summary, totalCanteens: rows.length, operationalCanteens: rows.filter(row => row.operational).length,
     acceptingCanteens: rows.filter(row => row.operational && row.acceptingOrders).length, canteens: rows };
 }
 export type AdminOrderQuery = { cursor?: string; limit: number; canteenId?: string; status?: OrderStatus;

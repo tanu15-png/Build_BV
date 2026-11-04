@@ -20,6 +20,8 @@
     "provision:initial": "node --env-file-if-exists=.env --import tsx src/cli/initial.ts",
     "provision:admin": "node --env-file-if-exists=.env --import tsx src/cli/admin.ts",
     "provision:code": "node --env-file-if-exists=.env --import tsx src/cli/code.ts",
+    "provision:member-codes": "node --env-file-if-exists=.env --import tsx src/cli/member-codes.ts",
+    "test:canteen-access": "tsx --test tests/integration/canteenAccess.test.ts",
     "test:catalog": "tsx --test tests/integration/catalog.test.ts",
     "test:orders": "tsx --test tests/integration/orders.test.ts",
     "orders:check": "node --env-file-if-exists=.env --import tsx src/cli/orders-check.ts",
@@ -28,7 +30,9 @@
     "worker:retry": "node --env-file-if-exists=.env --import tsx src/cli/outbox-retry.ts",
     "test:notifications": "tsx --test tests/integration/notifications.test.ts",
     "test:pickup": "tsx --test tests/integration/pickup.test.ts",
-    "test:admin": "tsx --test tests/integration/admin.test.ts"
+    "test:admin": "tsx --test tests/integration/admin.test.ts",
+    "menus:preview": "node --env-file-if-exists=.env --import tsx src/cli/import-menus.ts",
+    "menus:import": "node --env-file-if-exists=.env --import tsx src/cli/import-menus.ts --apply"
   },
   "keywords": [],
   "author": "",

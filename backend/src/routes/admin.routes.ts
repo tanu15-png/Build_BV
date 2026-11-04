@@ -5,6 +5,7 @@ import { contracts } from '../schemas/contracts.js';
 import { validate } from '../middleware/validate.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { requireAdmin, adminOrders, adminOverview, type AdminOrderQuery } from '../services/admin.js';
+import { campusDay } from '../services/orders.js';
 import type { createCatalogEvents } from '../services/catalogEvents.js';
 export function createAdminRouter(config: Config, db: PrismaClient, events: ReturnType<typeof createCatalogEvents>) {
   const router = Router();
@@ -15,7 +16,8 @@ export function createAdminRouter(config: Config, db: PrismaClient, events: Retu
   }
   router.get('/admin/overview', ...route('GET /admin/overview'), async (req, res) => {
     await requireAdmin(req, config, db);
-    res.json(await db.$transaction(adminOverview, { ...txOptions, isolationLevel: 'RepeatableRead' }));
+    const day = (res.locals.query as { day?: string }).day ?? campusDay(new Date());
+    res.json(await db.$transaction(tx => adminOverview(tx, day), { ...txOptions, isolationLevel: 'RepeatableRead' }));
   });
   router.get('/admin/orders', ...route('GET /admin/orders'), async (req, res) => {
     await requireAdmin(req, config, db);

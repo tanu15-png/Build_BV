@@ -1,0 +1,282 @@
+# spicy-bites | Spicy Bite .pdf
+@2|Snacks
+Samosa|15
+Tea|15
+Coffee|35
+Patties|22
+Chola Samosa Chaat|55
+Chilli Potato|130
+Honey Chilli Potato|150
+Finger Crisps|120
+Spring Roll|120
+French Fries|120
+French Fries with Cheese|170
+Garlic Bread|130
+Paneer Crispy|160
+Chinese Tawa|180
+Noodles with Manchurian|160
+Soya Chaap Chilli|180
+Candy Chilli Paneer Kabab|190
+Paneer Barbeque|190
+Chilli Paneer|200
+Chilli Mushroom|220
+Cheese Singar|180
+@2|Momos Special
+Steamed Momos|90
+Momos Gravy|120
+Fried Momos|110
+Paneer Momos|140
+Tandoori Momos|140
+Cheese Momos|140
+Pizza Momos|195
+Afghani Momos|160
+@2|Roll Express
+Mix Veg Kathi Roll|135
+Classic Paneer Roll|135
+Mix Veg Paneer Roll|135
+Paneer Bhurji Roll|135
+Paneer Tikka Roll|135
+Cheese Singar Roll|180
+@3|Sizzling Sandwich
+Grill Sandwich|95
+Classic Masala Aloo Grill Sandwich|90
+Tandoori Grill Sandwich|130
+Paneer Tikka Sandwich|130
+Cheesy Grill Sandwich|130
+Cheesy Corn Grill Sandwich|140
+Open Grill Sandwich|140
+Club Sandwich|140
+@3|Maggi
+Plain Maggi|60
+Masala Maggi|80
+Butter Maggi|100
+Tandoori Maggi|120
+Schezwan Maggi|120
+Cheese Maggi|130
+Paneer Maggi|130
+@3|Noodles
+Veg Chowmein|100
+Garlic Chowmein|120
+Hakka Noodles|120
+Butter Chowmein|120
+Cheese Chowmein|140
+Paneer Chowmein|140
+@3|Macaroni
+Veg Macaroni|100
+Garlic Macaroni|120
+Butter Macaroni|120
+Cheese Macaroni|140
+Paneer Macaroni|140
+@4|Pasta
+Red Sauce Pasta|130
+Veg Pasta with Sauce|130
+White Sauce Pasta|155
+Pink Sauce Pasta|170
+Red Sauce Pasta Full Cheesy|195|Extra cheese.
+White Sauce Pasta Full Cheesy|215|Extra cheese.
+@4|Chopsi
+Orikan Chopsi|145
+Indian Chopsi|145
+Cheese Chopsi|180
+@4|Cutlets
+Bread Cutlet|130
+Veg Cutlet|130
+Chilli Cutlet|130
+Paneer Pakora (5 pcs)|130
+@4|Sizzlers
+Veg Sizzler|290
+Ahistique Sizzler|290
+India Sizzler|290
+Mushroom Sizzler|360
+@4|Sweet Corn
+Sweet Corn|70
+Corn Bhel|90
+@4|Soups
+Tomato Soup|70
+Veg Soup|70
+Sweet Corn Soup|85
+Manchow Soup|90
+@5|Dosa Junction
+Plain Dosa|95
+Masala Dosa|110
+Pepper Masala Dosa|120
+Schezwan Dosa|150
+Punjabi Masala Dosa|150
+Masoor Masala Dosa|150
+Paneer Masala Dosa|180
+Cheese Masala Dosa|180
+Sweet Corn Masala Dosa|180
+Rava Masala Dosa|150
+Chilli Garlic Masala Dosa|150
+Tandoori Masala Dosa|170
+Bahubali Dosa|270
+Sandwich Dosa|195
+Pizza Dosa|240
+Peri Peri Dosa|180
+Spicy Special Dosa|270
+French Fry Dosa|220
+@5|Uttapam
+Tomato Uttapam|110
+Onion Uttapam|110
+Mix Uttapam|120
+Veg Uttapam|120
+Coconut Uttapam|130
+Masoor Uttapam|130
+Cheese Uttapam|180
+Paneer Uttapam|180
+Mushroom Uttapam|200
+@5|Kulcha
+Chola Kulcha|85
+Chola Bhatura|100
+Paneer Kulcha|115
+Stuffed Cheese Kulcha|140
+Kulcha Cheese Sandwich|140
+@5|Pav Bhaji
+Dabeli|70
+Butter Pav Bhaji|85
+Paneer Pav Bhaji|115
+@5|Burgers
+Veg Burger|95
+Veg Cheese Burger|115
+Veg Paneer Burger|125
+Popeye Burger|125
+Crispy Masala Burger|125
+Crunchy Corn Burger|125
+@6|Manchurian
+Veg Manchurian|125
+Gobi Manchurian|125
+Dry Manchurian|170
+Veg Paneer Manchurian|170
+Dry Paneer Manchurian|190
+@6|Rice
+Plain Rice|100
+Jeera Rice|110
+Steamed Rice|110
+Fried Rice|110
+Tawa Pulao|110
+Hyderabadi Biryani|110
+Paneer Veg Biryani|150
+Mushroom Fried Rice|160
+Paneer Fried Rice|160
+Schezwan Fried Rice|150
+@6|Pizza Bar
+Fresh Farm House Pizza|170|Onion, capsicum, tomato and cheese.
+Mexican Pizza|200|Cheese, Mexican topping, onion and capsicum.
+Tomato Olive Pizza|200|Tomato, black olives and mozzarella cheese.
+Peppy Paneer Pizza|205|Paneer, capsicum, tomato and mozzarella.
+Spicy Paneer Pizza|205
+Green Wave Pizza|205|Olives, capsicum and cheese.
+Pasta Pizza|205|Pasta, capsicum, onion and cheese.
+Tandoori Pizza|210|Paneer, tandoori sauce, onion and cheese.
+Paneer Tikka Pizza|210|Tandoori topping, capsicum, onion and cheese.
+Cheese Pizza|170|Only cheese.
+Magreta Pizza|205|Mayo, capsicum and cheese.
+Indian Pizza|190|Onion, capsicum, olives and cheese.
+Paneer Pappy Pizza|205|Paneer, capsicum, tomato, olives and cheese.
+Mushroom Pizza|220|Mushroom, tomato, cabbage and cheese.
+Cipolla Pizza|200|Onion and cheese.
+Cipolla Capsico Pizza|200|Capsicum, onion and cheese.
+Brock Baby Pizza|230|Mushroom, corn, onion and cheese.
+Garlic Pizza|200
+@7|Vegetables & Dal
+Dal Fry|115
+Punjabi Dal Tadka|140
+Dal Makhni|150
+Sev Tomato|140
+Aloo Matar|130
+Aloo Gobhi|130
+Chola / Aloo Chola|130
+Aloo Tomato Rasila|130
+Aloo Pyaz Sabji|130
+Aloo Pyaz Paneer Sabji|160
+Dum Aloo|140
+Mix Veg Sabji|150
+Shahi Paneer|160
+Malai Kofta|160
+Matar Paneer|160
+Butter Paneer Masala|160
+Kadhai Paneer|170
+Paneer Do Pyaza|180
+Butter Paneer Bhurji|190
+Paneer Lababdar|180
+Paneer Taka-Tak|180
+Paneer Korchan|180
+Paneer Tikka Masala|180
+Paneer Peshawari|180
+Mushroom Paneer|220
+Kaju Curry|220
+Handi Paneer|190
+Paneer Lajaniya|190
+Mushroom Gravy|190
+Soya Chaap Curry|180
+Soya Chaap Malai|180
+Soya Chaap Masala|180
+Soya Chaap Korma|180
+Paneer Pyaza|180
+Paneer Nagauri|190
+Fresh Baby Corn Palak Sabji|190
+@7|Sides
+Dahi|80
+Veg / Boondi Raita|80
+Masala Papad|40
+Green Salad|75
+@7|Breads & Tandoor
+Plain Chapati|12
+Butter Chapati|14
+Tandoori Roti|25
+Butter Naan|45
+Garlic Naan|65
+Stuffed Naan|95
+Missi Roti|40
+Tandoori Lachha Paratha|85
+Family Naan|95
+Aloo Tandoori Kulcha|125
+@7|Paratha
+Plain Paratha with Pickle|45
+Aloo Paratha with Dahi|75
+Aloo Pyaz Paratha with Dahi|75
+Gobhi Paratha with Dahi|75
+Mix Paratha with Dahi|85
+Lachha Paratha with Dahi|85
+Paneer Paratha with Dahi|95
+@8|Shakes Express
+Cold Coffee|95
+Chocolate Shake|95
+Butterscotch Shake|95
+Strawberry Shake|95
+Vanilla Shake|95
+Mango Shake|95
+Black Currant Shake|95
+Litchi Shake|95
+Mirinda Shake|95
+Chocolate Oreo Shake|120
+KitKat Shake|120
+5 Star Shake|120
+Chocolate Brownie Shake|140
+Mocha Mania Shake|130
+Cold Coffee with Brownie|140
+Choco Chip Shake|140
+Chocolate Hazelnut Shake|170
+Nutella Shake|170
+Brownie with Ice Cream|100
+Brownie with Ice Cream Sizzler|260
+Strawberry Mango Cooler|150
+Mango Cheese Shake|150
+Blueberry Cheesecake Shake|160
+Strawberry Oreo Shake|120
+Popcorn Toffee Shake|160
+Strawberry Bubblegum Shake|120
+Hazelnut Cold Coffee|120
+@8|Mocktails
+Mint Mojito|95
+Blue Curacao|95
+Watermelon Mocktail|95
+Lemon Iced Tea|95
+Nimbu Masala|95
+Hot Chocolate|70
+Blueberry Mojito|95
+Kiwi Mojito|95
+Chilli Guava Mocktail|95
+Kachcha Aam Mocktail|95
+Kala Khatta Mocktail|95
+Cumin Spice Mojito|110

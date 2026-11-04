@@ -1,5 +1,6 @@
 import { z } from 'zod';
 const databaseUrl = z.string().url().refine(v => /^postgres(ql)?:/.test(v), 'Expected PostgreSQL URL');
+const origin = z.url().refine(v => new URL(v).origin === v, 'Expected origin without path');
 const flag = z.enum(['true', 'false']).default('false').transform(v => v === 'true');
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -9,7 +10,10 @@ export const envSchema = z.object({
   MIGRATION_DATABASE_URL: databaseUrl.optional(),
   SUPABASE_URL: z.url().refine(v => v.startsWith('https://') && new URL(v).origin === v, 'Expected HTTPS project origin').optional(),
   SUPABASE_PUBLISHABLE_KEY: z.string().min(20).refine(v => v.startsWith('sb_publishable_'), 'Expected publishable key, never a secret key').optional(),
-  FRONTEND_ORIGIN: z.url().refine(v => new URL(v).origin === v, 'Expected origin without path'),
+  FRONTEND_ORIGIN: origin, // Student origin; retained for existing environment files.
+  CANTEEN_ORIGIN: origin.default('http://localhost:5174'),
+  ADMIN_ORIGIN: origin.default('http://localhost:5175'),
+  ADMIN_ACCESS_PASSWORD: z.string().min(8).max(256).optional(),
   ORDER_MODE: z.literal('TEST').default('TEST'),
   SEED_DEVELOPMENT_DATA: flag,
   EMAIL_VERIFICATION_BYPASS: z.literal('false').default('false'),
@@ -35,9 +39,10 @@ export const envSchema = z.object({
   }
   const deployed = ['staging', 'production'].includes(v.APP_ENV) || v.NODE_ENV === 'production';
   if (deployed && !v.SUPABASE_URL) ctx.addIssue({ code: 'custom', message: 'Deployed environments require Supabase Auth configuration' });
-  if (deployed && (v.SEED_DEVELOPMENT_DATA || v.EMAIL_PROVIDER === 'console' || !v.FRONTEND_ORIGIN.startsWith('https://'))) {
+  if (deployed && (v.SEED_DEVELOPMENT_DATA || v.EMAIL_PROVIDER === 'console' || [v.FRONTEND_ORIGIN, v.CANTEEN_ORIGIN, v.ADMIN_ORIGIN].some(value => !value.startsWith('https://')))) {
     ctx.addIssue({ code: 'custom', message: 'Deployed environments require HTTPS, real email and disabled development seeds' });
   }
+  if (new Set([v.FRONTEND_ORIGIN, v.CANTEEN_ORIGIN, v.ADMIN_ORIGIN]).size !== 3) ctx.addIssue({ code: 'custom', message: 'Each portal requires a distinct origin' });
   if (v.EMAIL_PROVIDER === 'http' && (!v.EMAIL_API_URL?.startsWith('https://') || !v.EMAIL_API_KEY || !v.EMAIL_FROM)) {
     ctx.addIssue({ code: 'custom', message: 'HTTP email requires HTTPS URL, API key and sender' });
   }

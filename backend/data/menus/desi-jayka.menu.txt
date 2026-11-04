@@ -1,0 +1,165 @@
+# desi-jayka | Dessi Zayaka.pdf
+@2|Coffee
+Cold Coffee (55 option)|55|Serving size is not specified; confirm with the canteen.
+Cold Coffee (70 option)|70|Serving size is not specified; confirm with the canteen.
+Cold Coffee with Ice Cream|100
+Hazelnut Coffee|110
+Chocolate Coffee|120
+Customized Coffee|60
+Iced Latte|80
+Tiramisu Brownie Frappe|150
+@2|Desserts
+Cheesecake|150
+@2|Shakes Paradise
+Classic Vanilla Shake|70
+Oreo Overloaded Shake|70
+Raspberry Ripple Shake|80
+Chocolate Bliss Shake|80
+Butterscotch Crunch Shake|90
+KitKat Break Shake|90
+Choco Brownie Chill Shake|100
+Dark Chocolate Shake|110
+Caramel Frappe|150
+@2|Special Cool Drinks
+Masala Chaas|30
+Thandi Thandak Lassi|50
+Lemon Iced Tea|90
+Peach Iced Tea|100
+Masala Lemonade Mojito|80
+Virgin Mojito|70
+Mint Mojito|70
+Kachcha Aam Slushy|130
+Blue Blast Slushy|130
+Rose Mocktail|130
+@3|Kick Starters
+Kathi Roll|90
+Veggie Roll|90
+Spring Roll|100
+Paneer Roll|100
+Paneer Cheese Roll|120
+Chilli Finger Potato|140
+Cheese Roll|150
+Crispy Corn|150
+Honey Chilli Fingers Potato|150
+Veg Manchurian (Gravy, 8 pcs)|150
+Veg Manchurian (Dry, 8 pcs)|150
+Cheese Balls (8 pcs)|180
+Chilli Paneer (Gravy, 8 pcs)|190
+Chilli Paneer (Dry, 8 pcs)|190
+Gobhi Manchurian|200
+Cheese Corn Ball|200
+Crispy Baby Corn|220
+Cheese Corn Roll|230
+Mushroom Chilli|250
+@3|Golden Fries
+French Fries|120
+Peri Peri Fries|140
+Cheese Fries|180
+@3|Sizzling Sensations
+Chinese Sizzler|370|Stir-fried vegetables, paneer, noodles or fried rice, fries, Manchurian and veg tikki with Schezwan sauce.
+@3|Crispy Cravings
+Shahi Samosa|15
+Kota Kachori|20
+Bread Pakoda|30
+Cheese Patties|50
+@4|Pizza
+Cheese Garlic Bread|130
+Margherita Pizza|150
+Garden Fresh Pizza|170|Onion and capsicum.
+OCT Pizza|180|Onion, capsicum and tomato.
+Sweet Corn Pizza|200
+Classic Paneer Pizza|220
+CP Pizza|230|Chilli paneer.
+Fresh Veggie Pizza|235|Onion, capsicum, tomato, broccoli and cabbage.
+TP Pizza|250|Tandoori paneer.
+Spicy Veg Pepperika Pizza|260
+Veg Mamma Pizza|350|Loaded with sauces.
+Cheese Burst Pizza|400
+@4|Pasta
+Pink Sauce Pasta|180
+Red Sauce Pasta|150
+White Sauce Pasta|170
+Mix Sauce Pasta|160
+Tandoori Sauce Pasta|150
+@4|Noodles
+Veggie Noodles|120
+Chilli Garlic Noodles|130
+Hakka Noodles|140
+Schezwan Noodles|150
+Manchurian Noodles|160
+Paneer Noodles|160
+@4|Maggi
+Plain Maggi|80
+Veg Maggi|100
+Tadka Maggi|120
+Cheese Maggi|130
+@5|Burger Town
+Aloo Tikki Burger|60
+Cheese Burger|80
+Tandoori Burger|80
+Double Cheese Burger|100
+Cheese Tandoori Burger|110
+@5|Gourmet Sandwiches
+Masala Sandwich|100
+Coleslaw Sandwich|110|Filled with mayo and salad.
+Cheese Chutney Sandwich|120
+Veg Cheese Grilled Sandwich|110
+Pizza Sandwich|140
+Sweet Corn Cheese Sandwich|150
+Tandoori Paneer Sandwich|170
+Paneer Tikka Sandwich|180
+Cheese Toast|120
+Paneer Cheese Toast|150
+Makhani Sandwich|200
+@5|Indian Stuffed Bread
+Plain Paratha (1 pc)|25
+Paratha with Curd (2 pcs)|60
+Aloo Pyaz Paratha (2 pcs)|110|Served with curd and pickle.
+Paneer Paratha (2 pcs)|130|Served with curd and pickle.
+Cheese Paratha (2 pcs)|150|Served with curd and pickle.
+Cheese Corn Paratha (2 pcs)|200|Served with curd and pickle.
+Pyaz Paratha (2 pcs)|110|Served with curd and pickle.
+Namak Mirch Paratha (2 pcs)|120|Served with curd and pickle.
+@6|Meals & Thali
+Your Choice Meal (Mix Veg)|130|Mix veg, 2 parathas, salad and pickle.
+Your Choice Meal (Dal Makhani)|130|Dal makhani, 2 parathas, salad and pickle.
+Your Choice Meal (Rajma)|130|Rajma, 2 parathas, salad and pickle.
+Your Choice Meal (Chana Masala)|130|Chana masala, 2 parathas, salad and pickle.
+Meal for One (Mix Veg & Dal)|150|Mix veg, dal makhani, jeera rice, 2 parathas, salad and pickle.
+Meal for One (Paneer)|170|Paneer masala, dahi, jeera rice, 3 rotis, salad and pickle.
+Jumbo Thali|200|Mix veg, paneer, dal makhani, dahi, jeera rice, salad, pickle, sweet and 2 parathas.
+Pav Bhaji|80|3 pav, bhaji, chutney and salad.
+Chole Bhature|100|2 bhature, chole, jeera aloo, pickle and salad.
+Extra Pav (2 pcs)|30
+Extra Bhatura (1 pc)|20
+@7|Flavors of Rice
+Fried Rice|100
+Paneer Fried Rice|130
+Schezwan Fried Rice|140
+Manchurian Fried Rice|160
+Chilli Paneer Fried Rice|170
+Mushroom Fried Rice|200
+@7|Indian Rice
+Jeera Rice with Rajma|150|Served with salad and pickle.
+Jeera Rice with Chhole|120|Served with salad and pickle.
+Jeera Rice with Butter Paneer Masala|200|Served with salad and pickle.
+Veg Biryani|130|Served with salad and pickle.
+Dal Jeera Rice|180|Served with salad and pickle.
+@7|Delicacy of Curries
+Kolhapuri Veg|150
+Chana Masala|160
+Jeera Aloo|140
+Dal Makhani|180
+Butter Paneer Masala|220
+Kadhai Paneer|250
+Mushroom Paneer|280
+@8|Soups
+Hot and Sour Soup|50
+Tomato Soup|50
+Manchow Soup|50
+@8|Dessi Jayka Special
+Kulhad Tea (10 option)|10|Serving size is not specified; confirm with the canteen.
+Kulhad Tea (15 option)|15|Serving size is not specified; confirm with the canteen.
+Hot Coffee (30 option)|30|Serving size is not specified; confirm with the canteen.
+Hot Coffee (50 option)|50|Serving size is not specified; confirm with the canteen.
+Hot Chocolate|120
