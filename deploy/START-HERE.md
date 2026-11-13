@@ -12,11 +12,13 @@ The workflow uses the official [checkout](https://github.com/actions/checkout) a
 
 Create a project from that repository and add four services named exactly `api`, `worker`, `student`, `canteen`. Use repository root `/` for all four.
 
-Set their Config File paths in Railway Settings:
+For new services, configure these directly in Railway Settings (the legacy Config File option is deprecated):
 
-- `api`: `/deploy/railway-api.json`
-- `worker`: `/deploy/railway-worker.json`
-- `student` and `canteen`: `/deploy/railway-frontend.json`
+- `api`: Dockerfile builder, path `deploy/Dockerfile.backend`, start `npm start`, pre-deploy `npm run db:migrate`, healthcheck `/health/ready`.
+- `worker`: Dockerfile builder, path `deploy/Dockerfile.backend`, start `npm run worker:start`, no pre-deploy command or healthcheck.
+- `student` and `canteen`: Dockerfile builder, path `deploy/Dockerfile.frontend`, no custom start command, healthcheck `/health/live`.
+
+Use one replica and On Failure restart policy with 10 retries. Leave serverless disabled. The JSON files in this directory remain references for the equivalent legacy configuration.
 
 Do not add an admin service. Keep API/worker private, without public domains or TCP proxies. Generate public HTTPS domains for student and canteen, each targeting port 8080. Keep API at one replica.
 

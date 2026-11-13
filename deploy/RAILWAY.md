@@ -6,11 +6,13 @@ Create **four services** from this repository: `api`, `worker`, `student`, `cant
 
 ## Service configuration
 
-Set the Railway Config File path:
+For new services, set the following directly in Railway Settings. Railway has deprecated legacy Config as Code; do not depend on opting new services into those JSON files.
 
-- API: `/deploy/railway-api.json`
-- Worker: `/deploy/railway-worker.json`
-- Both frontends: `/deploy/railway-frontend.json`
+- API: Dockerfile builder, `deploy/Dockerfile.backend`; start `npm start`; pre-deploy `npm run db:migrate`; healthcheck `/health/ready`.
+- Worker: Dockerfile builder, `deploy/Dockerfile.backend`; start `npm run worker:start`; no pre-deploy command or healthcheck.
+- Both frontends: Dockerfile builder, `deploy/Dockerfile.frontend`; no custom start command; healthcheck `/health/live`.
+
+Use one replica, On Failure restart policy with 10 retries, and leave serverless disabled. See [Railway infrastructure configuration](https://docs.railway.com/infrastructure-as-code) for the replacement to legacy Config as Code. The JSON files remain references for equivalent legacy settings.
 
 Clear automatically detected build/start overrides. Frontends use the Nginx image entrypoint. The API pre-deploy step runs migrations. The worker starts independently and never runs migrations. Use one API replica until catalog events have a shared transport.
 
