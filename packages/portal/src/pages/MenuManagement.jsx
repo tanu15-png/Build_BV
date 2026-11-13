@@ -1,3 +1,4 @@
+import OfferPrice from '../components/OfferPrice';
 import CanteenPoster from '../components/CanteenPoster';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Trash2 } from 'lucide-react';
@@ -8,7 +9,7 @@ import { api } from '../services/api';
 import { rupeesToPaise } from '../services/catalog';
 const input = 'mt-2 w-full rounded-xl border border-gray-200 px-4 py-3';
 const button = 'rounded-xl bg-[#075d50] px-4 py-2 font-bold text-white disabled:opacity-50';
-export default function MenuManagement() {
+export default function MenuManagement({ combosOnly = false }) {
   const { user } = useAuth();
   const { canteenId: adminCanteenId } = useParams();
   const canteenId = user.role === 'admin' ? adminCanteenId : user.canteenId;
@@ -22,9 +23,9 @@ export default function MenuManagement() {
   const [categoryName, setCategoryName] = useState('');
   const [addingTo, setAddingTo] = useState(null);
   const [editing, setEditing] = useState(null);
-  const load = useCallback(async () => {
+  const load = useCallback(async (fresh = false) => {
     const request = ++loadSequence.current;
-    const result = await api(`/canteens/${canteenId}/menu/manage`);
+    const result = await api(`/canteens/${canteenId}/menu/manage`, { fresh });
     if (request === loadSequence.current) seedManagementMenu(result);
   }, [canteenId, seedManagementMenu]);
   useEffect(() => {
@@ -36,6 +37,11 @@ export default function MenuManagement() {
     }, 0);
     return () => { active = false; clearTimeout(timer); };
   }, [load, canteenId, catalogRevision, pendingMenuSaves]);
+  useEffect(() => {
+    if(!menu?.cacheUntil || pendingMenuSaves)return;
+    const timer=setTimeout(()=>{void load(true).catch(issue=>setError(issue.message));},Math.min(2147483647,Math.max(50,Date.parse(menu.cacheUntil)-Date.now()+25)));
+    return()=>clearTimeout(timer);
+  },[menu,load,pendingMenuSaves]);
   const perform = (path, method, body, message) => {
     loadSequence.current++;
     setError(''); setSuccess(''); setFailedDraft(null);
@@ -67,10 +73,10 @@ export default function MenuManagement() {
     if (!window.confirm(message)) return;
     perform(`/menu-${kind === 'category' ? 'categories' : 'items'}/${entry.id}`, 'DELETE', { expectedVersion: entry.version }, kind === 'category' ? 'Category and its items deleted.' : 'Item deleted.');
   };
-  const activeCategories = menu?.categories.filter(c => !c.archived) || [];
+  const activeCategories = menu?.categories.filter(c => !c.archived && (combosOnly ? c.name === 'Combos' : c.name !== 'Combos')) || [];
   return <div className="min-h-screen bg-[#f6f8f7] p-5 lg:p-10"><main className="mx-auto max-w-5xl">
     <Link to={user.role === 'admin' ? '/admin/canteens' : '/canteen'} className="font-bold text-[#075d50]">← {user.role === 'admin' ? 'Campus canteens' : 'Canteen dashboard'}</Link>
-    <header className="my-7 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-4"><CanteenPoster slug={menu?.canteen.slug} name={menu?.canteen.name} className="h-20 w-20 rounded-2xl border" /><div><h1 className="text-3xl font-black">{menu?.canteen.name || 'Your canteen'} menu</h1><p className="mt-2 text-gray-600">Create categories, then add dishes inside them.</p></div></div><button onClick={() => { setError(''); load().catch(issue => setError(issue.message)); }} className="rounded-xl border px-4 py-2 font-bold">Refresh menu</button></header>
+    <header className="my-7 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-4"><CanteenPoster slug={menu?.canteen.slug} name={menu?.canteen.name} className="h-20 w-20 rounded-2xl border" /><div><h1 className="text-3xl font-black">{combosOnly ? 'Manage combos' : `${menu?.canteen.name || 'Your canteen'} menu`}</h1><p className="mt-2 text-gray-600">{combosOnly ? 'Create fixed bundles with their contents, price and availability.' : 'Create categories, then add dishes inside them.'}</p></div></div><button onClick={() => { setError(''); load(true).catch(issue => setError(issue.message)); }} className="rounded-xl border px-4 py-2 font-bold">Refresh menu</button></header>
     {error && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
     {pendingMenuSaves > 0 && <p role="status" className="mb-5 text-sm text-gray-500">Saving {pendingMenuSaves === 1 ? 'change' : `${pendingMenuSaves} changes`} in the background. You can keep editing.</p>}
     {success && <p role="status" className="mb-5 rounded-xl bg-green-50 p-4 text-green-800">{success}</p>}
@@ -79,18 +85,19 @@ export default function MenuManagement() {
         <p className="mt-4 text-sm text-gray-600">{menu.canteen.acceptingOrders ? 'Accepting new orders' : 'New orders paused'}. Existing orders can still be fulfilled.</p>
         <button onClick={() => perform(`/canteens/${canteenId}/availability`, 'PATCH', { expectedVersion: menu.canteen.version, acceptingOrders: !menu.canteen.acceptingOrders }, 'Availability saved.')} className={`${button} mt-3`}>{menu.canteen.acceptingOrders ? 'Pause incoming orders' : 'Resume incoming orders'}</button>
       </section>
-      <form onSubmit={async event => { event.preventDefault(); if (await perform(`/canteens/${canteenId}/categories`, 'POST', { name: categoryName }, 'Category created. Add its first item below.')) setCategoryName(''); }} className="mb-8 rounded-2xl bg-white p-6"><fieldset className="flex flex-wrap items-end gap-4"><label className="min-w-0 flex-1 font-bold">New category<input required maxLength={80} placeholder="e.g. Chinese or Snacks" value={categoryName} onChange={event => setCategoryName(event.target.value)} className={input} /></label><button className={button}>Add category</button></fieldset></form>
-      {!activeCategories.length && <p className="mb-6 text-gray-600">Your menu has no categories yet. Add one above to get started.</p>}
+      {combosOnly ? (!activeCategories.length && <button onClick={() => perform(`/canteens/${canteenId}/categories`, 'POST', { name: 'Combos' }, 'Combos section created. Add your first combo below.')} className={`${button} mb-6`}>Set up combos</button>) : (<form onSubmit={async event => { event.preventDefault(); if (await perform(`/canteens/${canteenId}/categories`, 'POST', { name: categoryName }, 'Category created. Add its first item below.')) setCategoryName(''); }} className="mb-8 rounded-2xl bg-white p-6"><fieldset className="flex flex-wrap items-end gap-4"><label className="min-w-0 flex-1 font-bold">New category<input required maxLength={80} placeholder="e.g. Chinese or Snacks" value={categoryName} onChange={event => setCategoryName(event.target.value)} className={input} /></label><button className={button}>Add category</button></fieldset></form>)}
+
+      {!activeCategories.length && <p className="mb-6 text-gray-600">{combosOnly ? 'Set up your combos section to add the first bundle.' : 'Your menu has no categories yet. Add one above to get started.'}</p>}
       <div className="space-y-6">{activeCategories.map(category => <section id={`category-${category.clientId || category.id}`} key={category.clientId || category.id} className="rounded-2xl bg-white p-6">
-        <CategoryEditor key={`${category.clientId || category.id}:${category.version}`} category={category} itemCount={menu.items.filter(item => item.categoryId === category.id && !item.archived).length} save={data => patchCategory(category, data)} remove={() => deleteEntry('category', category)} />
+        {combosOnly ? <h2 className="text-xl font-black">Your combos</h2> : (<CategoryEditor key={`${category.clientId || category.id}:${category.version}`} category={category} itemCount={menu.items.filter(item => item.categoryId === category.id && !item.archived).length} save={data => patchCategory(category, data)} remove={() => deleteEntry('category', category)} />)}
         <div className="mt-4 divide-y">{menu.items.filter(item => item.categoryId === category.id && !item.archived).map(item => <article key={item.clientId || item.id} className="py-4">
-          {(editing === item.id || editing === item.clientId) ? <ItemEditor key={`${item.clientId || item.id}:${item.version}`} item={item} initialDraft={failedDraft} categories={activeCategories} cancel={() => { setEditing(null); setFailedDraft(null); }} save={async data => { if (await patchItem(item, data)) setEditing(null); }} /> : <div className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-black">{item.name}</h3><p className="mt-1 text-sm text-gray-600">{item.description}</p><p className="mt-2 font-bold text-[#075d50]">₹{(item.pricePaise / 100).toFixed(2)} · {item.available ? 'Available' : 'Unavailable'}</p></div><div className="flex flex-wrap gap-3"><button onClick={() => { setEditing(item.id); setAddingTo(null); setFailedDraft(null); }} className="rounded-xl border px-3 py-2">Edit</button><button onClick={() => patchItem(item, { available: !item.available })} className={`rounded-xl border px-3 py-2 ${item.available ? 'border-gray-300 bg-white text-black' : 'border-black bg-black text-white'}`}>{item.available ? 'Mark unavailable' : 'Mark available'}</button><button onClick={() => patchItem(item, { archived: true })} className="rounded-xl border px-3 py-2 text-red-700">Archive item</button><DeleteButton label={`Delete item ${item.name}`} onClick={() => deleteEntry('item', item)} /></div></div>}
+          {(editing === item.id || editing === item.clientId) ? <ItemEditor key={`${item.clientId || item.id}:${item.version}`} item={item} initialDraft={failedDraft} categories={activeCategories} cancel={() => { setEditing(null); setFailedDraft(null); }} save={async data => { if (await patchItem(item, data)) setEditing(null); }} /> : <div className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-black">{item.name}</h3><p className="mt-1 text-sm text-gray-600">{item.description}</p><p className="mt-2 font-bold text-[#075d50]"><OfferPrice item={item} /> · {item.available ? 'Available' : 'Unavailable'}</p></div><div className="flex flex-wrap gap-3"><button onClick={() => { setEditing(item.id); setAddingTo(null); setFailedDraft(null); }} className="rounded-xl border px-3 py-2">Edit</button><button onClick={() => patchItem(item, { available: !item.available })} className={`rounded-xl border px-3 py-2 ${item.available ? 'border-gray-300 bg-white text-black' : 'border-black bg-black text-white'}`}>{item.available ? 'Mark unavailable' : 'Mark available'}</button><button onClick={() => patchItem(item, { archived: true })} className="rounded-xl border px-3 py-2 text-red-700">Archive item</button><DeleteButton label={`Delete item ${item.name}`} onClick={() => deleteEntry('item', item)} /></div></div>}
         </article>)}</div>
-        {(addingTo === category.id || addingTo === category.clientId) ? <div className="mt-4 border-t pt-4"><h3 className="mb-4 font-black">Add an item to {category.name}</h3><ItemEditor categoryId={category.id} initialDraft={failedDraft} categories={activeCategories} cancel={() => { setAddingTo(null); setFailedDraft(null); }} save={async data => { if (await perform(`/canteens/${canteenId}/menu`, 'POST', data, 'Item added.')) setAddingTo(null); }} /></div> : <button onClick={() => { setAddingTo(category.id); setEditing(null); setFailedDraft(null); }} className={`${button} mt-4`}>Add item to {category.name}</button>}
+        {(addingTo === category.id || addingTo === category.clientId) ? <div className="mt-4 border-t pt-4"><h3 className="mb-4 font-black">Add an item to {category.name}</h3><ItemEditor categoryId={category.id} initialDraft={failedDraft} categories={activeCategories} cancel={() => { setAddingTo(null); setFailedDraft(null); }} save={async data => { if (await perform(`/canteens/${canteenId}/menu`, 'POST', data, 'Item added.')) setAddingTo(null); }} /></div> : <button onClick={() => { setAddingTo(category.id); setEditing(null); setFailedDraft(null); }} className={`${button} mt-4`}>{combosOnly ? 'Add combo' : `Add item to ${category.name}`}</button>}
       </section>)}</div>
       <details className="mt-8 rounded-2xl bg-white p-6"><summary className="cursor-pointer font-black">Archived categories and items</summary><p className="mt-3 text-sm text-gray-600">Archived entries can be restored. The bin permanently deletes an entry. Restore a category before restoring its items.</p>
-        {menu.categories.filter(c => c.archived).map(category => <div key={category.id} className="mt-4 flex justify-between gap-3"><span>{category.name}</span><div className="flex items-center gap-3"><button onClick={() => patchCategory(category, { archived: false })} className="font-bold text-[#075d50]">Restore category</button><DeleteButton label={`Delete category ${category.name}`} onClick={() => deleteEntry('category', category)} /></div></div>)}
-        {menu.items.filter(item => item.archived).map(item => <div key={item.id} className="mt-4 flex justify-between gap-3"><span>{item.name} · {item.category}</span><div className="flex items-center gap-3"><button disabled={!activeCategories.some(c => c.id === item.categoryId)} onClick={() => patchItem(item, { archived: false })} className="font-bold text-[#075d50] disabled:opacity-40">Restore item</button><DeleteButton label={`Delete item ${item.name}`} onClick={() => deleteEntry('item', item)} /></div></div>)}
+        {menu.categories.filter(c => c.archived && (combosOnly ? c.name === 'Combos' : c.name !== 'Combos')).map(category => <div key={category.id} className="mt-4 flex justify-between gap-3"><span>{category.name}</span><div className="flex items-center gap-3"><button onClick={() => patchCategory(category, { archived: false })} className="font-bold text-[#075d50]">Restore category</button><DeleteButton label={`Delete category ${category.name}`} onClick={() => deleteEntry('category', category)} /></div></div>)}
+        {menu.items.filter(item => item.archived && (combosOnly ? item.category === 'Combos' : item.category !== 'Combos')).map(item => <div key={item.id} className="mt-4 flex justify-between gap-3"><span>{item.name} · {item.category}</span><div className="flex items-center gap-3"><button disabled={!activeCategories.some(c => c.id === item.categoryId)} onClick={() => patchItem(item, { archived: false })} className="font-bold text-[#075d50] disabled:opacity-40">Restore item</button><DeleteButton label={`Delete item ${item.name}`} onClick={() => deleteEntry('item', item)} /></div></div>)}
       </details>
     </>}
   </main></div>;

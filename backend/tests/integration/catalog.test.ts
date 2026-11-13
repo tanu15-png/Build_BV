@@ -1,3 +1,4 @@
+import { foreignCanteen } from './support.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac, randomBytes, randomUUID } from 'node:crypto';
@@ -20,8 +21,8 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
   const config = loadConfig({ DATABASE_URL: url, APP_ENV: 'test', NODE_ENV: 'test', FRONTEND_ORIGIN: 'http://localhost:5173', SESSION_SECRET: 's'.repeat(32), OTP_SECRET: 'o'.repeat(32), SEED_DEVELOPMENT_DATA: 'true', LOG_LEVEL: 'silent', DB_TIMEOUT_MS: '10000' });
   const db = createPrisma(config);
   await seed(db, config);
-  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'bella-bite' } });
-  const other = await db.canteen.findUniqueOrThrow({ where: { slug: 'shanu' } });
+  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'canteen' } });
+  const other = await foreignCanteen(db);
   const server = createApp(config, db, () => {}).listen(0, '127.0.0.1');
   await once(server, 'listening'); const port = server.address(); assert(port && typeof port !== 'string');
   const base = `http://127.0.0.1:${port.port}/api/v1`;
@@ -59,7 +60,7 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
       assert.equal((await anonymous.request('/cart')).status, 401);
       assert.equal((await anonymous.request(`/canteens/${canteen.id}/categories`, 'POST', { name: 'Chinese' })).status, 401);
       assert.equal((await student.browser.request(`/canteens/${canteen.id}/menu/manage`)).status, 403);
-      assert.equal((await otherStaff.browser.request(`/canteens/${canteen.id}/categories`, 'POST', { name: 'Chinese' })).status, 403);
+      assert.equal((await otherStaff.browser.request(`/canteens/${canteen.id}/categories`, 'POST', { name: 'Chinese' })).status, 401);
       assert.equal((await staff.browser.request('/cart')).status, 403);
     });
     await t.test('staff create case-insensitive unique categories and items inside their own canteen', async () => {
@@ -69,14 +70,14 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
       assert.equal((await staff.browser.request(`/canteens/${canteen.id}/menu`, 'POST', { name: 'Noodles', categoryId, pricePaise: 100.5 })).status, 422);
       const item = await staff.browser.request(`/canteens/${canteen.id}/menu`, 'POST', { name: 'Noodles', categoryId, pricePaise: 6050 });
       assert.equal(item.status, 201); menuItemSchema.parse(item.body); itemId = item.body.id;
-      assert.equal((await otherStaff.browser.request(`/canteens/${other.id}/menu`, 'POST', { name: 'Cross scope', categoryId, pricePaise: 1000 })).status, 422);
+      assert.equal((await otherStaff.browser.request(`/canteens/${other.id}/menu`, 'POST', { name: 'Cross scope', categoryId, pricePaise: 1000 })).status, 401);
       await assert.rejects(db.menuItem.create({ data: { canteenId: other.id, categoryId, name: 'Cross scope', pricePaise: 1000 } }));
       const menu = await student.browser.request(`/canteens/${canteen.id}/menu`); contracts['GET /canteens/:id/menu']!.response.parse(menu.body);
       assert(menu.body.categories.some((c: { id: string }) => c.id === categoryId));
       assert(menu.body.items.some((i: { categoryId: string }) => i.categoryId === categoryId));
     });
     await t.test('committed menu writes notify other browsers immediately through the catalog stream', async () => {
-      const response = await fetch(`${base}/catalog/events`, { signal: AbortSignal.timeout(10000) });
+      const response = await fetch(`${base}/student/catalog/events`, { signal: AbortSignal.timeout(10000) });
       const reader = response.body!.getReader();
       try {
         assert.match(new TextDecoder().decode((await reader.read()).value), /event: catalog-change/);
@@ -89,7 +90,7 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
       } finally { await reader.cancel(); }
     });
     await t.test('menu ownership, stale updates, category renaming and nonempty archival are enforced', async () => {
-      assert.equal((await otherStaff.browser.request(`/menu-items/${itemId}`, 'PATCH', { expectedVersion: 1, pricePaise: 1 })).status, 403);
+      assert.equal((await otherStaff.browser.request(`/menu-items/${itemId}`, 'PATCH', { expectedVersion: 1, pricePaise: 1 })).status, 401);
       assert.equal((await staff.browser.request(`/menu-items/${itemId}`, 'PATCH', { expectedVersion: 20, pricePaise: 1 })).status, 409);
       assert.equal((await staff.browser.request(`/menu-categories/${categoryId}`, 'PATCH', { expectedVersion: categoryVersion, archived: true })).status, 409);
       const renamed = await staff.browser.request(`/menu-categories/${categoryId}`, 'PATCH', { expectedVersion: categoryVersion, name: 'Chinese favourites' });
@@ -145,7 +146,7 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
       const reduced = await fresh(); assert.equal((await student.browser.request('/cart/review', 'POST', { expectedVersion: reduced.version, quote: reduced.quote })).body.error.code, 'CART_UNAVAILABLE');
       assert.equal((await student.browser.request(`/cart/items/${reduced.items[0]!.id}`, 'DELETE', { expectedVersion: reduced.version })).status, 200);
       assert.equal((await fresh()).canteenId, null);
-      const otherItem = await db.menuItem.findFirstOrThrow({ where: { canteenId: other.id } }); assert.equal((await add(otherItem.id)).status, 200);
+      const otherItem = await db.menuItem.findFirstOrThrow({ where: { canteenId: other.id } }); assert.equal((await add(otherItem.id)).status, 409);
     });
     await t.test('archival hides items/categories, preserves cart removals and supports restoration', async () => {
       const cart = await fresh(); assert.equal((await student.browser.request('/cart', 'DELETE', { expectedVersion: cart.version })).status, 200);
@@ -182,7 +183,7 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
       assert.equal((await add(item.id)).status, 200);
       const before = await fresh();
       const order = await db.order.create({ data: { studentId: student.user.id, canteenId: canteen.id, totalPaise: 1000, pickupAt: new Date(), codeDay: new Date(), items: { create: { menuItemId: item.id, name: item.name, quantity: 1, unitPricePaise: 1000 } } }, include: { items: true } });
-      assert.equal((await otherStaff.browser.request(`/menu-items/${item.id}`, 'DELETE', { expectedVersion: 1 })).status, 403);
+      assert.equal((await otherStaff.browser.request(`/menu-items/${item.id}`, 'DELETE', { expectedVersion: 1 })).status, 401);
       assert.equal((await student.browser.request(`/menu-items/${item.id}`, 'DELETE', { expectedVersion: 1 })).status, 403);
       assert.equal((await staff.browser.request(`/menu-items/${item.id}`, 'DELETE', { expectedVersion: 99 })).status, 409);
       assert.equal((await staff.browser.request(`/menu-items/${item.id}`, 'DELETE', { expectedVersion: 1 })).status, 200);
@@ -196,7 +197,7 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
       const active = await db.menuItem.create({ data: { canteenId: canteen.id, categoryId: category.id, name: 'Active tea', pricePaise: 1000 } });
       const archived = await db.menuItem.create({ data: { canteenId: canteen.id, categoryId: category.id, name: 'Archived tea', pricePaise: 1000, archived: true } });
       assert.equal((await add(active.id)).status, 200);
-      assert.equal((await otherStaff.browser.request(`/menu-categories/${category.id}`, 'DELETE', { expectedVersion: 1 })).status, 403);
+      assert.equal((await otherStaff.browser.request(`/menu-categories/${category.id}`, 'DELETE', { expectedVersion: 1 })).status, 401);
       assert.equal((await staff.browser.request(`/menu-categories/${category.id}`, 'DELETE', { expectedVersion: 99 })).status, 409);
       assert.equal((await staff.browser.request(`/menu-categories/${category.id}`, 'DELETE', { expectedVersion: 1 })).status, 200);
       assert.equal(await db.menuCategory.findUnique({ where: { id: category.id } }), null);

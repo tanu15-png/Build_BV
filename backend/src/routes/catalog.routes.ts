@@ -1,3 +1,5 @@
+import { priceFor, nextOfferBoundary } from '../services/offers.js';
+import { createReadCache } from '../services/readCache.js';
 import { Router, type Request } from 'express';
 import type { Config } from '../config/env.js';
 import type { PrismaClient, Prisma } from '../generated/prisma/client.js';
@@ -8,7 +10,7 @@ import { validate } from '../middleware/validate.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createCatalogEvents } from '../services/catalogEvents.js';
 type Tx = Prisma.TransactionClient;
-export function createCatalogRouter(config: Config, db: PrismaClient, events = createCatalogEvents()) {
+export function createCatalogRouter(config: Config, db: PrismaClient, events = createCatalogEvents(), reads = createReadCache()) {
   const router = Router();
   router.get('/catalog/events', events.subscribe);
   const readSession = createSessionReader(config, db);
@@ -18,13 +20,14 @@ export function createCatalogRouter(config: Config, db: PrismaClient, events = c
     return [validate(contract.params, 'params'), validate(contract.query, 'query'), ...(key.startsWith('GET ') ? [] : [validate(contract.body)])];
   }
   const conflict = () => new AppError(409, 'VERSION_CONFLICT', 'This record changed. Refresh and retry.');
-  const menuItem = (row: Prisma.MenuItemGetPayload<{ include: { category: true } }>) => ({ ...row, category: row.category.name });
+  const menuItem = (row: Prisma.MenuItemGetPayload<{ include: { category: true } }>, now = Date.now()) => { const { offers, ...item } = row as typeof row & { offers?: Parameters<typeof priceFor>[0]['offers'] }; return { ...item, category: row.category.name, ...priceFor({ ...row, offers }, now) }; };
   async function menu(tx: Tx, id: string, manage: boolean) {
     const canteen = await tx.canteen.findUnique({ where: { id } });
-    if (!canteen) throw new AppError(404, 'CANTEEN_NOT_FOUND', 'Canteen not found.');
+    if (!canteen || canteen.slug !== 'canteen') throw new AppError(404, 'CANTEEN_NOT_FOUND', 'Canteen not found.');
     const categories = await tx.menuCategory.findMany({ where: { canteenId: id, ...(!manage ? { archived: false } : {}) }, orderBy: { name: 'asc' } });
-    const items = await tx.menuItem.findMany({ where: { canteenId: id, ...(!manage ? { archived: false, category: { archived: false } } : {}) }, orderBy: { name: 'asc' }, include: { category: true } });
-    return { canteen, categories, items: items.map(menuItem) };
+    const items = await tx.menuItem.findMany({ where: { canteenId: id, ...(!manage ? { archived: false, category: { archived: false } } : {}) }, orderBy: { name: 'asc' }, include: { category: true, offers: true } });
+    const now = Date.now();
+    return { canteen, categories, items: items.map(item => menuItem(item, now)), cacheUntil: nextOfferBoundary(items, now) };
   }
   async function staffWrite<T>(req: Request, canteenId: string, work: (tx: Tx) => Promise<T>) {
     const { actor } = await readSession(req);
@@ -48,12 +51,14 @@ export function createCatalogRouter(config: Config, db: PrismaClient, events = c
     return found;
   }
   router.get('/catalog', async (_req, res) => {
-    res.json(await db.$transaction(async tx => {
-      const canteens = await tx.canteen.findMany({ orderBy: { slug: 'asc' } });
-      const categories = await tx.menuCategory.findMany({ where: { archived: false }, orderBy: { name: 'asc' } });
-      const items = await tx.menuItem.findMany({ where: { archived: false, category: { archived: false } }, orderBy: { name: 'asc' }, include: { category: true } });
-      return { canteens, categories, items: items.map(menuItem) };
-    }, { ...txOptions, isolationLevel: 'RepeatableRead' }));
+    const data = await reads.get('catalog', () => db.$transaction(async tx => {
+      const canteens = await tx.canteen.findMany({ where: { slug: 'canteen' }, orderBy: { slug: 'asc' } });
+      const categories = await tx.menuCategory.findMany({ where: { archived: false, canteen: { slug: 'canteen' } }, orderBy: { name: 'asc' } });
+      const items = await tx.menuItem.findMany({ where: { archived: false, canteen: { slug: 'canteen' }, category: { archived: false } }, orderBy: { name: 'asc' }, include: { category: true, offers: true } });
+      return { canteens, categories, items };
+    }, { ...txOptions, isolationLevel: 'RepeatableRead' }), 30000, _req.get('Cache-Control') === 'no-cache');
+    const now = Date.now();
+    res.json({ ...data, items: data.items.map(item => menuItem(item, now)), cacheUntil: nextOfferBoundary(data.items, now) });
   });
   router.get('/canteens/:id/menu', ...route('GET /canteens/:id/menu'), async (_req, res) => {
     res.json(await db.$transaction(tx => menu(tx, res.locals.params.id, false), { ...txOptions, isolationLevel: 'RepeatableRead' }));
@@ -120,7 +125,7 @@ export function createCatalogRouter(config: Config, db: PrismaClient, events = c
   router.post('/canteens/:id/menu', ...route('POST /canteens/:id/menu'), async (req, res) => {
     res.status(201).json(await staffWrite(req, res.locals.params.id, async tx => {
       await category(tx, req.body.categoryId, res.locals.params.id);
-      return menuItem(await tx.menuItem.create({ data: { ...req.body, canteenId: res.locals.params.id }, include: { category: true } }));
+      return menuItem(await tx.menuItem.create({ data: { ...req.body, canteenId: res.locals.params.id }, include: { category: true, offers: true } }));
     }));
   });
   router.patch('/menu-items/:id', ...route('PATCH /menu-items/:id'), async (req, res) => {
@@ -130,7 +135,7 @@ export function createCatalogRouter(config: Config, db: PrismaClient, events = c
       const existing = await tx.menuItem.findUniqueOrThrow({ where: { id: initial.id } });
       if (existing.version !== expectedVersion) throw conflict();
       if (data.categoryId || data.archived === false || !existing.archived) await category(tx, data.categoryId ?? existing.categoryId, existing.canteenId);
-      return menuItem(await tx.menuItem.update({ where: { id: initial.id }, data: { ...data, version: { increment: 1 } }, include: { category: true } }));
+      return menuItem(await tx.menuItem.update({ where: { id: initial.id }, data: { ...data, version: { increment: 1 } }, include: { category: true, offers: true } }));
     }));
   });
   async function studentCart<T>(req: Request, work: (tx: Tx, cart: Prisma.CartGetPayload<object>, studentId: string) => Promise<T>) {
@@ -151,7 +156,7 @@ export function createCatalogRouter(config: Config, db: PrismaClient, events = c
   async function available(tx: Tx, itemId: string) {
     const item = await tx.menuItem.findUnique({ where: { id: itemId }, include: { canteen: true, category: true } });
     if (!item) throw new AppError(404, 'ITEM_NOT_FOUND', 'Menu item not found.');
-    if (item.archived || !item.available || item.category.archived || !item.canteen.operational || !item.canteen.acceptingOrders) throw new AppError(409, 'ITEM_UNAVAILABLE', 'This item or canteen is currently unavailable.');
+    if (item.canteen.slug !== 'canteen' || item.archived || !item.available || item.category.archived || !item.canteen.operational || !item.canteen.acceptingOrders) throw new AppError(409, 'ITEM_UNAVAILABLE', 'This item or canteen is currently unavailable.');
     return item;
   }
   async function changed(tx: Tx, cartId: string) {

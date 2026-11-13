@@ -1,3 +1,7 @@
+import OfferManagement from './pages/OfferManagement.jsx';
+import BannerManagement from './pages/BannerManagement.jsx';
+import OrderSoundActivation from './components/OrderSoundActivation.jsx';
+import CanteenRewards from './pages/CanteenRewards.jsx';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { PortalProviders, ProtectedRoute } from '@spoonate/portal/PortalShell.jsx';
 import Login from './pages/CanteenLogin.jsx';
@@ -7,9 +11,13 @@ import CanteenDashboard from "./pages/CanteenDashboard.jsx";
 import CanteenOrders from "./pages/CanteenOrders.jsx";
 import CanteenOrderDetails from "./pages/CanteenOrderDetails.jsx";
 export default function App() {
-  return <PortalProviders><BrowserRouter><Routes>
+  return <PortalProviders><BrowserRouter><OrderSoundActivation /><Routes>
     <Route path="/login" element={<Login />} />
     <Route path="/canteen" element={<ProtectedRoute><CanteenDashboard /></ProtectedRoute>} />
+    <Route path="/canteen/combos" element={<ProtectedRoute><MenuManagement combosOnly /></ProtectedRoute>} />
+    <Route path="/canteen/rewards" element={<ProtectedRoute><CanteenRewards /></ProtectedRoute>} />
+    <Route path="/canteen/offers" element={<ProtectedRoute><OfferManagement /></ProtectedRoute>} />
+    <Route path="/canteen/banners" element={<ProtectedRoute><BannerManagement /></ProtectedRoute>} />
     <Route path="/canteen/menu" element={<ProtectedRoute><MenuManagement /></ProtectedRoute>} />
     <Route path="/canteen/members" element={<ProtectedRoute><CanteenMembers /></ProtectedRoute>} />
     <Route path="/canteen/orders" element={<ProtectedRoute><CanteenOrders /></ProtectedRoute>} />

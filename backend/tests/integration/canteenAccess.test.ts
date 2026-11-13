@@ -21,7 +21,7 @@ test('name-and-code entry creates scoped canteen sessions without email or Supab
   const config = loadConfig({ DATABASE_URL: url, FRONTEND_ORIGIN: 'http://localhost:5173', ADMIN_ACCESS_PASSWORD: 'test-admin-password',
     SESSION_SECRET: 's'.repeat(32), OTP_SECRET: 'o'.repeat(32), SEED_DEVELOPMENT_DATA: 'true', DB_TIMEOUT_MS: '10000', LOG_LEVEL: 'silent' });
   const db = createPrisma(config); await seed(db, config);
-  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'bella-bite' } });
+  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'canteen' } });
   const server = createApp(config, db, () => {}, (async () => assert.fail('name-and-code access must never contact Supabase')) as typeof fetch).listen(0, '127.0.0.1');
   await once(server, 'listening'); const address = server.address(); assert(address && typeof address !== 'string');
   const base = `http://127.0.0.1:${address.port}/api/v1`;
@@ -45,7 +45,7 @@ test('name-and-code entry creates scoped canteen sessions without email or Supab
   const staff = await new Browser().prepare();
   try {
     await t.test('the code selects the canteen and signs the named member in immediately', async () => {
-      const response = await staff.login('  Tanu   Verma ', ' BELLA-BITE ');
+      const response = await staff.login('  Tanu   Verma ', ' SHANU ');
       assert.equal(response.status, 200, JSON.stringify(response.body));
       contracts['POST /auth/canteen/access']!.response.parse(response.body);
       assert.equal(response.body.name, 'Tanu Verma'); assert.equal(response.body.canteenId, canteen.id);
@@ -59,43 +59,41 @@ test('name-and-code entry creates scoped canteen sessions without email or Supab
     });
     await t.test('repeated and concurrent sign-ins reuse the same canteen member', async () => {
       const second = await new Browser().prepare(); const third = await new Browser().prepare();
-      const [a, b] = await Promise.all([second.login('tanu verma', 'bella-bite'), third.login('TANU VERMA', 'bella-bite')]);
+      const [a, b] = await Promise.all([second.login('tanu verma', 'shanu'), third.login('TANU VERMA', 'shanu')]);
       assert.equal(a.status, 200); assert.equal(b.status, 200); assert.equal(a.body.id, b.body.id);
       assert.equal(await db.canteenMembership.count({ where: { canteenId: canteen.id } }), 1);
-      const another = await new Browser().prepare(); const result = await another.login('Tanu Verma', 'shanu');
-      assert.equal(result.status, 200); assert.notEqual(result.body.id, a.body.id); assert.notEqual(result.body.canteenId, canteen.id);
-      assert.equal((await another.request(`/canteens/${canteen.id}/members`)).status, 403);
+      const another = await new Browser().prepare();
+      assert.equal((await another.login('Tanu Verma','historical-code')).status,401);
     });
     await t.test('wrong codes, email fields, caller-selected canteens, other portals and forged requests are rejected', async () => {
       const before = await db.user.count();
       assert.equal((await staff.login('Intruder', 'incorrect')).status, 401);
       assert.equal(await db.user.count(), before);
       for (const extra of [{ email: 'unused@example.edu' }, { canteenId: canteen.id }]) {
-        assert.equal((await staff.request('/auth/canteen/access', 'POST', { name: 'Member', accessCode: 'bella-bite', ...extra })).status, 422);
+        assert.equal((await staff.request('/auth/canteen/access', 'POST', { name: 'Member', accessCode: 'shanu', ...extra })).status, 422);
       }
-      for (const portal of ['student', 'admin'] as const) {
-        assert.equal((await (await new Browser(portal).prepare()).login('Member', 'bella-bite')).status, 403);
+      for (const portal of ['student'] as const) {
+        assert.equal((await (await new Browser(portal).prepare()).login('Member', 'shanu')).status, 403);
       }
-      assert.equal((await staff.request('/auth/canteen/access', 'POST', { name: 'Member', accessCode: 'bella-bite' }, { 'X-CSRF-Token': '' })).status, 403);
+      assert.equal((await staff.request('/auth/canteen/access', 'POST', { name: 'Member', accessCode: 'shanu' }, { 'X-CSRF-Token': '' })).status, 403);
     });
     await t.test('removed and disabled members cannot sign in or keep using sessions', async () => {
-      const removed = await new Browser().prepare(); const login = await removed.login('Removed Member', 'bella-bite'); assert.equal(login.status, 200);
+      const removed = await new Browser().prepare(); const login = await removed.login('Removed Member', 'shanu'); assert.equal(login.status, 200);
       const member = await db.canteenMembership.findFirstOrThrow({ where: { userId: login.body.id, canteenId: canteen.id } });
       assert.equal((await staff.request(`/canteens/${canteen.id}/members/${member.id}/revoke`, 'POST', { expectedVersion: member.version })).status, 200);
       assert.equal((await removed.request('/auth/me')).status, 401);
-      assert.equal((await removed.login('Removed Member', 'bella-bite')).status, 403);
+      assert.equal((await removed.login('Removed Member', 'shanu')).status, 403);
       await db.user.update({ where: { id: login.body.id }, data: { status: 'DISABLED' } });
-      assert.equal((await removed.login('Removed Member', 'bella-bite')).status, 403);
+      assert.equal((await removed.login('Removed Member', 'shanu')).status, 403);
     });
     await t.test('rotation ends old sessions and permits the current code while preserving names', async () => {
-      await rotateCode(db, config, 'bella-bite', 'Bella-Bite-New');
+      await rotateCode(db, config, 'canteen', 'Test-Code-New');
       assert.equal((await staff.request('/auth/me')).status, 401);
-      assert.equal((await staff.login('Tanu Verma', 'bella-bite')).status, 401);
-      const result = await staff.login('Tanu Verma', 'BELLA-BITE-NEW'); assert.equal(result.status, 200);
+      assert.equal((await staff.login('Tanu Verma', 'shanu')).status, 401);
+      const result = await staff.login('Tanu Verma', 'TEST-CODE-NEW'); assert.equal(result.status, 200);
       assert.equal(result.body.email, canteenMemberEmail('Tanu Verma', canteen.id));
-      await assert.rejects(rotateCode(db, config, 'shanu', 'bella-bite-new'), { status: 409 });
       await db.canteen.update({ where: { id: canteen.id }, data: { operational: false } });
-      assert.equal((await staff.login('Another Member', 'bella-bite-new')).status, 403);
+      assert.equal((await staff.login('Another Member', 'Test-Code-New')).status, 403);
       await db.canteen.update({ where: { id: canteen.id }, data: { operational: true } });
     });
     await t.test('logout clears the canteen session and guessing codes is rate limited', async () => {

@@ -17,7 +17,7 @@ export default function OrderTracking() {
         <div className="mt-6 rounded-2xl bg-white p-8 shadow-card">
           <p className="mt-5 text-gray-500">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(" · ")}</p>
           <div className="mt-8 space-y-4">{(order.status === "REJECTED" ? ["RECEIVED", "REJECTED"] : orderStatuses).map((status, index) => <div key={status} className="flex items-center gap-4"><span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${index <= currentIndex ? "bg-[#0f8f73] text-white" : "bg-gray-100 text-gray-400"}`}>{index <= currentIndex ? <Check size={18} /> : <Circle size={16} />}</span><div><p className="font-bold">{statusLabels[status]}</p>{status === order.status && <p className="text-sm text-[#0f8f73]">Current status</p>}</div></div>)}</div>
-          {order.status === "REJECTED" && <p role="status" className="mt-8 rounded-xl bg-red-50 p-5 font-bold text-red-700">The canteen rejected this order. Please choose another canteen or place a new order.</p>}
+          {order.status === "REJECTED" && <p role="status" className="mt-8 rounded-xl bg-red-50 p-5 font-bold text-red-700">The canteen rejected this order. Please place a new order.</p>}
           
           {order.status === "COLLECTED" && <p className="mt-8 rounded-xl bg-green-50 p-5 font-bold text-green-700">Collected. Enjoy your food!</p>}
         </div>

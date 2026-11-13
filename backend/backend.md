@@ -102,7 +102,7 @@ frontend/src/
 The frontend currently has no HTTP API integration. The following contract maps its existing screens and context actions to the planned backend; it must be agreed before feature implementation. All routes below are relative to `/api/v1`, except `/health/live` and `/health/ready`. Register schemas and contract fixtures in Phase 1, then implement and connect each feature in its phase.
 
 - `Login.jsx` / `AuthContext`: student signup sends `{ name, email, password }` and returns a signup email challenge. Persist only a salted password hash in pending state; never expose/log the password. Signup verification activates the account and returns the student to login without a session. Student login sends `{ email, password }` and creates a session only for an active verified account with a matching password hash. Canteen login maps `{ email, cafeId, secretCode }` to `{ email, canteenId, accessCode }` and returns a bound email challenge; verification creates the scoped staff session. Challenges return `{ challengeId, expiresAt, resendAfter }`, and verification sends `{ code }`. Password-reset request/verification uses a separate purpose-bound email challenge followed by a new password. Admin login sends `{ email, password }`. Add verification/reset UI and `GET /auth/csrf`, returning `{ csrfToken }` for an `X-CSRF-Token` header on writes.
-- `StudentDashboard`, `CafePage`, and the login canteen selector use the directory/menu endpoints. API canteens expose UUID `id` plus stable `slug`; retain existing slug URLs such as `/student/cafe/bella-bite` by resolving the slug to the API UUID before requests. Menu responses expose `id`, `canteenId`, `name`, `description`, `category`, `pricePaise`, `available`, `archived` and `version`.
+- `StudentDashboard`, `CafePage`, and the login canteen selector use the directory/menu endpoints. API canteens expose UUID `id` plus stable `slug`; retain existing slug URLs such as `/student/cafe/test-canteen-8` by resolving the slug to the API UUID before requests. Menu responses expose `id`, `canteenId`, `name`, `description`, `category`, `pricePaise`, `available`, `archived` and `version`.
 - `Cart` / `OrderContext`: `addToCart` sends `{ menuItemId, quantity, expectedVersion }`; quantity edits send `{ quantity, expectedVersion }`. Cart responses contain `{ id, canteenId, version, items, totalPaise, quoteToken }`, with line IDs, menu-item IDs and current prices/availability. Item mutation URLs use the cart-line ID, not the menu-item ID. A server-issued quote token binds the reviewed prices and cart version; validate it again during checkout.
 - `Checkout` / `createOrder`: send `{ pickupAt, expectedCartVersion, quoteToken }` with an `Idempotency-Key`. Return the persisted order and clear the cart only after success. `OrderSuccess`, `MyOrders`, `OrderTracking` and canteen details use UUID `id` in routes and show `orderCode` for pickup. Order responses include `canteenId`, permitted student display details, immutable item snapshots, `orderCode`, `codeDay`, `status`, `totalPaise`, `pickupAt`, `version`, and status history; student email is not exposed in public catalog responses.
 - `CanteenDashboard`, `CanteenOrders`, `CanteenOrderDetails` / `updateOrderStatus`: map `ACCEPTED`, `PREPARING`, `READY`, `COLLECTED` to `/accept`, `/prepare`, `/ready`, `/collect`. Send `{ expectedVersion }`; collection also sends `{ code }`. Reuse command idempotency keys on retries. `toggleOrders` sends `{ acceptingOrders, expectedVersion }`; `toggleFood` sends `{ available, expectedVersion }`, using explicit desired values rather than blind toggles.
@@ -247,24 +247,15 @@ Execute phases in order. Every phase includes implementation tasks and a complet
 ### Phase 2 — Create migrations and provision the canteen directory
 
 1. Define the initial models and relations in prisma/schema.prisma, then generate Prisma migrations for the tables, constraints and indexes in section 5. Add SQL to migrations for constraints Prisma cannot express. Use Prisma Migrate for local development and apply committed migrations during deployment; do not use schema push as the release migration strategy.
-2. Configure Supabase staging/production PostgreSQL credentials, TLS, application/migration roles and supported Prisma pooling. Keep browser access to application tables disabled; qualify interactive transactions and migration connectivity before deployment. Seed the eight canteens below using stable slugs that match the frontend.
+2. Configure Supabase staging/production PostgreSQL credentials, TLS, application/migration roles and supported Prisma pooling. Keep browser access to application tables disabled; qualify interactive transactions and migration connectivity before deployment. Seed the single canteen using its stable generic slug.
 3. Add an operator CLI that prompts for a canteen code without echoing it, hashes it with salted Node.js crypto.scrypt, and writes the hash/version transactionally. Operators can manually provision codes without entering plain text in database SQL or logs.
 4. Permit name-based codes only for explicitly configured development seed data. Require operators to supply production codes; never overwrite existing manually entered hashes on reseeding.
 5. Seed sample menus only in development. Real menu prices, locations, and hours must come from canteen-supplied data.
 6. Add a separate admin provisioning command; do not ship the frontend's `admin123` credential as a production account.
 
-| Slug | Name / temporary development code |
-| --- | --- |
-| `mukteshwari` | Mukteshwari's Canteen |
-| `shanu` | Shanu's Canteen |
-| `spicy-bites` | Spicy Bites |
-| `annapurna` | Annapurna Canteen |
-| `agarwal` | Agarwal Canteen |
-| `fun-n-frolic` | Fun 'N' Frolic |
-| `desi-jayka` | Desi Jayka |
-| `bella-bite` | Bella Bite |
+The application seeds one generic canteen with slug `canteen`. Operator credentials are configured separately from its display name.
 
-**Complete when:** migration and seed tests pass, the eight names are returned correctly, codes are hashed, and catalog responses never reveal them.
+**Complete when:** migration and seed tests pass, the single generic canteen is returned correctly, codes are hashed, and catalog responses never reveal them.
 
 ### Phase 3 — Implement student signup verification and email/password login
 
@@ -501,4 +492,4 @@ Use this as the implementation acceptance checklist. Each row needs automated ve
 
 Implement phases 1–4 before accepting authenticated requests, phases 5–7 before placing real persisted test orders, phases 8–10 before canteen fulfillment testing, and phases 11–13 before replacing the frontend demo storage in a deployed environment. Implement the payment phase separately.
 
-The payment-free backend is complete when all eight canteens can use database-managed member codes, verified students can order from one canteen, availability is enforced transactionally, staff can accept/prepare/notify/verify pickup, admins can inspect scoped reports, retries do not create duplicates, and cross-device browser tests pass. Update this plan, the README and architecture together when a phase changes from planned to implemented.
+The payment-free backend is complete when the canteen can use database-managed member codes, verified students can order from one canteen, availability is enforced transactionally, staff can accept/prepare/notify/verify pickup, admins can inspect scoped reports, retries do not create duplicates, and cross-device browser tests pass. Update this plan, the README and architecture together when a phase changes from planned to implemented.

@@ -60,9 +60,15 @@ export const ModelName = {
   Session: 'Session',
   MenuCategory: 'MenuCategory',
   MenuItem: 'MenuItem',
+  Banner: 'Banner',
+  BannerItem: 'BannerItem',
+  BannerImage: 'BannerImage',
+  Offer: 'Offer',
+  BannerOffer: 'BannerOffer',
   Cart: 'Cart',
   CartItem: 'CartItem',
   Order: 'Order',
+  Reward: 'Reward',
   PickupCredential: 'PickupCredential',
   OrderItem: 'OrderItem',
   OrderEvent: 'OrderEvent',
@@ -220,6 +226,69 @@ export const MenuItemScalarFieldEnum = {
 export type MenuItemScalarFieldEnum = (typeof MenuItemScalarFieldEnum)[keyof typeof MenuItemScalarFieldEnum]
 
 
+export const BannerScalarFieldEnum = {
+  id: 'id',
+  canteenId: 'canteenId',
+  theme: 'theme',
+  title: 'title',
+  description: 'description',
+  imageRef: 'imageRef',
+  active: 'active',
+  targetType: 'targetType',
+  targetId: 'targetId',
+  publishedAt: 'publishedAt',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  version: 'version'
+} as const
+
+export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof BannerScalarFieldEnum]
+
+
+export const BannerItemScalarFieldEnum = {
+  bannerId: 'bannerId',
+  canteenId: 'canteenId',
+  menuItemId: 'menuItemId'
+} as const
+
+export type BannerItemScalarFieldEnum = (typeof BannerItemScalarFieldEnum)[keyof typeof BannerItemScalarFieldEnum]
+
+
+export const BannerImageScalarFieldEnum = {
+  id: 'id',
+  mime: 'mime',
+  data: 'data',
+  createdAt: 'createdAt'
+} as const
+
+export type BannerImageScalarFieldEnum = (typeof BannerImageScalarFieldEnum)[keyof typeof BannerImageScalarFieldEnum]
+
+
+export const OfferScalarFieldEnum = {
+  id: 'id',
+  canteenId: 'canteenId',
+  menuItemId: 'menuItemId',
+  name: 'name',
+  kind: 'kind',
+  value: 'value',
+  active: 'active',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  version: 'version'
+} as const
+
+export type OfferScalarFieldEnum = (typeof OfferScalarFieldEnum)[keyof typeof OfferScalarFieldEnum]
+
+
+export const BannerOfferScalarFieldEnum = {
+  bannerId: 'bannerId',
+  offerId: 'offerId',
+  canteenId: 'canteenId'
+} as const
+
+export type BannerOfferScalarFieldEnum = (typeof BannerOfferScalarFieldEnum)[keyof typeof BannerOfferScalarFieldEnum]
+
+
 export const CartScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
@@ -250,6 +319,7 @@ export const OrderScalarFieldEnum = {
   executionMode: 'executionMode',
   paymentStatus: 'paymentStatus',
   totalPaise: 'totalPaise',
+  rewardTokenCost: 'rewardTokenCost',
   pickupAt: 'pickupAt',
   codeDay: 'codeDay',
   orderCode: 'orderCode',
@@ -261,6 +331,18 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const RewardScalarFieldEnum = {
+  id: 'id',
+  canteenId: 'canteenId',
+  menuItemId: 'menuItemId',
+  tokenCost: 'tokenCost',
+  active: 'active',
+  version: 'version'
+} as const
+
+export type RewardScalarFieldEnum = (typeof RewardScalarFieldEnum)[keyof typeof RewardScalarFieldEnum]
 
 
 export const PickupCredentialScalarFieldEnum = {
@@ -279,7 +361,10 @@ export const OrderItemScalarFieldEnum = {
   menuItemId: 'menuItemId',
   name: 'name',
   quantity: 'quantity',
-  unitPricePaise: 'unitPricePaise'
+  unitPricePaise: 'unitPricePaise',
+  originalUnitPricePaise: 'originalUnitPricePaise',
+  offerId: 'offerId',
+  offerName: 'offerName'
 } as const
 
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]

@@ -10,3 +10,6 @@ dist/
 
 tmp/
 backend/.import-backups/
+
+# Generated private production service settings
+deploy/.production/

@@ -11,6 +11,19 @@ function setup() {
   });
   return { feed, requests, snapshot: () => current, expired: () => expired };
 }
+
+test('opening notifications marks the displayed unread items in one scoped batch', async () => {
+  const {feed,requests,snapshot}=setup();
+  const first=feed.refresh(); requests[0].resolve({items:[notification('a'),notification('b')],unreadCount:2,nextCursor:null}); await first;
+  const reading=feed.markOpened(['a','b']);
+  assert.equal(requests[1].path,'/notifications/read');
+  assert.deepEqual(requests[1].body,{ids:['a','b']});
+  await feed.markOpened(['a','b']);
+  assert.equal(requests.length,2);
+  requests[1].resolve({items:[notification('a','read'),notification('b','read')],unreadCount:0}); await reading;
+  assert.equal(snapshot().unreadCount,0);
+  assert(snapshot().items.every(item=>item.readAt));
+});
 test('offline notifications recover from the server without browser storage and survive a new feed', async () => {
   const { feed, requests, snapshot } = setup();
   const offline = feed.refresh(); requests[0].reject(new Error('Offline'));

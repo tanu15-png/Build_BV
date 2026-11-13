@@ -1,13 +1,6 @@
 // Directory confirmed for Build BV. Menu items are samples for testing.
 export const cafes = [
-  { id: "mukteshwari", name: "Mukteshwari's Canteen" },
-  { id: "shanu", name: "Shanu's Canteen" },
-  { id: "spicy-bites", name: "Spicy Bites" },
-  { id: "annapurna", name: "Annapurna Canteen" },
-  { id: "agarwal", name: "Agarwal Canteen" },
-  { id: "fun-n-frolic", name: "Fun 'N' Frolic" },
-  { id: "desi-jayka", name: "Desi Jayka" },
-  { id: "bella-bite", name: "Bella Bite" },
+  { id: 'canteen', name: 'Canteen' },
 ].map((cafe) => ({
   ...cafe,
   status: "Open",

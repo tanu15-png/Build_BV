@@ -1,6 +1,6 @@
 import { apiBase } from '../portal.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { api } from '../services/api';
+import { api, peekApiCache, invalidateApiReads } from '../services/api';
 import { mapCatalog, mapCart } from '../services/catalog';
 import { mergeCanteenMenu } from '../services/menuChanges';
 import { createMenuQueue } from '../services/menuQueue';
@@ -26,13 +26,13 @@ export function useCatalogCart(user) {
   const [management, setManagement] = useState({ owner: '', menu: null, pending: 0 });
   const [catalogSaving, setCatalogSaving] = useState(false);
   const [catalogRevision, setCatalogRevision] = useState(0);
-  const refresh = useCallback(async (catalogOnly = false) => {
+  const refresh = useCallback(async (catalogOnly = false, fresh = false) => {
     if (!key || (!catalogOnly && busyRef.current)) return;
     const catalogRequest = ++catalogSequence.current;
     const started = generation.current;
     setLoading(true);
     try {
-      const [nextCatalog] = await Promise.all([api('/catalog'), student && !catalogOnly ? cartQueue.current?.load(true) : null]);
+      const [nextCatalog] = await Promise.all([api('/catalog', { fresh }), student && !catalogOnly ? cartQueue.current?.load(true) : null]);
       if (started !== generation.current) return;
       const visible = pendingMenu.current ? mergeCanteenMenu(nextCatalog, pendingMenu.current) : nextCatalog;
       if (catalogRequest === catalogSequence.current) { catalogRef.current = visible; setCatalog({ owner: key, data: visible }); }
@@ -40,10 +40,11 @@ export function useCatalogCart(user) {
     } catch (issue) { if (catalogRequest === catalogSequence.current && started === generation.current) setError(issue.message); }
     finally { if (catalogRequest === catalogSequence.current && started === generation.current) setLoading(false); }
   }, [key, student]);
-  const refreshCatalog = useCallback(() => refresh(), [refresh]);
+  const refreshCatalog = useCallback(() => refresh(false, true), [refresh]);
   useEffect(() => {
     const activeGeneration = generation.current + 1; generation.current = activeGeneration; busyRef.current = false;
-    catalogRef.current = empty; pendingMenu.current = null;
+    catalogRef.current = peekApiCache('/catalog') || empty; pendingMenu.current = null;
+    if (key && catalogRef.current !== empty) setCatalog({ owner: key, data: catalogRef.current });
     const cartUpdates = createCartQueue({ request: api,
       changed: snapshot => {
         if (cartQueue.current !== cartUpdates) return;
@@ -73,17 +74,26 @@ export function useCatalogCart(user) {
     localStorage.removeItem('campusEatsCartsV2'); localStorage.removeItem('campusEatsAvailabilityV2');
     const initial = setTimeout(() => { setBusy(busyRef.current); setCatalogSaving(false); setError(''); void refresh(); }, 0);
     const timer = setInterval(() => { void refresh(); }, 30000);
-    const onFocus = () => { void refresh(); };
+    const onFocus = () => { void refresh(false, true); };
     window.addEventListener('focus', onFocus); window.addEventListener('online', onFocus);
     let updateTimer;
     const stream = key ? new EventSource(`${apiBase}/catalog/events`) : null;
     const onCatalogChange = () => {
+      invalidateApiReads();
       clearTimeout(updateTimer);
-      updateTimer = setTimeout(() => { setCatalogRevision(value => value + 1); void refresh(true); }, 150);
+      updateTimer = setTimeout(() => { setCatalogRevision(value => value + 1); void refresh(true, true); if(student)void cartUpdates.load(true).catch(issue=>setError(issue.message)); }, 150);
     };
     stream?.addEventListener('catalog-change', onCatalogChange);
+    stream?.addEventListener('rewards-change', invalidateApiReads);
+    stream?.addEventListener('orders-change', () => window.dispatchEvent(new Event('spoonate:orders-changed')));
     return () => { cartUpdates.dispose(); queue.dispose(); generation.current = activeGeneration + 1; clearTimeout(initial); clearTimeout(updateTimer); clearInterval(timer); stream?.close(); window.removeEventListener('focus', onFocus); window.removeEventListener('online', onFocus); };
-  }, [key, refresh]);
+  }, [key, refresh, student]);
+  useEffect(() => {
+    const until=catalog.data.cacheUntil;
+    if(!until||catalog.owner!==key)return;
+    const timer=setTimeout(()=>{void refresh(false,true);},Math.min(2147483647,Math.max(50,Date.parse(until)-Date.now()+25)));
+    return()=>clearTimeout(timer);
+  },[catalog,key,refresh]);
   const mutateCart = (build, project) => {
     if (!student) return Promise.reject(new Error('Sign in to update your cart.'));
     const queue = cartQueue.current;

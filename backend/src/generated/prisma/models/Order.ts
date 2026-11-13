@@ -28,11 +28,13 @@ export type AggregateOrder = {
 
 export type OrderAvgAggregateOutputType = {
   totalPaise: number | null
+  rewardTokenCost: number | null
   version: number | null
 }
 
 export type OrderSumAggregateOutputType = {
   totalPaise: number | null
+  rewardTokenCost: number | null
   version: number | null
 }
 
@@ -44,6 +46,7 @@ export type OrderMinAggregateOutputType = {
   executionMode: string | null
   paymentStatus: string | null
   totalPaise: number | null
+  rewardTokenCost: number | null
   pickupAt: Date | null
   codeDay: Date | null
   orderCode: string | null
@@ -62,6 +65,7 @@ export type OrderMaxAggregateOutputType = {
   executionMode: string | null
   paymentStatus: string | null
   totalPaise: number | null
+  rewardTokenCost: number | null
   pickupAt: Date | null
   codeDay: Date | null
   orderCode: string | null
@@ -80,6 +84,7 @@ export type OrderCountAggregateOutputType = {
   executionMode: number
   paymentStatus: number
   totalPaise: number
+  rewardTokenCost: number
   pickupAt: number
   codeDay: number
   orderCode: number
@@ -94,11 +99,13 @@ export type OrderCountAggregateOutputType = {
 
 export type OrderAvgAggregateInputType = {
   totalPaise?: true
+  rewardTokenCost?: true
   version?: true
 }
 
 export type OrderSumAggregateInputType = {
   totalPaise?: true
+  rewardTokenCost?: true
   version?: true
 }
 
@@ -110,6 +117,7 @@ export type OrderMinAggregateInputType = {
   executionMode?: true
   paymentStatus?: true
   totalPaise?: true
+  rewardTokenCost?: true
   pickupAt?: true
   codeDay?: true
   orderCode?: true
@@ -128,6 +136,7 @@ export type OrderMaxAggregateInputType = {
   executionMode?: true
   paymentStatus?: true
   totalPaise?: true
+  rewardTokenCost?: true
   pickupAt?: true
   codeDay?: true
   orderCode?: true
@@ -146,6 +155,7 @@ export type OrderCountAggregateInputType = {
   executionMode?: true
   paymentStatus?: true
   totalPaise?: true
+  rewardTokenCost?: true
   pickupAt?: true
   codeDay?: true
   orderCode?: true
@@ -251,6 +261,7 @@ export type OrderGroupByOutputType = {
   executionMode: string
   paymentStatus: string
   totalPaise: number
+  rewardTokenCost: number | null
   pickupAt: Date
   codeDay: Date
   orderCode: string | null
@@ -292,6 +303,7 @@ export type OrderWhereInput = {
   executionMode?: Prisma.StringFilter<"Order"> | string
   paymentStatus?: Prisma.StringFilter<"Order"> | string
   totalPaise?: Prisma.IntFilter<"Order"> | number
+  rewardTokenCost?: Prisma.IntNullableFilter<"Order"> | number | null
   pickupAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   codeDay?: Prisma.DateTimeFilter<"Order"> | Date | string
   orderCode?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -318,6 +330,7 @@ export type OrderOrderByWithRelationInput = {
   executionMode?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   totalPaise?: Prisma.SortOrder
+  rewardTokenCost?: Prisma.SortOrderInput | Prisma.SortOrder
   pickupAt?: Prisma.SortOrder
   codeDay?: Prisma.SortOrder
   orderCode?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -349,6 +362,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   executionMode?: Prisma.StringFilter<"Order"> | string
   paymentStatus?: Prisma.StringFilter<"Order"> | string
   totalPaise?: Prisma.IntFilter<"Order"> | number
+  rewardTokenCost?: Prisma.IntNullableFilter<"Order"> | number | null
   pickupAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   codeDay?: Prisma.DateTimeFilter<"Order"> | Date | string
   orderCode?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -375,6 +389,7 @@ export type OrderOrderByWithAggregationInput = {
   executionMode?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   totalPaise?: Prisma.SortOrder
+  rewardTokenCost?: Prisma.SortOrderInput | Prisma.SortOrder
   pickupAt?: Prisma.SortOrder
   codeDay?: Prisma.SortOrder
   orderCode?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -401,6 +416,7 @@ export type OrderScalarWhereWithAggregatesInput = {
   executionMode?: Prisma.StringWithAggregatesFilter<"Order"> | string
   paymentStatus?: Prisma.StringWithAggregatesFilter<"Order"> | string
   totalPaise?: Prisma.IntWithAggregatesFilter<"Order"> | number
+  rewardTokenCost?: Prisma.IntNullableWithAggregatesFilter<"Order"> | number | null
   pickupAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   codeDay?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   orderCode?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
@@ -417,6 +433,7 @@ export type OrderCreateInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -443,6 +460,7 @@ export type OrderUncheckedCreateInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -465,6 +483,7 @@ export type OrderUpdateInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -491,6 +510,7 @@ export type OrderUncheckedUpdateInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -515,6 +535,7 @@ export type OrderCreateManyInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -531,6 +552,7 @@ export type OrderUpdateManyMutationInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -549,6 +571,7 @@ export type OrderUncheckedUpdateManyInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -588,6 +611,7 @@ export type OrderCountOrderByAggregateInput = {
   executionMode?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   totalPaise?: Prisma.SortOrder
+  rewardTokenCost?: Prisma.SortOrder
   pickupAt?: Prisma.SortOrder
   codeDay?: Prisma.SortOrder
   orderCode?: Prisma.SortOrder
@@ -600,6 +624,7 @@ export type OrderCountOrderByAggregateInput = {
 
 export type OrderAvgOrderByAggregateInput = {
   totalPaise?: Prisma.SortOrder
+  rewardTokenCost?: Prisma.SortOrder
   version?: Prisma.SortOrder
 }
 
@@ -611,6 +636,7 @@ export type OrderMaxOrderByAggregateInput = {
   executionMode?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   totalPaise?: Prisma.SortOrder
+  rewardTokenCost?: Prisma.SortOrder
   pickupAt?: Prisma.SortOrder
   codeDay?: Prisma.SortOrder
   orderCode?: Prisma.SortOrder
@@ -629,6 +655,7 @@ export type OrderMinOrderByAggregateInput = {
   executionMode?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   totalPaise?: Prisma.SortOrder
+  rewardTokenCost?: Prisma.SortOrder
   pickupAt?: Prisma.SortOrder
   codeDay?: Prisma.SortOrder
   orderCode?: Prisma.SortOrder
@@ -641,6 +668,7 @@ export type OrderMinOrderByAggregateInput = {
 
 export type OrderSumOrderByAggregateInput = {
   totalPaise?: Prisma.SortOrder
+  rewardTokenCost?: Prisma.SortOrder
   version?: Prisma.SortOrder
 }
 
@@ -834,6 +862,7 @@ export type OrderCreateWithoutStudentInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -858,6 +887,7 @@ export type OrderUncheckedCreateWithoutStudentInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -911,6 +941,7 @@ export type OrderScalarWhereInput = {
   executionMode?: Prisma.StringFilter<"Order"> | string
   paymentStatus?: Prisma.StringFilter<"Order"> | string
   totalPaise?: Prisma.IntFilter<"Order"> | number
+  rewardTokenCost?: Prisma.IntNullableFilter<"Order"> | number | null
   pickupAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   codeDay?: Prisma.DateTimeFilter<"Order"> | Date | string
   orderCode?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -927,6 +958,7 @@ export type OrderCreateWithoutCanteenInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -951,6 +983,7 @@ export type OrderUncheckedCreateWithoutCanteenInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -999,6 +1032,7 @@ export type OrderCreateWithoutPickupCredentialInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1024,6 +1058,7 @@ export type OrderUncheckedCreateWithoutPickupCredentialInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1061,6 +1096,7 @@ export type OrderUpdateWithoutPickupCredentialInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1086,6 +1122,7 @@ export type OrderUncheckedUpdateWithoutPickupCredentialInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1107,6 +1144,7 @@ export type OrderCreateWithoutItemsInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1132,6 +1170,7 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1169,6 +1208,7 @@ export type OrderUpdateWithoutItemsInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1194,6 +1234,7 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1215,6 +1256,7 @@ export type OrderCreateWithoutEventsInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1240,6 +1282,7 @@ export type OrderUncheckedCreateWithoutEventsInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1277,6 +1320,7 @@ export type OrderUpdateWithoutEventsInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1302,6 +1346,7 @@ export type OrderUncheckedUpdateWithoutEventsInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1323,6 +1368,7 @@ export type OrderCreateWithoutAllocationInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1348,6 +1394,7 @@ export type OrderUncheckedCreateWithoutAllocationInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1385,6 +1432,7 @@ export type OrderUpdateWithoutAllocationInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1410,6 +1458,7 @@ export type OrderUncheckedUpdateWithoutAllocationInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1431,6 +1480,7 @@ export type OrderCreateWithoutNotificationsInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1456,6 +1506,7 @@ export type OrderUncheckedCreateWithoutNotificationsInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1493,6 +1544,7 @@ export type OrderUpdateWithoutNotificationsInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1518,6 +1570,7 @@ export type OrderUncheckedUpdateWithoutNotificationsInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1539,6 +1592,7 @@ export type OrderCreateWithoutIdempotencyKeysInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1564,6 +1618,7 @@ export type OrderUncheckedCreateWithoutIdempotencyKeysInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1601,6 +1656,7 @@ export type OrderUpdateWithoutIdempotencyKeysInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1626,6 +1682,7 @@ export type OrderUncheckedUpdateWithoutIdempotencyKeysInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1648,6 +1705,7 @@ export type OrderCreateManyStudentInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1664,6 +1722,7 @@ export type OrderUpdateWithoutStudentInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1688,6 +1747,7 @@ export type OrderUncheckedUpdateWithoutStudentInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1711,6 +1771,7 @@ export type OrderUncheckedUpdateManyWithoutStudentInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1728,6 +1789,7 @@ export type OrderCreateManyCanteenInput = {
   executionMode?: string
   paymentStatus?: string
   totalPaise: number
+  rewardTokenCost?: number | null
   pickupAt: Date | string
   codeDay: Date | string
   orderCode?: string | null
@@ -1744,6 +1806,7 @@ export type OrderUpdateWithoutCanteenInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1768,6 +1831,7 @@ export type OrderUncheckedUpdateWithoutCanteenInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1791,6 +1855,7 @@ export type OrderUncheckedUpdateManyWithoutCanteenInput = {
   executionMode?: Prisma.StringFieldUpdateOperationsInput | string
   paymentStatus?: Prisma.StringFieldUpdateOperationsInput | string
   totalPaise?: Prisma.IntFieldUpdateOperationsInput | number
+  rewardTokenCost?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pickupAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   codeDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1867,6 +1932,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   executionMode?: boolean
   paymentStatus?: boolean
   totalPaise?: boolean
+  rewardTokenCost?: boolean
   pickupAt?: boolean
   codeDay?: boolean
   orderCode?: boolean
@@ -1894,6 +1960,7 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   executionMode?: boolean
   paymentStatus?: boolean
   totalPaise?: boolean
+  rewardTokenCost?: boolean
   pickupAt?: boolean
   codeDay?: boolean
   orderCode?: boolean
@@ -1914,6 +1981,7 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   executionMode?: boolean
   paymentStatus?: boolean
   totalPaise?: boolean
+  rewardTokenCost?: boolean
   pickupAt?: boolean
   codeDay?: boolean
   orderCode?: boolean
@@ -1934,6 +2002,7 @@ export type OrderSelectScalar = {
   executionMode?: boolean
   paymentStatus?: boolean
   totalPaise?: boolean
+  rewardTokenCost?: boolean
   pickupAt?: boolean
   codeDay?: boolean
   orderCode?: boolean
@@ -1944,7 +2013,7 @@ export type OrderSelectScalar = {
   pickupVerifiedBy?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "canteenId" | "status" | "executionMode" | "paymentStatus" | "totalPaise" | "pickupAt" | "codeDay" | "orderCode" | "version" | "createdAt" | "updatedAt" | "collectedAt" | "pickupVerifiedBy", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "canteenId" | "status" | "executionMode" | "paymentStatus" | "totalPaise" | "rewardTokenCost" | "pickupAt" | "codeDay" | "orderCode" | "version" | "createdAt" | "updatedAt" | "collectedAt" | "pickupVerifiedBy", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   canteen?: boolean | Prisma.CanteenDefaultArgs<ExtArgs>
@@ -1985,6 +2054,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     executionMode: string
     paymentStatus: string
     totalPaise: number
+    rewardTokenCost: number | null
     pickupAt: Date
     codeDay: Date
     orderCode: string | null
@@ -2431,6 +2501,7 @@ export interface OrderFieldRefs {
   readonly executionMode: Prisma.FieldRef<"Order", 'String'>
   readonly paymentStatus: Prisma.FieldRef<"Order", 'String'>
   readonly totalPaise: Prisma.FieldRef<"Order", 'Int'>
+  readonly rewardTokenCost: Prisma.FieldRef<"Order", 'Int'>
   readonly pickupAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly codeDay: Prisma.FieldRef<"Order", 'DateTime'>
   readonly orderCode: Prisma.FieldRef<"Order", 'String'>

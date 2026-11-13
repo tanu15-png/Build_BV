@@ -249,6 +249,9 @@ export type CanteenWhereInput = {
   carts?: Prisma.CartListRelationFilter
   cartItems?: Prisma.CartItemListRelationFilter
   orders?: Prisma.OrderListRelationFilter
+  rewards?: Prisma.RewardListRelationFilter
+  banners?: Prisma.BannerListRelationFilter
+  offers?: Prisma.OfferListRelationFilter
 }
 
 export type CanteenOrderByWithRelationInput = {
@@ -269,6 +272,9 @@ export type CanteenOrderByWithRelationInput = {
   carts?: Prisma.CartOrderByRelationAggregateInput
   cartItems?: Prisma.CartItemOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
+  rewards?: Prisma.RewardOrderByRelationAggregateInput
+  banners?: Prisma.BannerOrderByRelationAggregateInput
+  offers?: Prisma.OfferOrderByRelationAggregateInput
 }
 
 export type CanteenWhereUniqueInput = Prisma.AtLeast<{
@@ -292,6 +298,9 @@ export type CanteenWhereUniqueInput = Prisma.AtLeast<{
   carts?: Prisma.CartListRelationFilter
   cartItems?: Prisma.CartItemListRelationFilter
   orders?: Prisma.OrderListRelationFilter
+  rewards?: Prisma.RewardListRelationFilter
+  banners?: Prisma.BannerListRelationFilter
+  offers?: Prisma.OfferListRelationFilter
 }, "id" | "slug">
 
 export type CanteenOrderByWithAggregationInput = {
@@ -342,6 +351,9 @@ export type CanteenCreateInput = {
   carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateInput = {
@@ -362,6 +374,9 @@ export type CanteenUncheckedCreateInput = {
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUpdateInput = {
@@ -382,6 +397,9 @@ export type CanteenUpdateInput = {
   carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateInput = {
@@ -402,6 +420,9 @@ export type CanteenUncheckedUpdateInput = {
   carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenCreateManyInput = {
@@ -588,6 +609,34 @@ export type CanteenUpdateOneRequiredWithoutMenuItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CanteenUpdateToOneWithWhereWithoutMenuItemsInput, Prisma.CanteenUpdateWithoutMenuItemsInput>, Prisma.CanteenUncheckedUpdateWithoutMenuItemsInput>
 }
 
+export type CanteenCreateNestedOneWithoutBannersInput = {
+  create?: Prisma.XOR<Prisma.CanteenCreateWithoutBannersInput, Prisma.CanteenUncheckedCreateWithoutBannersInput>
+  connectOrCreate?: Prisma.CanteenCreateOrConnectWithoutBannersInput
+  connect?: Prisma.CanteenWhereUniqueInput
+}
+
+export type CanteenUpdateOneRequiredWithoutBannersNestedInput = {
+  create?: Prisma.XOR<Prisma.CanteenCreateWithoutBannersInput, Prisma.CanteenUncheckedCreateWithoutBannersInput>
+  connectOrCreate?: Prisma.CanteenCreateOrConnectWithoutBannersInput
+  upsert?: Prisma.CanteenUpsertWithoutBannersInput
+  connect?: Prisma.CanteenWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CanteenUpdateToOneWithWhereWithoutBannersInput, Prisma.CanteenUpdateWithoutBannersInput>, Prisma.CanteenUncheckedUpdateWithoutBannersInput>
+}
+
+export type CanteenCreateNestedOneWithoutOffersInput = {
+  create?: Prisma.XOR<Prisma.CanteenCreateWithoutOffersInput, Prisma.CanteenUncheckedCreateWithoutOffersInput>
+  connectOrCreate?: Prisma.CanteenCreateOrConnectWithoutOffersInput
+  connect?: Prisma.CanteenWhereUniqueInput
+}
+
+export type CanteenUpdateOneRequiredWithoutOffersNestedInput = {
+  create?: Prisma.XOR<Prisma.CanteenCreateWithoutOffersInput, Prisma.CanteenUncheckedCreateWithoutOffersInput>
+  connectOrCreate?: Prisma.CanteenCreateOrConnectWithoutOffersInput
+  upsert?: Prisma.CanteenUpsertWithoutOffersInput
+  connect?: Prisma.CanteenWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CanteenUpdateToOneWithWhereWithoutOffersInput, Prisma.CanteenUpdateWithoutOffersInput>, Prisma.CanteenUncheckedUpdateWithoutOffersInput>
+}
+
 export type CanteenCreateNestedOneWithoutCartsInput = {
   create?: Prisma.XOR<Prisma.CanteenCreateWithoutCartsInput, Prisma.CanteenUncheckedCreateWithoutCartsInput>
   connectOrCreate?: Prisma.CanteenCreateOrConnectWithoutCartsInput
@@ -632,6 +681,20 @@ export type CanteenUpdateOneRequiredWithoutOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CanteenUpdateToOneWithWhereWithoutOrdersInput, Prisma.CanteenUpdateWithoutOrdersInput>, Prisma.CanteenUncheckedUpdateWithoutOrdersInput>
 }
 
+export type CanteenCreateNestedOneWithoutRewardsInput = {
+  create?: Prisma.XOR<Prisma.CanteenCreateWithoutRewardsInput, Prisma.CanteenUncheckedCreateWithoutRewardsInput>
+  connectOrCreate?: Prisma.CanteenCreateOrConnectWithoutRewardsInput
+  connect?: Prisma.CanteenWhereUniqueInput
+}
+
+export type CanteenUpdateOneRequiredWithoutRewardsNestedInput = {
+  create?: Prisma.XOR<Prisma.CanteenCreateWithoutRewardsInput, Prisma.CanteenUncheckedCreateWithoutRewardsInput>
+  connectOrCreate?: Prisma.CanteenCreateOrConnectWithoutRewardsInput
+  upsert?: Prisma.CanteenUpsertWithoutRewardsInput
+  connect?: Prisma.CanteenWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CanteenUpdateToOneWithWhereWithoutRewardsInput, Prisma.CanteenUpdateWithoutRewardsInput>, Prisma.CanteenUncheckedUpdateWithoutRewardsInput>
+}
+
 export type CanteenCreateWithoutAccessCodesInput = {
   id?: string
   slug: string
@@ -649,6 +712,9 @@ export type CanteenCreateWithoutAccessCodesInput = {
   carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateWithoutAccessCodesInput = {
@@ -668,6 +734,9 @@ export type CanteenUncheckedCreateWithoutAccessCodesInput = {
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenCreateOrConnectWithoutAccessCodesInput = {
@@ -703,6 +772,9 @@ export type CanteenUpdateWithoutAccessCodesInput = {
   carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateWithoutAccessCodesInput = {
@@ -722,6 +794,9 @@ export type CanteenUncheckedUpdateWithoutAccessCodesInput = {
   carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenCreateWithoutMembershipsInput = {
@@ -741,6 +816,9 @@ export type CanteenCreateWithoutMembershipsInput = {
   carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateWithoutMembershipsInput = {
@@ -760,6 +838,9 @@ export type CanteenUncheckedCreateWithoutMembershipsInput = {
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenCreateOrConnectWithoutMembershipsInput = {
@@ -795,6 +876,9 @@ export type CanteenUpdateWithoutMembershipsInput = {
   carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateWithoutMembershipsInput = {
@@ -814,6 +898,9 @@ export type CanteenUncheckedUpdateWithoutMembershipsInput = {
   carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenCreateWithoutChallengesInput = {
@@ -833,6 +920,9 @@ export type CanteenCreateWithoutChallengesInput = {
   carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateWithoutChallengesInput = {
@@ -852,6 +942,9 @@ export type CanteenUncheckedCreateWithoutChallengesInput = {
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenCreateOrConnectWithoutChallengesInput = {
@@ -887,6 +980,9 @@ export type CanteenUpdateWithoutChallengesInput = {
   carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateWithoutChallengesInput = {
@@ -906,6 +1002,9 @@ export type CanteenUncheckedUpdateWithoutChallengesInput = {
   carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenCreateWithoutSessionsInput = {
@@ -925,6 +1024,9 @@ export type CanteenCreateWithoutSessionsInput = {
   carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateWithoutSessionsInput = {
@@ -944,6 +1046,9 @@ export type CanteenUncheckedCreateWithoutSessionsInput = {
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenCreateOrConnectWithoutSessionsInput = {
@@ -979,6 +1084,9 @@ export type CanteenUpdateWithoutSessionsInput = {
   carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateWithoutSessionsInput = {
@@ -998,6 +1106,9 @@ export type CanteenUncheckedUpdateWithoutSessionsInput = {
   carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenCreateWithoutCategoriesInput = {
@@ -1017,6 +1128,9 @@ export type CanteenCreateWithoutCategoriesInput = {
   carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateWithoutCategoriesInput = {
@@ -1036,6 +1150,9 @@ export type CanteenUncheckedCreateWithoutCategoriesInput = {
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenCreateOrConnectWithoutCategoriesInput = {
@@ -1071,6 +1188,9 @@ export type CanteenUpdateWithoutCategoriesInput = {
   carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateWithoutCategoriesInput = {
@@ -1090,6 +1210,9 @@ export type CanteenUncheckedUpdateWithoutCategoriesInput = {
   carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenCreateWithoutMenuItemsInput = {
@@ -1109,6 +1232,9 @@ export type CanteenCreateWithoutMenuItemsInput = {
   carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateWithoutMenuItemsInput = {
@@ -1128,6 +1254,9 @@ export type CanteenUncheckedCreateWithoutMenuItemsInput = {
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenCreateOrConnectWithoutMenuItemsInput = {
@@ -1163,6 +1292,9 @@ export type CanteenUpdateWithoutMenuItemsInput = {
   carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateWithoutMenuItemsInput = {
@@ -1182,6 +1314,217 @@ export type CanteenUncheckedUpdateWithoutMenuItemsInput = {
   carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
+}
+
+export type CanteenCreateWithoutBannersInput = {
+  id?: string
+  slug: string
+  name: string
+  location?: string | null
+  hours?: string | null
+  acceptingOrders?: boolean
+  operational?: boolean
+  version?: number
+  accessCodes?: Prisma.CanteenAccessCodeCreateNestedManyWithoutCanteenInput
+  memberships?: Prisma.CanteenMembershipCreateNestedManyWithoutCanteenInput
+  challenges?: Prisma.AuthChallengeCreateNestedManyWithoutCanteenInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutCanteenInput
+  menuItems?: Prisma.MenuItemCreateNestedManyWithoutCanteenInput
+  categories?: Prisma.MenuCategoryCreateNestedManyWithoutCanteenInput
+  carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
+  cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
+  orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
+}
+
+export type CanteenUncheckedCreateWithoutBannersInput = {
+  id?: string
+  slug: string
+  name: string
+  location?: string | null
+  hours?: string | null
+  acceptingOrders?: boolean
+  operational?: boolean
+  version?: number
+  accessCodes?: Prisma.CanteenAccessCodeUncheckedCreateNestedManyWithoutCanteenInput
+  memberships?: Prisma.CanteenMembershipUncheckedCreateNestedManyWithoutCanteenInput
+  challenges?: Prisma.AuthChallengeUncheckedCreateNestedManyWithoutCanteenInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutCanteenInput
+  menuItems?: Prisma.MenuItemUncheckedCreateNestedManyWithoutCanteenInput
+  categories?: Prisma.MenuCategoryUncheckedCreateNestedManyWithoutCanteenInput
+  carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
+  cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
+}
+
+export type CanteenCreateOrConnectWithoutBannersInput = {
+  where: Prisma.CanteenWhereUniqueInput
+  create: Prisma.XOR<Prisma.CanteenCreateWithoutBannersInput, Prisma.CanteenUncheckedCreateWithoutBannersInput>
+}
+
+export type CanteenUpsertWithoutBannersInput = {
+  update: Prisma.XOR<Prisma.CanteenUpdateWithoutBannersInput, Prisma.CanteenUncheckedUpdateWithoutBannersInput>
+  create: Prisma.XOR<Prisma.CanteenCreateWithoutBannersInput, Prisma.CanteenUncheckedCreateWithoutBannersInput>
+  where?: Prisma.CanteenWhereInput
+}
+
+export type CanteenUpdateToOneWithWhereWithoutBannersInput = {
+  where?: Prisma.CanteenWhereInput
+  data: Prisma.XOR<Prisma.CanteenUpdateWithoutBannersInput, Prisma.CanteenUncheckedUpdateWithoutBannersInput>
+}
+
+export type CanteenUpdateWithoutBannersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acceptingOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  operational?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  accessCodes?: Prisma.CanteenAccessCodeUpdateManyWithoutCanteenNestedInput
+  memberships?: Prisma.CanteenMembershipUpdateManyWithoutCanteenNestedInput
+  challenges?: Prisma.AuthChallengeUpdateManyWithoutCanteenNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutCanteenNestedInput
+  menuItems?: Prisma.MenuItemUpdateManyWithoutCanteenNestedInput
+  categories?: Prisma.MenuCategoryUpdateManyWithoutCanteenNestedInput
+  carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
+  cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
+}
+
+export type CanteenUncheckedUpdateWithoutBannersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acceptingOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  operational?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  accessCodes?: Prisma.CanteenAccessCodeUncheckedUpdateManyWithoutCanteenNestedInput
+  memberships?: Prisma.CanteenMembershipUncheckedUpdateManyWithoutCanteenNestedInput
+  challenges?: Prisma.AuthChallengeUncheckedUpdateManyWithoutCanteenNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutCanteenNestedInput
+  menuItems?: Prisma.MenuItemUncheckedUpdateManyWithoutCanteenNestedInput
+  categories?: Prisma.MenuCategoryUncheckedUpdateManyWithoutCanteenNestedInput
+  carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
+  cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
+}
+
+export type CanteenCreateWithoutOffersInput = {
+  id?: string
+  slug: string
+  name: string
+  location?: string | null
+  hours?: string | null
+  acceptingOrders?: boolean
+  operational?: boolean
+  version?: number
+  accessCodes?: Prisma.CanteenAccessCodeCreateNestedManyWithoutCanteenInput
+  memberships?: Prisma.CanteenMembershipCreateNestedManyWithoutCanteenInput
+  challenges?: Prisma.AuthChallengeCreateNestedManyWithoutCanteenInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutCanteenInput
+  menuItems?: Prisma.MenuItemCreateNestedManyWithoutCanteenInput
+  categories?: Prisma.MenuCategoryCreateNestedManyWithoutCanteenInput
+  carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
+  cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
+  orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+}
+
+export type CanteenUncheckedCreateWithoutOffersInput = {
+  id?: string
+  slug: string
+  name: string
+  location?: string | null
+  hours?: string | null
+  acceptingOrders?: boolean
+  operational?: boolean
+  version?: number
+  accessCodes?: Prisma.CanteenAccessCodeUncheckedCreateNestedManyWithoutCanteenInput
+  memberships?: Prisma.CanteenMembershipUncheckedCreateNestedManyWithoutCanteenInput
+  challenges?: Prisma.AuthChallengeUncheckedCreateNestedManyWithoutCanteenInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutCanteenInput
+  menuItems?: Prisma.MenuItemUncheckedCreateNestedManyWithoutCanteenInput
+  categories?: Prisma.MenuCategoryUncheckedCreateNestedManyWithoutCanteenInput
+  carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
+  cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+}
+
+export type CanteenCreateOrConnectWithoutOffersInput = {
+  where: Prisma.CanteenWhereUniqueInput
+  create: Prisma.XOR<Prisma.CanteenCreateWithoutOffersInput, Prisma.CanteenUncheckedCreateWithoutOffersInput>
+}
+
+export type CanteenUpsertWithoutOffersInput = {
+  update: Prisma.XOR<Prisma.CanteenUpdateWithoutOffersInput, Prisma.CanteenUncheckedUpdateWithoutOffersInput>
+  create: Prisma.XOR<Prisma.CanteenCreateWithoutOffersInput, Prisma.CanteenUncheckedCreateWithoutOffersInput>
+  where?: Prisma.CanteenWhereInput
+}
+
+export type CanteenUpdateToOneWithWhereWithoutOffersInput = {
+  where?: Prisma.CanteenWhereInput
+  data: Prisma.XOR<Prisma.CanteenUpdateWithoutOffersInput, Prisma.CanteenUncheckedUpdateWithoutOffersInput>
+}
+
+export type CanteenUpdateWithoutOffersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acceptingOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  operational?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  accessCodes?: Prisma.CanteenAccessCodeUpdateManyWithoutCanteenNestedInput
+  memberships?: Prisma.CanteenMembershipUpdateManyWithoutCanteenNestedInput
+  challenges?: Prisma.AuthChallengeUpdateManyWithoutCanteenNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutCanteenNestedInput
+  menuItems?: Prisma.MenuItemUpdateManyWithoutCanteenNestedInput
+  categories?: Prisma.MenuCategoryUpdateManyWithoutCanteenNestedInput
+  carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
+  cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+}
+
+export type CanteenUncheckedUpdateWithoutOffersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acceptingOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  operational?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  accessCodes?: Prisma.CanteenAccessCodeUncheckedUpdateManyWithoutCanteenNestedInput
+  memberships?: Prisma.CanteenMembershipUncheckedUpdateManyWithoutCanteenNestedInput
+  challenges?: Prisma.AuthChallengeUncheckedUpdateManyWithoutCanteenNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutCanteenNestedInput
+  menuItems?: Prisma.MenuItemUncheckedUpdateManyWithoutCanteenNestedInput
+  categories?: Prisma.MenuCategoryUncheckedUpdateManyWithoutCanteenNestedInput
+  carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
+  cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenCreateWithoutCartsInput = {
@@ -1201,6 +1544,9 @@ export type CanteenCreateWithoutCartsInput = {
   categories?: Prisma.MenuCategoryCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateWithoutCartsInput = {
@@ -1220,6 +1566,9 @@ export type CanteenUncheckedCreateWithoutCartsInput = {
   categories?: Prisma.MenuCategoryUncheckedCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenCreateOrConnectWithoutCartsInput = {
@@ -1255,6 +1604,9 @@ export type CanteenUpdateWithoutCartsInput = {
   categories?: Prisma.MenuCategoryUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateWithoutCartsInput = {
@@ -1274,6 +1626,9 @@ export type CanteenUncheckedUpdateWithoutCartsInput = {
   categories?: Prisma.MenuCategoryUncheckedUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenCreateWithoutCartItemsInput = {
@@ -1293,6 +1648,9 @@ export type CanteenCreateWithoutCartItemsInput = {
   categories?: Prisma.MenuCategoryCreateNestedManyWithoutCanteenInput
   carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateWithoutCartItemsInput = {
@@ -1312,6 +1670,9 @@ export type CanteenUncheckedCreateWithoutCartItemsInput = {
   categories?: Prisma.MenuCategoryUncheckedCreateNestedManyWithoutCanteenInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenCreateOrConnectWithoutCartItemsInput = {
@@ -1347,6 +1708,9 @@ export type CanteenUpdateWithoutCartItemsInput = {
   categories?: Prisma.MenuCategoryUpdateManyWithoutCanteenNestedInput
   carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateWithoutCartItemsInput = {
@@ -1366,6 +1730,9 @@ export type CanteenUncheckedUpdateWithoutCartItemsInput = {
   categories?: Prisma.MenuCategoryUncheckedUpdateManyWithoutCanteenNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenCreateWithoutOrdersInput = {
@@ -1385,6 +1752,9 @@ export type CanteenCreateWithoutOrdersInput = {
   categories?: Prisma.MenuCategoryCreateNestedManyWithoutCanteenInput
   carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenUncheckedCreateWithoutOrdersInput = {
@@ -1404,6 +1774,9 @@ export type CanteenUncheckedCreateWithoutOrdersInput = {
   categories?: Prisma.MenuCategoryUncheckedCreateNestedManyWithoutCanteenInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
 }
 
 export type CanteenCreateOrConnectWithoutOrdersInput = {
@@ -1439,6 +1812,9 @@ export type CanteenUpdateWithoutOrdersInput = {
   categories?: Prisma.MenuCategoryUpdateManyWithoutCanteenNestedInput
   carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
 }
 
 export type CanteenUncheckedUpdateWithoutOrdersInput = {
@@ -1458,6 +1834,113 @@ export type CanteenUncheckedUpdateWithoutOrdersInput = {
   categories?: Prisma.MenuCategoryUncheckedUpdateManyWithoutCanteenNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
+}
+
+export type CanteenCreateWithoutRewardsInput = {
+  id?: string
+  slug: string
+  name: string
+  location?: string | null
+  hours?: string | null
+  acceptingOrders?: boolean
+  operational?: boolean
+  version?: number
+  accessCodes?: Prisma.CanteenAccessCodeCreateNestedManyWithoutCanteenInput
+  memberships?: Prisma.CanteenMembershipCreateNestedManyWithoutCanteenInput
+  challenges?: Prisma.AuthChallengeCreateNestedManyWithoutCanteenInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutCanteenInput
+  menuItems?: Prisma.MenuItemCreateNestedManyWithoutCanteenInput
+  categories?: Prisma.MenuCategoryCreateNestedManyWithoutCanteenInput
+  carts?: Prisma.CartCreateNestedManyWithoutCanteenInput
+  cartItems?: Prisma.CartItemCreateNestedManyWithoutCanteenInput
+  orders?: Prisma.OrderCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferCreateNestedManyWithoutCanteenInput
+}
+
+export type CanteenUncheckedCreateWithoutRewardsInput = {
+  id?: string
+  slug: string
+  name: string
+  location?: string | null
+  hours?: string | null
+  acceptingOrders?: boolean
+  operational?: boolean
+  version?: number
+  accessCodes?: Prisma.CanteenAccessCodeUncheckedCreateNestedManyWithoutCanteenInput
+  memberships?: Prisma.CanteenMembershipUncheckedCreateNestedManyWithoutCanteenInput
+  challenges?: Prisma.AuthChallengeUncheckedCreateNestedManyWithoutCanteenInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutCanteenInput
+  menuItems?: Prisma.MenuItemUncheckedCreateNestedManyWithoutCanteenInput
+  categories?: Prisma.MenuCategoryUncheckedCreateNestedManyWithoutCanteenInput
+  carts?: Prisma.CartUncheckedCreateNestedManyWithoutCanteenInput
+  cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCanteenInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCanteenInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutCanteenInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutCanteenInput
+}
+
+export type CanteenCreateOrConnectWithoutRewardsInput = {
+  where: Prisma.CanteenWhereUniqueInput
+  create: Prisma.XOR<Prisma.CanteenCreateWithoutRewardsInput, Prisma.CanteenUncheckedCreateWithoutRewardsInput>
+}
+
+export type CanteenUpsertWithoutRewardsInput = {
+  update: Prisma.XOR<Prisma.CanteenUpdateWithoutRewardsInput, Prisma.CanteenUncheckedUpdateWithoutRewardsInput>
+  create: Prisma.XOR<Prisma.CanteenCreateWithoutRewardsInput, Prisma.CanteenUncheckedCreateWithoutRewardsInput>
+  where?: Prisma.CanteenWhereInput
+}
+
+export type CanteenUpdateToOneWithWhereWithoutRewardsInput = {
+  where?: Prisma.CanteenWhereInput
+  data: Prisma.XOR<Prisma.CanteenUpdateWithoutRewardsInput, Prisma.CanteenUncheckedUpdateWithoutRewardsInput>
+}
+
+export type CanteenUpdateWithoutRewardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acceptingOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  operational?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  accessCodes?: Prisma.CanteenAccessCodeUpdateManyWithoutCanteenNestedInput
+  memberships?: Prisma.CanteenMembershipUpdateManyWithoutCanteenNestedInput
+  challenges?: Prisma.AuthChallengeUpdateManyWithoutCanteenNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutCanteenNestedInput
+  menuItems?: Prisma.MenuItemUpdateManyWithoutCanteenNestedInput
+  categories?: Prisma.MenuCategoryUpdateManyWithoutCanteenNestedInput
+  carts?: Prisma.CartUpdateManyWithoutCanteenNestedInput
+  cartItems?: Prisma.CartItemUpdateManyWithoutCanteenNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutCanteenNestedInput
+}
+
+export type CanteenUncheckedUpdateWithoutRewardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hours?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acceptingOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  operational?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  accessCodes?: Prisma.CanteenAccessCodeUncheckedUpdateManyWithoutCanteenNestedInput
+  memberships?: Prisma.CanteenMembershipUncheckedUpdateManyWithoutCanteenNestedInput
+  challenges?: Prisma.AuthChallengeUncheckedUpdateManyWithoutCanteenNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutCanteenNestedInput
+  menuItems?: Prisma.MenuItemUncheckedUpdateManyWithoutCanteenNestedInput
+  categories?: Prisma.MenuCategoryUncheckedUpdateManyWithoutCanteenNestedInput
+  carts?: Prisma.CartUncheckedUpdateManyWithoutCanteenNestedInput
+  cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCanteenNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutCanteenNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutCanteenNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutCanteenNestedInput
 }
 
 
@@ -1475,6 +1958,9 @@ export type CanteenCountOutputType = {
   carts: number
   cartItems: number
   orders: number
+  rewards: number
+  banners: number
+  offers: number
 }
 
 export type CanteenCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1487,6 +1973,9 @@ export type CanteenCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   carts?: boolean | CanteenCountOutputTypeCountCartsArgs
   cartItems?: boolean | CanteenCountOutputTypeCountCartItemsArgs
   orders?: boolean | CanteenCountOutputTypeCountOrdersArgs
+  rewards?: boolean | CanteenCountOutputTypeCountRewardsArgs
+  banners?: boolean | CanteenCountOutputTypeCountBannersArgs
+  offers?: boolean | CanteenCountOutputTypeCountOffersArgs
 }
 
 /**
@@ -1562,6 +2051,27 @@ export type CanteenCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.
   where?: Prisma.OrderWhereInput
 }
 
+/**
+ * CanteenCountOutputType without action
+ */
+export type CanteenCountOutputTypeCountRewardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RewardWhereInput
+}
+
+/**
+ * CanteenCountOutputType without action
+ */
+export type CanteenCountOutputTypeCountBannersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BannerWhereInput
+}
+
+/**
+ * CanteenCountOutputType without action
+ */
+export type CanteenCountOutputTypeCountOffersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OfferWhereInput
+}
+
 
 export type CanteenSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1581,6 +2091,9 @@ export type CanteenSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   carts?: boolean | Prisma.Canteen$cartsArgs<ExtArgs>
   cartItems?: boolean | Prisma.Canteen$cartItemsArgs<ExtArgs>
   orders?: boolean | Prisma.Canteen$ordersArgs<ExtArgs>
+  rewards?: boolean | Prisma.Canteen$rewardsArgs<ExtArgs>
+  banners?: boolean | Prisma.Canteen$bannersArgs<ExtArgs>
+  offers?: boolean | Prisma.Canteen$offersArgs<ExtArgs>
   _count?: boolean | Prisma.CanteenCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["canteen"]>
 
@@ -1628,6 +2141,9 @@ export type CanteenInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   carts?: boolean | Prisma.Canteen$cartsArgs<ExtArgs>
   cartItems?: boolean | Prisma.Canteen$cartItemsArgs<ExtArgs>
   orders?: boolean | Prisma.Canteen$ordersArgs<ExtArgs>
+  rewards?: boolean | Prisma.Canteen$rewardsArgs<ExtArgs>
+  banners?: boolean | Prisma.Canteen$bannersArgs<ExtArgs>
+  offers?: boolean | Prisma.Canteen$offersArgs<ExtArgs>
   _count?: boolean | Prisma.CanteenCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CanteenIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1645,6 +2161,9 @@ export type $CanteenPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     carts: Prisma.$CartPayload<ExtArgs>[]
     cartItems: Prisma.$CartItemPayload<ExtArgs>[]
     orders: Prisma.$OrderPayload<ExtArgs>[]
+    rewards: Prisma.$RewardPayload<ExtArgs>[]
+    banners: Prisma.$BannerPayload<ExtArgs>[]
+    offers: Prisma.$OfferPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2058,6 +2577,9 @@ export interface Prisma__CanteenClient<T, Null = never, ExtArgs extends runtime.
   carts<T extends Prisma.Canteen$cartsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Canteen$cartsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CartPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cartItems<T extends Prisma.Canteen$cartItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Canteen$cartItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CartItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.Canteen$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Canteen$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  rewards<T extends Prisma.Canteen$rewardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Canteen$rewardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RewardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  banners<T extends Prisma.Canteen$bannersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Canteen$bannersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BannerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  offers<T extends Prisma.Canteen$offersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Canteen$offersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2701,6 +3223,78 @@ export type Canteen$ordersArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * Canteen.rewards
+ */
+export type Canteen$rewardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Reward
+   */
+  select?: Prisma.RewardSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Reward
+   */
+  omit?: Prisma.RewardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardInclude<ExtArgs> | null
+  where?: Prisma.RewardWhereInput
+  orderBy?: Prisma.RewardOrderByWithRelationInput | Prisma.RewardOrderByWithRelationInput[]
+  cursor?: Prisma.RewardWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RewardScalarFieldEnum | Prisma.RewardScalarFieldEnum[]
+}
+
+/**
+ * Canteen.banners
+ */
+export type Canteen$bannersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Banner
+   */
+  select?: Prisma.BannerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Banner
+   */
+  omit?: Prisma.BannerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BannerInclude<ExtArgs> | null
+  where?: Prisma.BannerWhereInput
+  orderBy?: Prisma.BannerOrderByWithRelationInput | Prisma.BannerOrderByWithRelationInput[]
+  cursor?: Prisma.BannerWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BannerScalarFieldEnum | Prisma.BannerScalarFieldEnum[]
+}
+
+/**
+ * Canteen.offers
+ */
+export type Canteen$offersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Offer
+   */
+  select?: Prisma.OfferSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Offer
+   */
+  omit?: Prisma.OfferOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OfferInclude<ExtArgs> | null
+  where?: Prisma.OfferWhereInput
+  orderBy?: Prisma.OfferOrderByWithRelationInput | Prisma.OfferOrderByWithRelationInput[]
+  cursor?: Prisma.OfferWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OfferScalarFieldEnum | Prisma.OfferScalarFieldEnum[]
 }
 
 /**

@@ -5,7 +5,7 @@ import { loadConfig } from '../config/env.js';
 async function main() {
   const config = loadConfig();
   assert(config.SUPABASE_URL && config.SUPABASE_PUBLISHABLE_KEY, 'Supabase Auth settings missing');
-  for (const portal of ['student', 'canteen']) {
+  for (const portal of ['student']) {
     const frontend = parseEnv(readFileSync(`../apps/${portal}/.env`, 'utf8'));
     assert.equal(frontend.VITE_SUPABASE_URL, config.SUPABASE_URL, `${portal} and backend must use the same project`);
     assert.equal(frontend.VITE_SUPABASE_PUBLISHABLE_KEY, config.SUPABASE_PUBLISHABLE_KEY, `${portal} publishable key differs`);
@@ -17,7 +17,7 @@ async function main() {
   const value = await response.json() as { external?: { email?: boolean }; mailer_autoconfirm?: boolean; disable_signup?: boolean };
   assert.equal(value.external?.email, true, 'Enable the Email provider');
   assert.equal(value.mailer_autoconfirm, false, 'Enable Confirm email in Supabase');
-  assert.equal(value.disable_signup, false, 'Allow new signups for student and initial staff registration');
+  assert.equal(value.disable_signup, false, 'Allow new signups for student registration');
   console.log('PASS: frontend/backend project settings match; public Auth API accepts the key; email signup enabled and confirmation required.');
   console.log('SMTP delivery and callback allowlist still require a real browser/email acceptance test. No email was sent.');
 }

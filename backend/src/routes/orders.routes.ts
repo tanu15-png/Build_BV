@@ -68,15 +68,16 @@ export function createOrdersRouter(config: Config, db: PrismaClient, options: Or
       await tx.$queryRaw`SELECT m.id FROM menu_items m JOIN cart_items c ON c.menu_item_id = m.id WHERE c.cart_id = ${initial.id}::uuid ORDER BY m.id FOR UPDATE OF m`;
       await tx.$queryRaw`SELECT c.id FROM menu_categories c WHERE c.id IN (SELECT m.category_id FROM menu_items m JOIN cart_items l ON l.menu_item_id = m.id WHERE l.cart_id = ${initial.id}::uuid) ORDER BY c.id FOR SHARE`;
       const cart = await tx.cart.findUniqueOrThrow({ where: { id: initial.id }, include: cartInclude });
-      const summary = cartResponse(cart, config);
+      if (cart.canteen?.slug !== 'canteen') throw new AppError(409, 'CANTEEN_UNAVAILABLE', 'Only Canteen is available. Clear your old cart first.');
+      const now = await serverNow(tx, options);
+      const summary = cartResponse(cart, config, now.getTime());
       if (cart.version !== body.expectedVersion) throw new AppError(409, 'CART_CHANGED', 'Your cart changed. Review the updated cart.', { cart: summary });
       if (!cart.items.length) throw new AppError(409, 'CART_EMPTY', 'Add items to your cart before ordering.');
       verifyCartQuote(body.quote, summary, actor.id, config);
-      const now = await serverNow(tx, options);
       const pickupAt = pickupTime(body.pickupAt, now);
       const orderId = await allocateOrder(tx, { studentId: actor.id, canteenId: cart.canteenId!, totalPaise: summary.totalPaise, pickupAt, now }, options);
-      await tx.orderItem.createMany({ data: cart.items.map(line => ({
-        orderId, menuItemId: line.menuItemId, name: line.menuItem.name, quantity: line.quantity, unitPricePaise: line.menuItem.pricePaise,
+      await tx.orderItem.createMany({ data: summary.items.map(line => ({
+        orderId, menuItemId: line.menuItemId, name: line.name, quantity: line.quantity, unitPricePaise: line.unitPricePaise, originalUnitPricePaise: line.originalUnitPricePaise, offerId: line.offer?.id, offerName: line.offer?.name,
       })) });
       await event(tx, orderId, actor.id, null, 'RECEIVED', now);
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import type { Config } from '../config/env.js';
 import type { PrismaClient, Prisma, Notification } from '../generated/prisma/client.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -30,6 +31,22 @@ export function createNotificationsRouter(config: Config, db: PrismaClient) {
     res.json(page);
   });
   const readContract = contracts['PATCH /notifications/:id/read']!;
+  router.patch('/notifications/read', async (req, res) => {
+    const { actor } = await current(req);
+    if (actor.role !== 'STUDENT') throw new AppError(403, 'STUDENT_REQUIRED', 'Student access required.');
+    const body = z.object({ ids: z.array(z.uuid()).min(1).max(100) }).safeParse(req.body);
+    if (!body.success) throw new AppError(422, 'NOTIFICATIONS_INVALID', 'Choose up to 100 notifications.');
+    const result = await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM users WHERE id = ${actor.id}::uuid FOR UPDATE`;
+      await createSessionReader(config, tx)(req);
+      const readAt = new Date();
+      await tx.notification.updateMany({ where: { id: { in: body.data.ids }, recipientId: actor.id, readAt: null }, data: { readAt } });
+      const items = await tx.notification.findMany({ where: { id: { in: body.data.ids }, recipientId: actor.id } });
+      const unreadCount = await tx.notification.count({ where: { recipientId: actor.id, readAt: null } });
+      return { items: items.map(response), unreadCount };
+    }, txOptions);
+    res.json(result);
+  });
   router.patch('/notifications/:id/read', validate(readContract.params, 'params'), validate(readContract.body), async (req, res) => {
     const { actor } = await current(req);
     if (actor.role !== 'STUDENT') throw new AppError(403, 'STUDENT_REQUIRED', 'Student notifications are only available to students.');

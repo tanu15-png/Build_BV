@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { mapCatalog } from '../src/services/catalog.js';
 import { mergeCanteenMenu, prepareMenuChange, saveMenuChange } from '../src/services/menuChanges.js';
 
-const menu = { canteen: { id: 'canteen', slug: 'bella-bite', name: 'Bella Bite', version: 3, operational: true, acceptingOrders: true, hours: '9 AM–5 PM' },
+const menu = { canteen: { id: 'canteen', slug: 'test-canteen-8', name: 'Test canteen 8', version: 3, operational: true, acceptingOrders: true, hours: '9 AM–5 PM' },
   categories: [{ id: 'snacks', canteenId: 'canteen', name: 'Snacks', version: 1, archived: false }],
   items: [{ id: 'tea', canteenId: 'canteen', categoryId: 'snacks', category: 'Snacks', name: 'Tea', pricePaise: 1000, version: 1, available: true, archived: false }] };
-const catalog = { canteens: [menu.canteen, { id: 'other', slug: 'shanu', name: 'Shanu' }], categories: menu.categories, items: menu.items };
+const catalog = { canteens: [menu.canteen, { id: 'other', slug: 'canteen', name: 'Canteen' }], categories: menu.categories, items: menu.items };
 
 test('new items appear before the save completes and replace their temporary ID with the saved ID', async () => {
   let resolve;

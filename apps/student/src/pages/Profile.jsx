@@ -37,11 +37,7 @@ export default function Profile() {
               value="Banasthali Vidyapith"
             />
 
-            <Info
-              icon={<User />}
-              label="Account type"
-              value="Personal account"
-            />
+
 
           </div>
 

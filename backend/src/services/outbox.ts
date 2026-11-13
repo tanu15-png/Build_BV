@@ -16,10 +16,10 @@ export function notificationData(event: Prisma.OrderEventGetPayload<{ include: {
   return { recipientId: order.studentId, sourceEventId: event.id, orderId: order.id, type: event.newStatus,
     createdAt: event.createdAt,
     message: event.newStatus === 'READY'
-      ? `${order.canteen.name} has prepared order ${reference}. Your food is ready to collect.`
+      ? `The canteen has prepared order ${reference}. Your food is ready to collect.`
       : event.newStatus === 'REJECTED'
-        ? `${order.canteen.name} rejected order ${reference}. Please choose another canteen or place a new order.`
-        : `${order.canteen.name} accepted order ${reference}.` };
+        ? `The canteen rejected order ${reference}. Please place a new order.`
+        : `The canteen accepted order ${reference}.` };
 }
 export function createOutboxWorker(db: PrismaClient, config: Pick<Config, 'DB_TIMEOUT_MS' | 'OUTBOX_LEASE_SECONDS' | 'OUTBOX_MAX_ATTEMPTS' | 'OUTBOX_BATCH_SIZE'>) {
   const txOptions = { maxWait: config.DB_TIMEOUT_MS, timeout: 15000 };

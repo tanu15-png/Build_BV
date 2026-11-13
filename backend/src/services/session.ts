@@ -26,7 +26,7 @@ export function createSessionReader(config: Config, db: PrismaClient | Prisma.Tr
     requirePortalRole(req, session.role);
     if (!session.user.roles.some(role => role.role === session.role)) throw new AppError(403, 'ROLE_DENIED', 'Account permissions have changed.');
     if (session.role === 'STUDENT') studentEmail(session.user.email);
-    if (session.role === 'CANTEEN' && (!session.membership || session.membership.status !== 'ACTIVE' || session.membership.codeVersion !== session.canteen?.accessCodes[0]?.version)) throw new AppError(401, 'MEMBERSHIP_REVOKED', 'Your canteen access has ended. Sign in again or contact an administrator.');
+    if (session.role === 'CANTEEN' && (session.canteen?.slug !== 'canteen' || !session.membership || session.membership.status !== 'ACTIVE' || session.membership.codeVersion !== session.canteen?.accessCodes[0]?.version)) throw new AppError(401, 'MEMBERSHIP_REVOKED', 'Your canteen access has ended. Sign in again or contact an administrator.');
     const actor: Actor = { id: session.user.id, email: session.user.email, name: session.user.name, role: session.role, canteenId: session.canteenId };
     return { session, actor };
   }

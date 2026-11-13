@@ -21,12 +21,13 @@ export function useNotifications(user, refreshSession) {
     if (feed.current?.owner === owner) return feed.current.refresh().catch(() => {});
   }, [owner]);
   const visible = state.owner === owner && owner ? state : empty;
+  const markNotificationsOpened = useCallback(ids => feed.current?.owner === owner ? feed.current.markOpened(ids) : Promise.resolve(), [owner]);
   return {
     notifications: visible.items, unreadNotificationCount: visible.unreadCount,
     notificationsLoading: Boolean(owner) && (state.owner !== owner || visible.loading), notificationsError: visible.error,
     notificationsInitialized: visible.initialized,
     notificationsInitialLoading: Boolean(owner) && !visible.initialized && !visible.error,
-    readingNotificationIds: visible.readingIds, refreshNotifications,
+    readingNotificationIds: visible.readingIds, refreshNotifications, markNotificationsOpened,
     loadMoreNotifications: visible.nextCursor ? () => feed.current?.refresh(true).catch(() => {}) : null,
     markNotificationRead: id => feed.current?.owner === owner ? feed.current.markRead(id) : Promise.reject(new Error('Sign in to read your notifications.')),
   };

@@ -11,7 +11,7 @@ catch (error) { if (error.code !== 'ENOENT') throw error; }
 const port = Number(process.env.PORT ?? backendEnv.PORT ?? 4000);
 const busy = await busyServices([
   { name: 'Student', port: 5173 }, { name: 'Canteen', port: 5174 },
-  { name: 'Admin', port: 5175 }, { name: 'API', port },
+  { name: 'API', port },
 ]);
 if (busy.length) {
   console.error(`Development services were not started. These ports are already in use:\n${busy.map(service => `  ${service.name}: ${service.port}`).join('\n')}\nUse the existing websites, or press Ctrl+C in the terminal running them before starting again.\nOn Linux/WSL, inspect port owners with: ss -ltnp`);
@@ -53,7 +53,7 @@ function stop(code = 0) {
     }, 5000);
   }
 }
-for (const [cwd, script] of [['apps/student', 'dev'], ['apps/canteen', 'dev'], ['apps/admin', 'dev'], ['backend', 'dev'], ['backend', 'worker:dev']]) {
+for (const [cwd, script] of [['apps/student', 'dev'], ['apps/canteen', 'dev'], ['backend', 'dev'], ['backend', 'worker:dev']]) {
   const child = spawn(process.execPath, [npmCli, 'run', script], { cwd, stdio: 'inherit', detached: process.platform !== 'win32', windowsHide: true });
   children.push(child);
   child.on('error', error => { console.error(`${cwd} (${script}): ${error.message}`); stop(1); });

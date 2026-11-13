@@ -9,7 +9,7 @@ export function mapCatalog(data) {
       categories: data.categories.filter(category => category.canteenId === c.id).map(category => category.name),
       image: canteenPoster(c.slug) })),
     categories: data.categories,
-    foods: data.items.map(item => ({ ...item, cafeId: slugs.get(item.canteenId), price: item.pricePaise / 100, image: item.imageRef || foodImage })),
+    foods: data.items.map(item => ({ ...item, cafeId: slugs.get(item.canteenId), price: (item.effectivePricePaise ?? item.pricePaise) / 100, image: item.imageRef || foodImage })),
   };
 }
 export function mapCart(data, cafes) {

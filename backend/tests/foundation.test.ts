@@ -100,7 +100,7 @@ test('frontend fixtures enforce identity, quantity, campus domain, paise, status
   contracts['POST /cart/items']!.body.parse({ expectedVersion: 1, menuItemId: id, quantity: 2 });
   assert.equal(contracts['POST /cart/items']!.body.safeParse({ expectedVersion: 1, menuItemId: id, quantity: 0 }).success, false);
   assert.equal(contracts['POST /canteens/:id/menu']!.body.safeParse({ name: 'Tea', categoryId: id, pricePaise: 1.1 }).success, false);
-  assert.equal(contracts['GET /canteens']!.response.safeParse({ canteens: [{ id, slug: 'bella-bite', name: 'Bella Bite', location: null, hours: null, acceptingOrders: true, operational: true, version: 1, codeHash: 'secret' }] }).success, false);
+  assert.equal(contracts['GET /canteens']!.response.safeParse({ canteens: [{ id, slug: 'test-canteen-8', name: 'Test canteen 8', location: null, hours: null, acceptingOrders: true, operational: true, version: 1, codeHash: 'secret' }] }).success, false);
   for (const route of ['DELETE /menu-items/:id', 'DELETE /menu-categories/:id']) {
     contracts[route]!.body.parse({ expectedVersion: 1 });
     assert.equal(contracts[route]!.body.safeParse({}).success, false);

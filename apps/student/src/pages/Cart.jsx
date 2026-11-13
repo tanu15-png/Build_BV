@@ -1,3 +1,5 @@
+import OfferPrice from '@spoonate/portal/components/OfferPrice';
+import PlaceOrderButton from '../components/PlaceOrderButton';
 import {
   ArrowLeft,
   Minus,
@@ -19,13 +21,13 @@ export default function Cart() {
     cafes,
     updateQuantity,
     removeFromCart,
-    cartState, catalogError, refreshCatalog,
+    cartState, catalogError, refreshCatalog, pendingCheckout,
   } = useOrders();
 
   const subtotal = (cartState?.totalPaise || 0) / 100;
 
   if (!cartState) return <div className="p-10"><p role="status">{catalogError || "Loading your saved cart…"}</p><button onClick={refreshCatalog} className="mt-4 underline">Retry</button></div>;
-  if (!cart.length) {
+  if (!cart.length && !pendingCheckout) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8faf9]">
 
@@ -40,14 +42,14 @@ export default function Cart() {
           </h1>
 
           <p className="text-gray-500 mt-2">
-            Order something from a campus café.
+            Choose something from the menu.
           </p>
 
           <Link
             to="/dashboard"
             className="inline-block mt-6 bg-[#075d50] text-white px-6 py-3 rounded-xl font-bold"
           >
-            Browse Cafés
+            Browse menu
           </Link>
 
         </div>
@@ -104,7 +106,7 @@ export default function Cart() {
                   </h3>
 
                   <p className="text-[#0f8f73] font-bold mt-1">
-                    ₹{item.price.toFixed(2)}
+                    <OfferPrice item={item} />
                   </p>
 
                   {!item.available && <p className="mt-2 text-sm text-red-700">Unavailable now. You can reduce the quantity or remove it.</p>}
@@ -165,7 +167,7 @@ export default function Cart() {
             </h2>
 
             <div className="flex justify-between mt-6">
-              <span>Subtotal</span>
+              <span>Subtotal · offers included</span>
               <span>₹{subtotal.toFixed(2)}</span>
             </div>
 
@@ -181,12 +183,7 @@ export default function Cart() {
               <span>₹{subtotal.toFixed(2)}</span>
             </div>
 
-            <Link
-              to="/dashboard/checkout"
-              className="block text-center bg-[#075d50] text-white rounded-xl py-3 mt-6 font-bold"
-            >
-              Review Cart
-            </Link>
+            <PlaceOrderButton />
 
           </div>
 

@@ -6,9 +6,11 @@ import { once } from 'node:events';
 import { createApp } from '../src/app.js';
 import { loadConfig } from '../src/config/env.js';
 import type { PrismaClient } from '../src/generated/prisma/client.js';
-import { portals, portalOrigin, type Portal } from '../src/services/portal.js';
+import { portalOrigin, type Portal } from '../src/services/portal.js';
 
-test('one browser retains all three portal sessions through login, replacement, and logout', async () => {
+const portals = ['student', 'canteen'] as const;
+
+test('student and Canteen sessions coexist, logout is isolated and retired staff sessions are blocked', async () => {
   const config = loadConfig({ DATABASE_URL: 'postgresql://localhost/test', FRONTEND_ORIGIN: 'http://localhost:5173', SESSION_SECRET: 's'.repeat(32), OTP_SECRET: 'o'.repeat(32), SUPABASE_URL: 'https://test.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_portal_test_12345', LOG_LEVEL: 'silent', ADMIN_ACCESS_PASSWORD: 'test-team-password' });
   const canteenId = randomUUID();
   const users = portals.map(portal => ({ id: randomUUID(), email: portal === 'student' ? 'student@banasthali.in' : `${portal}@example.edu`, supabaseSubject: randomUUID(), name: portal, status: 'ACTIVE', roles: [{ role: portal.toUpperCase() }] }));
@@ -21,7 +23,7 @@ test('one browser retains all three portal sessions through login, replacement, 
     create: async ({ data }: { data: Row }) => { sessions.set(data.tokenHash, data); return data; },
     findUnique: async ({ where }: { where: { tokenHash: string } }) => {
       const row = sessions.get(where.tokenHash);
-      return row ? { ...row, user: row.userId === teamUser.id ? teamUser : users.find(user => user.id === row.userId), membership, canteen: { accessCodes: [{ version: 1 }] } } : null;
+      return row ? { ...row, user: row.userId === teamUser.id ? teamUser : users.find(user => user.id === row.userId), membership, canteen: { slug: 'canteen', accessCodes: [{ version: 1 }] } } : null;
     },
     updateMany: async ({ where, data }: { where: Partial<Row>; data: Partial<Row> }) => {
       let count = 0;
@@ -51,7 +53,7 @@ test('one browser retains all three portal sessions through login, replacement, 
   } as unknown as PrismaClient;
   const tokens = new Map<string, typeof users[number]>();
   const proof = (portal: Portal) => {
-    const user = users[portals.indexOf(portal)]!;
+    const user = users[portals.findIndex(value => value === portal)]!;
     const token = `e30.${Buffer.from(JSON.stringify({ sub: user.supabaseSubject, amr: [{ method: portal === 'canteen' ? 'otp' : 'password', timestamp: Math.floor(Date.now() / 1000) }] })).toString('base64url')}.signature`;
     tokens.set(token, user); return token;
   };
@@ -82,66 +84,22 @@ test('one browser retains all three portal sessions through login, replacement, 
   try {
     for (const portal of portals) {
       csrf.set(portal, (await request(portal, '/auth/csrf')).body.csrfToken);
-      const before = authCalls;
-      const login = portal === 'admin'
-        ? await request(portal, '/auth/admin/password', 'POST', { password: config.ADMIN_ACCESS_PASSWORD })
-        : await request(portal, '/auth/session', 'POST', { role: portal.toUpperCase(), ...(portal === 'canteen' ? { challengeId: challenge.id } : {}) }, proof(portal));
-      if (portal === 'admin') assert.equal(authCalls, before, 'team sign-in must not call Supabase');
+      const login = await request(portal, '/auth/session', 'POST', { role: portal.toUpperCase(), ...(portal === 'canteen' ? { challengeId: challenge.id } : {}) }, proof(portal));
       assert.equal(login.response.status, 200, JSON.stringify(login.body));
-      for (const signedIn of portals.slice(0, portals.indexOf(portal) + 1)) assert.equal((await request(signedIn, '/auth/me')).body.role, signedIn.toUpperCase());
+      assert.equal((await request(portal, '/auth/me')).body.role, portal.toUpperCase());
     }
-    assert.equal((await request('admin', '/auth/admin/password', 'POST', { password: 'wrong-password' })).response.status, 401);
-    assert.equal((await request('admin', '/auth/admin/password', 'POST', { password: config.ADMIN_ACCESS_PASSWORD, email: 'unused@example.edu' })).response.status, 422);
-    assert.equal((await request('student', '/auth/admin/password', 'POST', { password: config.ADMIN_ACCESS_PASSWORD })).response.status, 403);
-    assert.equal((await request('admin', '/auth/admin/password', 'POST', { password: config.ADMIN_ACCESS_PASSWORD }, undefined, { 'X-CSRF-Token': 'forged' })).response.status, 403);
-    assert.equal((await request('admin', '/auth/admin/activate', 'POST', {})).response.status, 410);
-    assert.equal((await request('admin', '/auth/admin/confirm', 'POST', {})).response.status, 410);
-    assert.equal((await request('admin', '/auth/session', 'POST', { role: 'ADMIN' }, proof('admin'))).response.status, 403);
-    const priorAdmin = jar.get('spoonate_admin_session')!;
-    assert.equal((await request('admin', '/auth/admin/password', 'POST', { password: config.ADMIN_ACCESS_PASSWORD })).response.status, 200);
-    assert(sessions.get(hash(priorAdmin))!.revokedAt);
-    assert.equal((await request('student', '/auth/me')).body.role, 'STUDENT');
-    assert.equal((await request('canteen', '/auth/me')).body.role, 'CANTEEN');
+    assert.equal((await request('admin', '/auth/me')).response.status, 404);
     const staffOrder = await request('canteen', `/orders/${canteenId}`);
     assert.equal(staffOrder.response.status, 200);
     assert(!('studentName' in staffOrder.body));
-    assert(!JSON.stringify(staffOrder.body).includes('Private customer name'));
-    assert.equal((await request('admin', `/orders/${canteenId}`)).body.studentName, 'Private customer name');
-    const staffCookie = jar.get('spoonate_canteen_session')!; const adminCookie = jar.get('spoonate_admin_session')!;
-    const beforeSignup = jar.get('spoonate_student_session')!;
-    const signup = await request('student', '/auth/confirm-signup', 'POST', { email: users[0]!.email, code: '123456' });
-    assert.equal(signup.response.status, 200);
-    assert(sessions.get(hash(beforeSignup))!.revokedAt);
-    assert.equal((await request('canteen', '/auth/me')).body.role, 'CANTEEN');
-    assert.equal((await request('admin', '/auth/me')).body.role, 'ADMIN');
     const oldStudent = jar.get('spoonate_student_session')!;
     assert.equal((await request('student', '/auth/session', 'POST', { role: 'STUDENT' }, proof('student'))).response.status, 200);
     assert(sessions.get(hash(oldStudent))!.revokedAt);
-    assert(!sessions.get(hash(staffCookie))!.revokedAt); assert(!sessions.get(hash(adminCookie))!.revokedAt);
-    assert.equal((await request('student', '/auth/session', 'POST', { role: 'ADMIN' }, proof('admin'))).response.status, 403);
-    assert.equal((await request('student', '/auth/admin/activate', 'POST', {})).response.status, 403);
-    assert.equal((await request('admin', '/auth/confirm-signup', 'POST', {})).response.status, 403);
-    assert.equal((await request('admin', '/AUTH/CONFIRM-SIGNUP/', 'POST', {})).response.status, 403);
-    assert.equal((await fetch(`${base}/api/v1/%61dmin/auth/me`, { headers: { Origin: config.FRONTEND_ORIGIN } })).status, 403);
-    assert.equal((await fetch(`${base}/api/V1/admin/auth/me`, { headers: { Origin: config.FRONTEND_ORIGIN } })).status, 403);
-    assert.equal((await request('admin', '/auth/canteen/login', 'POST', {})).response.status, 403);
-    assert.equal((await request('admin', '/auth/me', 'GET', undefined, undefined, { Origin: config.FRONTEND_ORIGIN })).response.status, 403);
-    assert.equal((await request('student', '/auth/logout', 'POST', {}, undefined, { 'X-CSRF-Token': csrf.get('admin')! })).response.status, 403);
-    const savedCsrfCookie = jar.get('spoonate_student_csrf')!;
-    jar.set('spoonate_student_csrf', jar.get('spoonate_admin_csrf')!);
-    assert.equal((await request('student', '/auth/logout', 'POST', {}, undefined, { 'X-CSRF-Token': csrf.get('admin')! })).response.status, 403);
-    jar.set('spoonate_student_csrf', savedCsrfCookie);
-    const studentCookie = jar.get('spoonate_student_session')!;
-    jar.set('spoonate_student_session', adminCookie);
-    assert.equal((await request('student', '/auth/me')).response.status, 403);
-    assert.equal((await request('student', '/auth/logout', 'POST', {})).response.status, 200);
-    assert(!sessions.get(hash(adminCookie))!.revokedAt, 'substituting a cookie cannot revoke another portal session');
-    jar.set('spoonate_student_session', studentCookie);
+    assert.equal((await request('canteen', '/auth/me')).body.role, 'CANTEEN');
     assert.equal((await request('student', '/auth/logout', 'POST', {})).response.status, 200);
     assert.equal((await request('student', '/auth/me')).response.status, 401);
     assert.equal((await request('canteen', '/auth/me')).body.role, 'CANTEEN');
-    assert.equal((await request('admin', '/auth/me')).body.role, 'ADMIN');
     assert.equal((await request('canteen', '/auth/logout', 'POST', {})).response.status, 200);
-    assert.equal((await request('admin', '/auth/me')).body.role, 'ADMIN');
+    assert.equal((await request('canteen', '/auth/me')).response.status, 401);
   } finally { await new Promise<void>(resolve => server.close(() => resolve())); }
 });

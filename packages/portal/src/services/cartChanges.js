@@ -19,7 +19,7 @@ export function addCartItem(cart, item, canteen) {
   const items = existing
     ? cart.items.map(line => line.menuItemId === item.id ? { ...line, quantity: line.quantity + 1 } : line)
     : [...cart.items, { id: `pending-${item.id}`, menuItemId: item.id, canteenId: item.canteenId,
-      name: item.name, quantity: 1, unitPricePaise: item.pricePaise, categoryId: item.categoryId,
+      name: item.name, quantity: 1, unitPricePaise: item.effectivePricePaise ?? item.pricePaise, originalUnitPricePaise:item.pricePaise, offer:item.offer ?? null, categoryId: item.categoryId,
       category: item.category, description: item.description, imageRef: item.imageRef,
       menuVersion: item.version, available: true, archived: false }];
   return recalculate(cart, items);

@@ -50,7 +50,7 @@ export function orderNotifications(orders) {
       message: event.status === "READY"
         ? `${order.cafeName} has prepared order ${orderCode(order)} (${orderDay(order)}). Show your dated order card at pickup.`
         : event.status === "REJECTED"
-          ? `${order.cafeName} rejected order ${orderCode(order)} (${orderDay(order)}). Please choose another canteen or place a new order.`
+          ? `${order.cafeName} rejected order ${orderCode(order)} (${orderDay(order)}). Please place a new order.`
           : `${order.cafeName} accepted order ${orderCode(order)} (${orderDay(order)}).`,
     }))).sort((a, b) => new Date(b.at) - new Date(a.at));
 }

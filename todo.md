@@ -13,7 +13,7 @@ Database hosting: **Supabase-managed PostgreSQL**, following [scale.md](scale.md
 - [x] Apply all three committed migrations (initial schema, Supabase identity binding and menu categories) to the connected development project using separate owner credentials.
 - [x] Add server-only database/Auth environment variables and documented placeholders; keep local credentials Git-ignored and expose only the Auth publishable key to Vite.
 - [x] Configure the dedicated application role, application-table RLS/grants and server-only connection URLs; use session pooling on port 5432.
-- [x] Seed all eight canteens without demo menus or browser account imports; generate separate backend session/OTP secrets.
+- [x] Seed the single canteen without demo menus or browser account imports; generate separate backend session/OTP secrets.
 - [x] Provision the operator-specified admin and initial canteen access codes; save generated credentials in Git-ignored backend/.env.provisioned without printing passwords.
 - [x] Add repeatable `db:check` and `provision:initial` commands, plus a configurable bounded application pool.
 - [x] Verify the connected session pool: encrypted application connection, applied migrations, restricted grants/RLS on all 20 tables, browser-role denial, named prepared statements, interactive commit/rollback, bounded application-pool timeout/recovery and real Express health/directory responses.
@@ -30,7 +30,7 @@ Scope: this is development setup using the requested encrypted `sslmode=require`
 - [ ] Budget pooled and PostgreSQL connections across API replicas, workers, deployments and migration tools; leave operational headroom and test connection exhaustion behavior.
 - [ ] Apply committed Prisma migrations to staging and production; create users, password hashes, email challenges, sessions, canteen memberships, menus, carts, orders, daily code allocations, notifications and outbox tables.
 - [ ] Enforce campus-wide daily code uniqueness with UNIQUE(code_day, code), derive Asia/Kolkata dates from server time, and test simultaneous allocations, collision retries, midnight renewal and daily exhaustion on Supabase PostgreSQL.
-- [ ] Seed the eight canteens and provision production access-code hashes and admin credentials without importing browser passwords or overwriting existing operator-managed data.
+- [ ] Seed the single canteen and provision production access-code hashes and admin credentials without importing browser passwords or overwriting existing operator-managed data.
 - [ ] Complete live email/browser acceptance for the implemented Supabase signup/login, staff verification, scoped memberships, shared counts and atomic member/session revocation. See backend/AUTH.md for the implemented code and provider limits.
 - [ ] Connect a production email provider for signup, canteen-login and password-reset OTPs; configure verified sending identity, delivery monitoring, expiry/resend controls and quotas for campus onboarding bursts.
 - [ ] Deploy Express and the durable outbox worker on separately selected hosting; configure their Supabase connections, secrets, health checks and startup/shutdown behavior.
@@ -50,7 +50,7 @@ The auth/account/member browser-storage entries below record the original protot
 - [x] Implement canteen login with member email, selected canteen and matching development access code.
 - [x] Add a browser-local canteen member panel with emails, valid signed-in counts, confirmed removal, session revocation and blocked rejoining. Real email OTP and cross-device enforcement remain backend work.
 - [x] Implement demo admin login and campus overview.
-- [x] Include all eight canteens, including Bella Bite, with separate sample menus.
+- [x] Include the single canteen, with its sample menu.
 - [x] Implement student directory, menu browsing, cart, checkout, success, history, tracking, notifications and profile screens.
 - [x] Enforce a single-canteen cart, quantity changes, item removal and explicit cart clearing.
 - [x] Check canteen/item availability on additions, quantity increases and checkout; use current menu prices at submission.

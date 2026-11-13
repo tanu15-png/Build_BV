@@ -1,3 +1,4 @@
+import { foreignCanteen } from './support.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac, randomBytes, randomUUID } from 'node:crypto';
@@ -19,7 +20,7 @@ test('canteen-controlled collection and atomic staff handover', { skip: !url }, 
   const config = loadConfig({ DATABASE_URL: url, APP_ENV: 'test', NODE_ENV: 'test', FRONTEND_ORIGIN: 'http://localhost:5173',
     SESSION_SECRET: 's'.repeat(32), OTP_SECRET: 'o'.repeat(32), SEED_DEVELOPMENT_DATA: 'true', LOG_LEVEL: 'silent', DB_TIMEOUT_MS: '10000' });
   const db = createPrisma(config); await seed(db, config);
-  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'bella-bite' } });
+  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'canteen' } });
   let now = new Date('2026-10-16T10:00:00.000Z');
   const server = createApp(config, db, () => {}, fetch, { clock: async () => now }).listen(0, '127.0.0.1');
   await once(server, 'listening'); const port = server.address(); assert(port && typeof port !== 'string');
@@ -50,7 +51,7 @@ test('canteen-controlled collection and atomic staff handover', { skip: !url }, 
   const other = await fixture('STUDENT', 'other-pickup@banasthali.in');
   const staff = await fixture('CANTEEN', 'pickup-staff@example.edu', canteen.id);
   const staffTwo = await fixture('CANTEEN', 'pickup-staff-two@example.edu', canteen.id);
-  const otherCanteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'shanu' } });
+  const otherCanteen = await foreignCanteen(db);
   const otherStaff = await fixture('CANTEEN', 'pickup-other-staff@example.edu', otherCanteen.id);
   const admin = await fixture('ADMIN', 'pickup-admin@example.edu');
   const item = await db.menuItem.findFirstOrThrow({ where: { canteenId: canteen.id } });
@@ -83,8 +84,8 @@ test('canteen-controlled collection and atomic staff handover', { skip: !url }, 
     });
     await t.test('only active own-canteen staff with CSRF and an idempotency key can collect', async () => {
       const order = await ready();
-      for (const browser of [student.browser, admin.browser]) assert.equal((await collect(order, browser)).status, 403);
-      assert.equal((await collect(order, otherStaff.browser)).status, 404);
+      assert.equal((await collect(order,student.browser)).status,403);assert.equal((await collect(order,admin.browser)).status,404);
+      assert.equal((await collect(order, otherStaff.browser)).status, 401);
       assert.equal((await collect(order, await new Browser(base, 'canteen').prepare())).status, 401);
       assert.equal((await staff.browser.request(`/orders/${order.id}/collect`, 'POST', { expectedVersion: order.version })).status, 422);
       const noCsrf = new Browser(base, 'canteen'); noCsrf.jar = new Map(staff.browser.jar);

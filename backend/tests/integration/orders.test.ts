@@ -1,3 +1,4 @@
+import { foreignCanteen } from './support.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac, randomBytes, randomUUID } from 'node:crypto';
@@ -20,8 +21,8 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
   const config = loadConfig({ DATABASE_URL: url, APP_ENV: 'test', NODE_ENV: 'test', FRONTEND_ORIGIN: 'http://localhost:5173',
     SESSION_SECRET: 's'.repeat(32), OTP_SECRET: 'o'.repeat(32), SEED_DEVELOPMENT_DATA: 'true', LOG_LEVEL: 'silent', DB_TIMEOUT_MS: '10000' });
   const db = createPrisma(config); await seed(db, config);
-  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'bella-bite' } });
-  const other = await db.canteen.findUniqueOrThrow({ where: { slug: 'shanu' } });
+  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'canteen' } });
+  const other = await foreignCanteen(db);
   const item = await db.menuItem.findFirstOrThrow({ where: { canteenId: canteen.id } });
   const otherItem = await db.menuItem.findFirstOrThrow({ where: { canteenId: other.id } });
   let now = new Date('2026-11-01T10:00:00.000Z');
@@ -111,15 +112,15 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
       assert.deepEqual(responses.map(r => r.status).sort(), [201, 409]);
       assert.equal(await db.order.count(), before + 1); assert.equal(await db.idempotencyKey.count({ where: { action: 'CREATE_ORDER' } }), before + 1);
     });
-    await t.test('collision fallback and concurrent cross-canteen allocation produce campus-wide unique codes', async () => {
-      const a = bodyFor(await fill()); const b = bodyFor(await fill(second.browser, otherItem.id));
+    await t.test('collision fallback and concurrent student allocation produce campus-wide unique codes', async () => {
+      const a = bodyFor(await fill()); const b = bodyFor(await fill(second.browser, item.id));
       const responses = await Promise.all([student.browser.request('/orders', 'POST', a, randomUUID()), second.browser.request('/orders', 'POST', b, randomUUID())]);
       assert(responses.every(r => r.status === 201)); assert.notEqual(responses[0]!.body.orderCode, responses[1]!.body.orderCode);
       const rows = await db.order.findMany(); assert.equal(new Set(rows.map(row => row.orderCode)).size, rows.length);
     });
     await t.test('reads, cursors and filters remain scoped to the student or owning canteen', async () => {
       assert.equal((await second.browser.request('/orders/' + first.id)).status, 404);
-      assert.equal((await otherStaff.browser.request('/orders/' + first.id)).status, 404);
+      assert.equal((await otherStaff.browser.request('/orders/' + first.id)).status, 401);
       assert.equal((await staff.browser.request('/orders/' + first.id)).status, 200);
       const page = await student.browser.request('/orders?limit=1'); assert.equal(page.status, 200); contracts['GET /orders']!.response.parse(page.body);
       assert(page.body.nextCursor); const next = await student.browser.request('/orders?limit=1&cursor=' + page.body.nextCursor); assert.equal(next.status, 200); assert.notEqual(page.body.items[0].id, next.body.items[0].id);
@@ -127,7 +128,7 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
       assert.equal((await student.browser.request('/orders?cursor=' + foreign)).status, 422);
       assert.equal((await staff.browser.request('/orders?canteenId=' + other.id)).status, 403);
       assert.equal((await student.browser.request('/orders?canteenId=' + other.id)).body.items.length, 0);
-      assert.equal((await admin.browser.request('/orders')).body.items.length, await db.order.count());
+      assert.equal((await admin.browser.request('/orders')).status,404);
     });
     await t.test('canteen pagination returns newest receipts first with stable timestamp ties', async () => {
       const ids = [1, 2, 3].map(index => `00000000-1000-4000-8000-${String(index).padStart(12, '0')}`);
@@ -203,7 +204,7 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
     });
     await t.test('only owning active staff can advance orders and no state may be skipped', async () => {
       assert.equal((await student.browser.request('/orders/' + first.id + '/accept', 'POST', { expectedVersion: 1 }, randomUUID())).status, 403);
-      assert.equal((await otherStaff.browser.request('/orders/' + first.id + '/accept', 'POST', { expectedVersion: 1 }, randomUUID())).status, 404);
+      assert.equal((await otherStaff.browser.request('/orders/' + first.id + '/accept', 'POST', { expectedVersion: 1 }, randomUUID())).status, 401);
       assert.equal((await staff.browser.request('/orders/' + first.id + '/prepare', 'POST', { expectedVersion: 1 }, randomUUID())).body.error.code, 'ORDER_STATE_CONFLICT');
       assert.equal((await staff.browser.request('/orders/' + first.id + '/ready', 'POST', { expectedVersion: 1 }, randomUUID())).status, 409);
       assert.equal((await staff.browser.request('/orders/' + first.id + '/accept', 'POST', { expectedVersion: 1 })).status, 422);
@@ -252,7 +253,7 @@ test('transactional checkout, code allocation and fulfillment with isolated Post
       const path = `/orders/${placed.body.id}/reject`;
       const body = { expectedVersion: 1 }; const key = randomUUID();
       assert.equal((await student.browser.request(path, 'POST', body, randomUUID())).status, 403);
-      assert.equal((await otherStaff.browser.request(path, 'POST', body, randomUUID())).status, 404);
+      assert.equal((await otherStaff.browser.request(path, 'POST', body, randomUUID())).status, 401);
       assert.equal((await staff.browser.request(path, 'POST', { expectedVersion: 2 }, randomUUID())).status, 409);
       const results = await Promise.all([staff.browser.request(path, 'POST', body, key), staffTwo.browser.request(path, 'POST', body, randomUUID())]);
       assert.deepEqual(results.map(result => result.status).sort(), [200, 409]);

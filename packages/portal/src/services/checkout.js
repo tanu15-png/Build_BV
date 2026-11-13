@@ -9,9 +9,10 @@ export function checkoutSnapshot(cart) {
       .sort((a, b) => a.menuItemId.localeCompare(b.menuItemId)),
   });
 }
-export async function submitCheckout({ cart, review, createOrder, pendingRequest }) {
+export async function submitCheckout({ cart, review, createOrder, pendingRequest, onStage = () => {} }) {
   // An uncertain submission must retry its original payload and idempotency key.
-  if (pendingRequest) return createOrder(pendingRequest.body);
+  if (pendingRequest) { onStage('Submitting…'); return createOrder(pendingRequest.body); }
+  onStage('Checking items and prices…');
   const shown = checkoutSnapshot(cart);
   let current;
   // review() joins the cart's existing write queue, so pending additions finish
@@ -25,5 +26,6 @@ export async function submitCheckout({ cart, review, createOrder, pendingRequest
   if (shown !== checkoutSnapshot(current)) {
     throw new Error('Your cart changed. Check the updated items and total, then place your order again.');
   }
+  onStage('Submitting…');
   return createOrder({ expectedVersion: current.version, quote: current.quote });
 }

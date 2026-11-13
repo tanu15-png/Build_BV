@@ -1,8 +1,8 @@
 # SpoonAte backend
 
-> Admin access uses a shared server-side `ADMIN_ACCESS_PASSWORD`, without Supabase email or verification. Set it in backend/.env (local) or hosting secrets (deployed); no VITE variable or database migration is needed. Existing admin email-activation instructions are superseded by this team-password entry.
+The active application has student and canteen portals only. The admin frontend is removed and `/api/v1/admin` returns 404. No admin domain or password is required. Canteen members enter with a name and the agreed member code, without email or Supabase challenges. Student signup/login/recovery uses Supabase.
 
-> Portal routing: website apps now live in `apps/student`, `apps/canteen` and `apps/admin`. API paths below are relative to `/api/v1/<portal>`; use the matching portal and origin. See [deployment instructions](../DEPLOYMENT.md) for the three website environments, proxy and callback configuration.
+Use [DEPLOYMENT.md](../DEPLOYMENT.md) and [Railway setup](../deploy/RAILWAY.md) as the current release instructions. API paths are relative to `/api/v1/student` or `/api/v1/canteen`; use the matching website origin. `/health/live` checks the process; `/health/ready` checks database connectivity. The remaining phase notes below document historical implementation details; retired admin and staff-email instructions do not apply to the current release.
 
 Phase 1 foundation, Phase 2 database/provisioning and Supabase Auth integration are implemented. See [AUTH.md](AUTH.md) for verified signup, password login/reset, staff email challenges, cookie sessions, member removal and admin authorization. Catalog, carts, test orders, fulfillment, notifications, canteen-controlled collection and admin oversight are implemented; the feature documents below record their verification and deployment steps. `/api/v1/canteens` exposes a safe directory; `/health/live` checks the process and `/health/ready` checks the database within a deadline. Unimplemented business routes return the standard 404 envelope.
 

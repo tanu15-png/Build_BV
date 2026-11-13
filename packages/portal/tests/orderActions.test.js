@@ -62,9 +62,9 @@ test('pending checkout requests are isolated by authenticated actor', async () =
   assert.equal(b.pendingCheckout(), null);
 });
 test('server orders retain their UUID, code/day, immutable paise prices and status history', () => {
-  const order = mapOrder({ id: 'uuid', orderCode: 'A01', codeDay: '2026-11-01', canteenId: 'can', canteenName: 'Bella Bite', totalPaise: 6050,
-    items: [{ id: 'line', unitPricePaise: 6050, quantity: 1 }], events: [{ newStatus: 'READY', createdAt: '2026-11-01T10:00:00Z' }] }, [{ databaseId: 'can', id: 'bella-bite' }]);
-  assert.equal(order.id, 'uuid'); assert.equal(order.orderCode, 'A01'); assert.equal(order.total, 60.5); assert.equal(order.cafeId, 'bella-bite');
+  const order = mapOrder({ id: 'uuid', orderCode: 'A01', codeDay: '2026-11-01', canteenId: 'can', canteenName: 'Test canteen 8', totalPaise: 6050,
+    items: [{ id: 'line', unitPricePaise: 6050, quantity: 1 }], events: [{ newStatus: 'READY', createdAt: '2026-11-01T10:00:00Z' }] }, [{ databaseId: 'can', id: 'test-canteen-8' }]);
+  assert.equal(order.id, 'uuid'); assert.equal(order.orderCode, 'A01'); assert.equal(order.total, 60.5); assert.equal(order.cafeId, 'test-canteen-8');
   assert.deepEqual(order.history, [{ status: 'READY', at: '2026-11-01T10:00:00Z' }]);
 });
 test('CSRF recovery preserves the idempotency key and original request body', async t => {

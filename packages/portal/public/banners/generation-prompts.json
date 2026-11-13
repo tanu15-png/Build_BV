@@ -1,0 +1,17 @@
+{
+  "mode": "Built-in image_gen",
+  "prompts": [
+    {
+      "slug": "exam-season",
+      "prompt": "Create a polished wide panoramic promotional banner for SpoonAte, a student canteen ordering app. Landscape 3:1 composition, professional editorial food photography with tasteful flat graphic shapes, warm cream and deep forest green palette; study notebook, pencils and a steaming coffee beside a grilled vegetable sandwich, appealing Indian college canteen food photography. The only text must be the exact large headline \"EXAM SEASON\" and a small \"SpoonAte\" wordmark. Large legible typography on the left, beautifully lit realistic food arranged on the right. Keep all text and food fully within generous safe margins. No prices, no discounts, no buttons, no extra words, no competing logos, no watermarks. This exact same image will be scaled down to fit mobile without cropping; avoid tiny details and small text."
+    },
+    {
+      "slug": "sunday-funday",
+      "prompt": "Create a polished wide panoramic promotional banner for SpoonAte, a student canteen ordering app. Landscape 3:1 composition, professional editorial food photography with tasteful flat graphic shapes, sunny butter-yellow and fresh teal palette; overhead pizza slices, crispy french fries, a veggie burger and cold coffee, playful weekend canteen food photography. The only text must be the exact large headline \"SUNDAY FUNDAY\" and a small \"SpoonAte\" wordmark. Large legible typography on the left, beautifully lit realistic food arranged on the right. Keep all text and food fully within generous safe margins. No prices, no discounts, no buttons, no extra words, no competing logos, no watermarks. This exact same image will be scaled down to fit mobile without cropping; avoid tiny details and small text."
+    },
+    {
+      "slug": "birthday",
+      "prompt": "Create a polished wide panoramic promotional banner for SpoonAte, a student canteen ordering app. Landscape 3:1 composition, professional editorial food photography with tasteful flat graphic shapes, soft lilac and cream with deep green accents; festive confetti, a small beautiful frosted birthday cake with candles as decorative celebration imagery, pizza slices and strawberry milkshakes, joyful campus celebration. The only text must be the exact large headline \"HAPPY BIRTHDAY\" and a small \"SpoonAte\" wordmark. Large legible typography on the left, beautifully lit realistic food arranged on the right. Keep all text and food fully within generous safe margins. No prices, no discounts, no buttons, no extra words, no competing logos, no watermarks. This exact same image will be scaled down to fit mobile without cropping; avoid tiny details and small text."
+    }
+  ]
+}

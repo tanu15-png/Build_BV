@@ -1,3 +1,5 @@
+import { createIncomingOrderTracker } from '../services/incomingOrders';
+import { playOrderChime } from '../services/orderSound';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { pollingInterval, startVisiblePolling } from '../services/polling';
 import { api } from '../services/api';
@@ -5,6 +7,8 @@ import { createOrderActions, mapOrder } from '../services/orderActions';
 import { createOrderQueue } from '../services/orderQueue';
 export function useRemoteOrders(user, cafes, refreshCart, refreshNotifications, refreshSession) {
   const actorId = user?.id;
+  const canteen = user?.role === 'canteen';
+  const announcements = useRef(null);
   const owner = user && ['student', 'canteen'].includes(user.role) ? user.id + ':' + user.role + ':' + (user.canteenId || '') : '';
   const actions = useMemo(() => createOrderActions({ api, storage: sessionStorage, actorId }), [actorId]);
   const [state, setState] = useState({ owner: '', items: [], nextCursor: null });
@@ -26,6 +30,7 @@ export function useRemoteOrders(user, cafes, refreshCart, refreshNotifications, 
     try {
       const page = await api('/orders?limit=100' + (cursor ? '&cursor=' + cursor : ''));
       if (started !== generation.current || sequence !== requestSequence.current) return;
+      announcements.current?.observe(page.items, { append: Boolean(cursor) });
       fulfillmentQueue.current?.seed(page.items);
       setState(current => {
         const incoming = page.items.map(order => {
@@ -49,6 +54,7 @@ export function useRemoteOrders(user, cafes, refreshCart, refreshNotifications, 
   }, [owner, refreshSession]);
   useEffect(() => {
     const activeGeneration = generation.current + 1; generation.current = activeGeneration; busyRef.current = false; recent.current.clear();
+    announcements.current = canteen && owner ? createIncomingOrderTracker({ notify: playOrderChime, storage: sessionStorage, owner }) : null;
     let fulfillmentChanged = false;
     const initial = setTimeout(() => {
       setBusy(false); setError(''); setPending({ owner, request: actions.pendingCheckout() });
@@ -68,9 +74,12 @@ export function useRemoteOrders(user, cafes, refreshCart, refreshNotifications, 
     queue.owner = owner; fulfillmentQueue.current = queue;
     const polling = owner ? startVisiblePolling({ refresh: () => refreshOrders(), intervalMs: pollingInterval(import.meta.env.VITE_SYNC_INTERVAL_MS) }) : null;
     poller.current = polling;
-    return () => { queue.dispose(); generation.current = activeGeneration + 1; clearTimeout(initial); polling?.stop(); };
+    let arrivalTimer;
+    const onArrival = () => { clearTimeout(arrivalTimer); arrivalTimer = setTimeout(() => { void refreshOrders(); }, 100); };
+    window.addEventListener('spoonate:orders-changed', onArrival);
+    return () => { queue.dispose(); generation.current = activeGeneration + 1; clearTimeout(initial); clearTimeout(arrivalTimer); window.removeEventListener('spoonate:orders-changed', onArrival); announcements.current = null; polling?.stop(); };
 
-  }, [actions, owner, refreshOrders, refreshNotifications]);
+  }, [actions, owner, refreshOrders, refreshNotifications, canteen]);
   async function mutate(run, checkout = false) {
     if (busyRef.current) throw new Error('Please wait for your current order request.');
     const started = generation.current; requestSequence.current++; busyRef.current = true; setBusy(true); setError('');

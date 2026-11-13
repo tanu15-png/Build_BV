@@ -1,5 +1,8 @@
+import { createOffersRouter } from './routes/offers.routes.js';
+import { createBannersRouter } from './routes/banners.routes.js';
+import { createReadCache } from './services/readCache.js';
 import { portals, portalOrigin, setPortal, type Portal } from './services/portal.js';
-import { createAdminRouter } from './routes/admin.routes.js';
+import { createRewardsRouter } from './routes/rewards.routes.js';
 import { createCatalogEvents } from './services/catalogEvents.js';
 import { createNotificationsRouter } from './routes/notifications.routes.js';
 import { createOrdersRouter } from './routes/orders.routes.js';
@@ -35,6 +38,23 @@ function originDenied(config: Config, portal?: Portal) {
 export function createApp(config: Config, db: PrismaClient,
   log: (entry: object) => void = entry => console.log(JSON.stringify(entry)), authFetch: typeof fetch = fetch, orderOptions: OrderOptions = {}) {
   const app = express();
+  if (config.TRUST_PROXY_HOPS) app.set('trust proxy', config.TRUST_PROXY_HOPS);
+  const reads = createReadCache();
+  const catalogEvents = createCatalogEvents();
+  app.locals.closeEventStreams = () => catalogEvents.close();
+  app.use((req, res, next) => {
+    const json = res.json.bind(res);
+    res.json = body => {
+      if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && res.statusCode < 400) {
+        if (/\/(?:menu-items|menu-categories|canteens|banners|offers)(?:\/|$)/.test(req.originalUrl)) reads.clear();
+        else if (/\/(?:orders|rewards)(?:\/|$)/.test(req.originalUrl)) reads.clear('rewards:');
+        if (/\/(orders|rewards)(?:\/|$)/.test(req.originalUrl)) catalogEvents.publishRewards();
+        if (/\/orders(?:\/|$)/.test(req.originalUrl) || /\/rewards\/redeem(?:\?|$)/.test(req.originalUrl)) catalogEvents.publishOrders();
+      }
+      return json(body);
+    };
+    next();
+  });
   app.disable('x-powered-by');
   app.use(requestId);
   app.use((req, res, next) => {
@@ -52,7 +72,7 @@ export function createApp(config: Config, db: PrismaClient,
     }
     if (req.method === 'OPTIONS') {
       res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-CSRF-Token,X-Request-Id,Idempotency-Key');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-CSRF-Token,X-Request-Id,Idempotency-Key,Cache-Control');
       res.status(204).end(); return;
     }
     next();
@@ -61,19 +81,20 @@ export function createApp(config: Config, db: PrismaClient,
   app.use('/health', createHealthRouter(() => db.$queryRawUnsafe('SELECT 1'), config.DB_TIMEOUT_MS));
   const api = Router();
   api.get('/canteens', async (_req, res) => {
-    const rows = await db.canteen.findMany({ orderBy: { slug: 'asc' }, select: {
+    const rows = await db.canteen.findMany({ where: { slug: 'canteen' }, orderBy: { slug: 'asc' }, select: {
       id: true, slug: true, name: true, location: true, hours: true, acceptingOrders: true, operational: true, version: true } });
     res.json({ canteens: rows.map(row => canteenSchema.parse(row)) });
   });
   api.use(createAuthRouter(config, db, authFetch));
-  const catalogEvents = createCatalogEvents();
-  api.use(createCatalogRouter(config, db, catalogEvents));
-  api.use(createAdminRouter(config, db, catalogEvents));
+  api.use(createCatalogRouter(config, db, catalogEvents, reads));
+  api.use(createRewardsRouter(config, db, reads));
+  api.use(createBannersRouter(config, db, catalogEvents, reads));
+  api.use(createOffersRouter(config, db, catalogEvents, reads));
   api.use(createNotificationsRouter(config, db));
   api.use(createOrdersRouter(config, db, orderOptions));
   app.use('/api/v1/:portal', (req, _res, next) => {
     const portal = req.params.portal as Portal;
-    if (!portals.includes(portal)) return next(new AppError(404, 'PORTAL_REQUIRED', 'Use a portal API address.'));
+    if (!portals.includes(portal) || portal === 'admin') return next(new AppError(404, 'PORTAL_REQUIRED', 'Use a portal API address.'));
     // Validate the decoded router parameter as well as the raw path (encoded aliases must not bypass origin scoping).
     const origin = req.get('origin');
     if (origin && !allowsOrigin(origin, config, portal)) return next(originDenied(config, portal));

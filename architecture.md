@@ -74,7 +74,7 @@ Build_BV/
 | Route | Role | Behavior |
 | --- | --- | --- |
 | `/login` | Public | Student signup/email-password login, canteen membership login, admin login |
-| `/student` | Student | Search the eight canteens and sample menus; view own active order |
+| `/student` | Student | Browse the single canteen menu; view own active order |
 | `/student/cafe/:cafeId` | Student | Browse one canteen's menu and availability |
 | `/student/cart` | Student | Own single-canteen cart, quantities, removal, empty cart |
 | `/student/checkout` | Student | Estimated pickup selection and test order submission |
@@ -180,7 +180,7 @@ Payment occurs only after acceptance. Preparation in the paid release is gated o
 
 ## Verification
 
-`npm run test` runs Node tests for domain validation, signup/email-password login, membership codes, all eight canteens, single-canteen carts, availability checks, current-price totals, future pickup times, daily codes/collisions/exhaustion, midnight reuse, UUID identity, campus-time display, ownership, valid transitions, pickup verification and scoped member/session revocation. `npm run lint` checks frontend sources, and `npm run build` checks the complete module graph and production bundle.
+`npm run test` runs Node tests for domain validation, signup/email-password login, membership codes, the single canteen, single-canteen carts, availability checks, current-price totals, future pickup times, daily codes/collisions/exhaustion, midnight reuse, UUID identity, campus-time display, ownership, valid transitions, pickup verification and scoped member/session revocation. `npm run lint` checks frontend sources, and `npm run build` checks the complete module graph and production bundle.
 
 ### Canteen member management
 

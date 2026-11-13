@@ -1,3 +1,4 @@
+import { foreignCanteen } from './support.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync, type SpawnSyncReturns } from 'node:child_process';
@@ -22,25 +23,26 @@ test('migrations, repeatable seeds, constraints, provisioning and safe catalog',
     };
     applyMigration();
     await seed(db, config);
-    assert.equal(await db.canteen.count(), 8);
+    assert.equal(await db.canteen.count(), 1);
     const canteens = await db.canteen.findMany();
     assert.deepEqual(canteens.map(c => c.name).sort(), directory.map(([, n]) => n).sort());
-    const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'bella-bite' } });
+    const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'canteen' } });
     const item = await db.menuItem.findFirstOrThrow({ where: { canteenId: canteen.id } });
     await db.menuItem.update({ where: { id: item.id }, data: { pricePaise: 1234, available: false } });
     await db.canteen.update({ where: { id: canteen.id }, data: { acceptingOrders: false } });
     applyMigration();
     await seed(db, config);
-    assert.equal(await db.menuItem.count(), 16);
+    assert.equal(await db.menuItem.count(), 2);
     assert.equal((await db.menuItem.findUniqueOrThrow({ where: { id: item.id } })).pricePaise, 1234);
     assert.equal((await db.canteen.findUniqueOrThrow({ where: { id: canteen.id } })).acceptingOrders, false);
     const firstCode = await db.canteenAccessCode.findFirstOrThrow({ where: { canteenId: canteen.id, active: true } });
-    assert(await verifySecret('bella-bite', firstCode.codeHash));
-    await rotateCode(db, config, 'bella-bite', 'new strong operator code');
+    assert(await verifySecret('shanu', firstCode.codeHash));
+    await rotateCode(db, config, 'canteen', 'new strong operator code');
     await seed(db, config);
     const active = await db.canteenAccessCode.findFirstOrThrow({ where: { canteenId: canteen.id, active: true } });
     assert.equal(active.version, 2); assert(await verifySecret('new strong operator code', active.codeHash));
-    await assert.rejects(() => rotateCode(db, { ...config, SEED_DEVELOPMENT_DATA: false }, 'bella-bite', 'mukteshwari'), { status: 409 });
+    await foreignCanteen(db);
+    await assert.rejects(() => rotateCode(db, config, 'canteen', 'foreign-test-code'), {status:409});
     await assert.rejects(() => provisionAdmin(db, 'admin@example.edu', 'Admin', 'admin123'));
     await provisionAdmin(db, 'admin@example.edu', 'Admin', 'unique operator password');
     const admin = await db.user.findUniqueOrThrow({ where: { email: 'admin@example.edu' }, include: { roles: true } });
@@ -61,12 +63,12 @@ test('migrations, repeatable seeds, constraints, provisioning and safe catalog',
     await db.rateLimit.create({ data: { key: 'test', windowEndsAt: new Date(), count: 1 } });
     await assert.rejects(() => db.rateLimit.update({ where: { key: 'test' }, data: { count: -1 } }));
     // Production-style seeds only insert directory records, never sample menus or codes.
-    await seed(db, { ...config, SEED_DEVELOPMENT_DATA: false }); assert.equal(await db.menuItem.count(), 16);
+    await seed(db, { ...config, SEED_DEVELOPMENT_DATA: false }); assert.equal(await db.menuItem.count(), 3);
     const server = createApp(config, db).listen(0, '127.0.0.1'); await once(server, 'listening');
     try {
       const address = server.address(); assert(address && typeof address !== 'string');
       const response = await fetch(`http://127.0.0.1:${address.port}/api/v1/student/canteens`); assert.equal(response.status, 200);
-      const text = await response.text(); assert.equal(JSON.parse(text).canteens.length, 8);
+      const text = await response.text(); assert.equal(JSON.parse(text).canteens.length, 1);
       assert(!text.includes('scrypt')); assert(!text.includes('codeHash')); assert(!text.includes('password'));
       assert.equal((await fetch(`http://127.0.0.1:${address.port}/health/ready`)).status, 200);
     } finally { await new Promise<void>(resolve => server.close(() => resolve())); }

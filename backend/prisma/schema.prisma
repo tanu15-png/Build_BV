@@ -78,6 +78,9 @@ model Canteen {
   carts Cart[]
   cartItems CartItem[]
   orders Order[]
+  rewards Reward[]
+  banners Banner[]
+  offers Offer[]
   @@map("canteens")
 }
 model CanteenAccessCode {
@@ -176,10 +179,77 @@ model MenuItem {
   canteen Canteen @relation(fields: [canteenId], references: [id], onDelete: Restrict)
   cartItems CartItem[]
   orderItems OrderItem[]
+  rewards Reward[]
+  bannerItems BannerItem[]
+  offers Offer[]
   @@unique([id, canteenId])
   @@index([canteenId, archived, available])
   @@index([categoryId])
   @@map("menu_items")
+}
+model Banner {
+  id String @id @default(uuid()) @db.Uuid
+  canteenId String @map("canteen_id") @db.Uuid
+  theme String?
+  title String
+  description String @default("")
+  imageRef String @map("image_ref")
+  active Boolean @default(true)
+  targetType String @default("theme") @map("target_type")
+  targetId String? @map("target_id") @db.Uuid
+  publishedAt DateTime @default(now()) @map("published_at") @db.Timestamptz
+  startsAt DateTime? @map("starts_at") @db.Timestamptz
+  endsAt DateTime? @map("ends_at") @db.Timestamptz
+  version Int @default(1)
+  canteen Canteen @relation(fields: [canteenId], references: [id], onDelete: Restrict)
+  items BannerItem[]
+  offers BannerOffer[]
+  @@unique([id, canteenId])
+  @@unique([canteenId, theme])
+  @@map("banners")
+}
+model BannerItem {
+  bannerId String @map("banner_id") @db.Uuid
+  canteenId String @map("canteen_id") @db.Uuid
+  menuItemId String @map("menu_item_id") @db.Uuid
+  banner Banner @relation(fields: [bannerId, canteenId], references: [id, canteenId], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId, canteenId], references: [id, canteenId], onDelete: Cascade)
+  @@id([bannerId, menuItemId])
+  @@map("banner_items")
+}
+model BannerImage {
+  id String @id @default(uuid()) @db.Uuid
+  mime String
+  data Bytes
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@map("banner_images")
+}
+model Offer {
+  id String @id @default(uuid()) @db.Uuid
+  canteenId String @map("canteen_id") @db.Uuid
+  menuItemId String @map("menu_item_id") @db.Uuid
+  name String
+  kind String
+  value Int
+  active Boolean @default(true)
+  startsAt DateTime @map("starts_at") @db.Timestamptz
+  endsAt DateTime @map("ends_at") @db.Timestamptz
+  version Int @default(1)
+  canteen Canteen @relation(fields: [canteenId], references: [id], onDelete: Restrict)
+  menuItem MenuItem @relation(fields: [menuItemId,canteenId], references: [id,canteenId], onDelete: Cascade)
+  banners BannerOffer[]
+  @@unique([id,canteenId])
+  @@index([menuItemId,active,startsAt,endsAt])
+  @@map("offers")
+}
+model BannerOffer {
+  bannerId String @map("banner_id") @db.Uuid
+  offerId String @map("offer_id") @db.Uuid
+  canteenId String @map("canteen_id") @db.Uuid
+  banner Banner @relation(fields:[bannerId,canteenId],references:[id,canteenId],onDelete:Cascade)
+  offer Offer @relation(fields:[offerId,canteenId],references:[id,canteenId],onDelete:Cascade)
+  @@id([bannerId,offerId])
+  @@map("banner_offers")
 }
 model Cart {
   id String @id @default(uuid()) @db.Uuid
@@ -213,6 +283,7 @@ model Order {
   executionMode String @default("TEST") @map("execution_mode")
   paymentStatus String @default("NOT_REQUIRED_TEST") @map("payment_status")
   totalPaise Int @map("total_paise")
+  rewardTokenCost Int? @map("reward_token_cost")
   pickupAt DateTime @map("pickup_at") @db.Timestamptz
   codeDay DateTime @map("code_day") @db.Date
   orderCode String? @map("order_code") @db.VarChar(3)
@@ -236,6 +307,17 @@ model Order {
   @@index([createdAt, id])
   @@map("orders")
 }
+model Reward {
+  id String @id @default(uuid()) @db.Uuid
+  canteenId String @map("canteen_id") @db.Uuid
+  menuItemId String @unique @map("menu_item_id") @db.Uuid
+  tokenCost Int @map("token_cost")
+  active Boolean @default(true)
+  version Int @default(1)
+  canteen Canteen @relation(fields: [canteenId], references: [id], onDelete: Restrict)
+  menuItem MenuItem @relation(fields: [menuItemId, canteenId], references: [id, canteenId], onDelete: Cascade)
+  @@map("rewards")
+}
 model PickupCredential {
   orderId String @id @map("order_id") @db.Uuid
   encryptedCode String @map("encrypted_code")
@@ -251,6 +333,9 @@ model OrderItem {
   name String
   quantity Int
   unitPricePaise Int @map("unit_price_paise")
+  originalUnitPricePaise Int? @map("original_unit_price_paise")
+  offerId String? @map("offer_id") @db.Uuid
+  offerName String? @map("offer_name")
   order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
   menuItem MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
   @@index([orderId])

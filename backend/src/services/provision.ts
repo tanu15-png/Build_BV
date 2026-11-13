@@ -1,13 +1,10 @@
+import { canteenPassword } from '../config/canteen.js';
 import { randomUUID } from 'node:crypto';
 import { AppError } from '../middleware/errorHandler.js';
 import type { PrismaClient, Prisma } from '../generated/prisma/client.js';
 import { hashSecret, verifySecret } from './hash.js';
 import type { Config } from '../config/env.js';
-export const directory = [
-  ['mukteshwari', "Mukteshwari's Canteen"], ['shanu', "Shanu's Canteen"], ['spicy-bites', 'Spicy Bites'],
-  ['annapurna', 'Annapurna Canteen'], ['agarwal', 'Agarwal Canteen'], ['fun-n-frolic', "Fun 'N' Frolic"],
-  ['desi-jayka', 'Desi Jayka'], ['bella-bite', 'Bella Bite'],
-] as const;
+export const directory = [['canteen', "Canteen"]] as const;
 export function developmentSeedsAllowed(config: Config) {
   return config.SEED_DEVELOPMENT_DATA && ['development', 'test'].includes(config.APP_ENV) && config.NODE_ENV !== 'production';
 }
@@ -19,7 +16,7 @@ export async function seed(db: PrismaClient, config: Config) {
       await tx.$queryRaw`SELECT id FROM canteens WHERE slug = ${slug} FOR UPDATE`;
       const canteen = await tx.canteen.findUniqueOrThrow({ where: { slug } });
       if (await tx.canteenAccessCode.count({ where: { canteenId: canteen.id } }) === 0) {
-        await tx.canteenAccessCode.create({ data: { canteenId: canteen.id, codeHash: await hashSecret(slug), version: 1 } });
+        await tx.canteenAccessCode.create({ data: { canteenId: canteen.id, codeHash: await hashSecret(canteenPassword), version: 1 } });
       }
       // Seed only a completely empty menu; never overwrite operator-managed records or availability.
       if (await tx.menuItem.count({ where: { canteenId: canteen.id } }) === 0) {

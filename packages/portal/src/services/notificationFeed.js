@@ -62,5 +62,18 @@ export function createNotificationFeed({ request, changed, unauthorized = () => 
     reads.set(id, completion);
     return completion;
   }
-  return { refresh, markRead, snapshot: () => state, dispose() { disposed = true; } };
+  async function markOpened(ids) {
+    const selected = ids.filter(id => !state.readingIds.includes(id) && state.items.some(item => item.id === id && !item.readAt)).slice(0,100);
+    if (!selected.length || disposed || suspended) return;
+    emit({ readingIds: [...state.readingIds, ...selected] });
+    try {
+      const page = await request('/notifications/read', { method: 'PATCH', body: { ids: selected } });
+      if (disposed) return;
+      revision++;
+      const saved = new Map(page.items.map(item => [item.id,item]));
+      emit({ items: state.items.map(item => saved.get(item.id) || item), unreadCount: page.unreadCount, error: '' });
+    } catch(error) { if (!disposed) failed(error); throw error; }
+    finally { emit({ readingIds: state.readingIds.filter(id => !selected.includes(id)) }); }
+  }
+  return { refresh, markRead, markOpened, snapshot: () => state, dispose() { disposed = true; } };
 }

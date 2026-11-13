@@ -5,6 +5,7 @@ const flag = z.enum(['true', 'false']).default('false').transform(v => v === 'tr
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(3).default(0),
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
   DATABASE_URL: databaseUrl,
   MIGRATION_DATABASE_URL: databaseUrl.optional(),
@@ -39,7 +40,7 @@ export const envSchema = z.object({
   }
   const deployed = ['staging', 'production'].includes(v.APP_ENV) || v.NODE_ENV === 'production';
   if (deployed && !v.SUPABASE_URL) ctx.addIssue({ code: 'custom', message: 'Deployed environments require Supabase Auth configuration' });
-  if (deployed && (v.SEED_DEVELOPMENT_DATA || v.EMAIL_PROVIDER === 'console' || [v.FRONTEND_ORIGIN, v.CANTEEN_ORIGIN, v.ADMIN_ORIGIN].some(value => !value.startsWith('https://')))) {
+  if (deployed && (v.SEED_DEVELOPMENT_DATA || v.EMAIL_PROVIDER === 'console' || [v.FRONTEND_ORIGIN, v.CANTEEN_ORIGIN].some(value => !value.startsWith('https://')))) {
     ctx.addIssue({ code: 'custom', message: 'Deployed environments require HTTPS, real email and disabled development seeds' });
   }
   if (new Set([v.FRONTEND_ORIGIN, v.CANTEEN_ORIGIN, v.ADMIN_ORIGIN]).size !== 3) ctx.addIssue({ code: 'custom', message: 'Each portal requires a distinct origin' });

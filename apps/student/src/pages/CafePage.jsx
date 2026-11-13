@@ -1,4 +1,5 @@
-import { ArrowLeft, Search, ShoppingCart } from "lucide-react";
+import OfferPrice from '@spoonate/portal/components/OfferPrice';
+import { ArrowLeft, Search } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
 
@@ -8,6 +9,7 @@ export default function CafePage() {
   const { cafeId } = useParams();
 
   const { cart, cafes, foods, addToCart, isFoodAvailable, categories, catalogLoading, catalogError } = useOrders();
+  const [offersOnly,setOffersOnly]=useState(false);
   const [search, setSearch] = useState("");
 
   const [category, setCategory] =
@@ -17,7 +19,7 @@ export default function CafePage() {
     (c) => c.id === cafeId
   );
 
-  const cafeFoods = foods.filter((food) => food.cafeId === cafeId && food.name.toLowerCase().includes(search.trim().toLowerCase()));
+  const cafeFoods = foods.filter((food) => food.cafeId === cafeId && (!offersOnly||food.offer) && food.name.toLowerCase().includes(search.trim().toLowerCase()));
 
   const filteredFoods =
     !categories.some(item => item.id === category)
@@ -25,12 +27,6 @@ export default function CafePage() {
       : cafeFoods.filter(
           (food) => food.categoryId === category
         );
-
-  const cartTotal = cart.reduce(
-    (sum, item) =>
-      sum + item.unitPricePaise * item.quantity / 100,
-    0
-  );
 
   if (!cafe && (catalogLoading || catalogError)) return <p role="status" className="p-10">{catalogError || "Loading menu…"}</p>;
   if (!cafe) {
@@ -105,7 +101,7 @@ export default function CafePage() {
 
         {/* CATEGORY */}
 
-        <div className="flex gap-3 mt-6 overflow-x-auto pb-2">
+        <div className="flex gap-3 mt-6 overflow-x-auto pb-2"><button aria-pressed={offersOnly} onClick={()=>setOffersOnly(value=>!value)} className={`rounded-full border px-5 py-2.5 font-bold whitespace-nowrap ${offersOnly?'border-amber-500 bg-amber-100':'border-amber-200 bg-amber-50'}`}>✦ Offers</button>
 
           {[
             { id: null, name: "All" },
@@ -158,7 +154,7 @@ export default function CafePage() {
                 <div className="flex justify-between items-center mt-5">
 
                   <span className="text-[#0f8f73] font-black text-xl">
-                    ₹{food.price.toFixed(2)}
+                    <OfferPrice item={food} />
                   </span>
 
                   <button
@@ -183,47 +179,6 @@ export default function CafePage() {
 
       </main>
 
-      {/* CART */}
-
-      {cart.length > 0 && (
-
-        <div className="fixed bottom-5 left-5 right-5 lg:left-auto lg:right-10 lg:w-[380px] bg-[#075d50] text-white rounded-2xl p-4 shadow-2xl z-40">
-
-          <div className="flex justify-between items-center">
-
-            <div className="flex items-center gap-3">
-
-              <ShoppingCart />
-
-              <div>
-                <p className="font-bold">
-                  {cart.reduce(
-                    (sum, item) =>
-                      sum + item.quantity,
-                    0
-                  )}{" "}
-                  items
-                </p>
-
-                <p className="text-white/60 text-sm">
-                  ₹{cartTotal.toFixed(2)}
-                </p>
-              </div>
-
-            </div>
-
-            <Link
-              to="/dashboard/cart"
-              className="bg-[#facc15] text-[#075d50] px-5 py-2.5 rounded-xl font-black"
-            >
-              View Cart
-            </Link>
-
-          </div>
-
-        </div>
-
-      )}
 
     </div>
   );

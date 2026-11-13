@@ -1,0 +1,21 @@
+FROM node:24-bookworm-slim AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY apps ./apps
+COPY packages ./packages
+RUN npm ci
+ARG PORTAL
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_PUBLISHABLE_KEY
+RUN case "$PORTAL" in student|canteen) ;; *) echo 'PORTAL must be student or canteen'; exit 1 ;; esac \
+    && npm run build --workspace=@spoonate/${PORTAL} \
+    && mkdir /site && cp -a apps/${PORTAL}/dist/. /site/
+
+FROM nginx:stable-alpine
+ENV PORT=8080
+# Only substitute these deployment variables; preserve Nginx request variables.
+ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
+ENV NGINX_ENVSUBST_FILTER="^(PORT|API_UPSTREAM|NGINX_LOCAL_RESOLVERS)$"
+COPY deploy/frontend.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=build /site /usr/share/nginx/html
+EXPOSE 8080

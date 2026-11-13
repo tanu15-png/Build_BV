@@ -1,0 +1,94 @@
+name: Release checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-test-only-password
+          POSTGRES_DB: spoonate_test_runner
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d spoonate_test_runner"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Lint and dependency audits
+        run: |
+          npm run lint
+          npm audit --audit-level=moderate
+          npm --prefix backend audit --audit-level=moderate
+      - name: Unit checks and production builds
+        run: |
+          npm test
+          npm run test:dev
+          npm run build
+          npm --prefix backend run build
+          npm --prefix backend test
+      - name: Isolated database integration checks
+        working-directory: backend
+        env:
+          INTEGRATION_DATABASE_URL: postgresql://postgres:ci-test-only-password@127.0.0.1:5432/spoonate_test_runner
+        run: |
+          npm run test:integration:local
+          node scripts/test-shutdown.mjs
+      - name: Build all deployment images
+        run: |
+          docker build -f deploy/Dockerfile.backend -t spoonate-ci-api .
+          docker build -f deploy/Dockerfile.frontend --build-arg PORTAL=student --build-arg VITE_SUPABASE_URL=https://qualification.supabase.co --build-arg VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_qualification_test_only -t spoonate-ci-student .
+          docker build -f deploy/Dockerfile.frontend --build-arg PORTAL=canteen -t spoonate-ci-canteen .
+      - name: Test images with isolated test settings
+        env:
+          DATABASE_URL: postgresql://postgres:ci-test-only-password@127.0.0.1:5432/spoonate_test_runner
+          MIGRATION_DATABASE_URL: postgresql://postgres:ci-test-only-password@127.0.0.1:5432/spoonate_test_runner
+          NODE_ENV: test
+          APP_ENV: test
+          FRONTEND_ORIGIN: http://localhost:5397
+          CANTEEN_ORIGIN: http://localhost:5398
+          SESSION_SECRET: ci-session-test-secret-1234567890123456
+          OTP_SECRET: ci-otp-test-secret-6543210987654321
+          SEED_DEVELOPMENT_DATA: 'true'
+          LOG_LEVEL: silent
+          TRUST_PROXY_HOPS: '1'
+        run: |
+          trap 'docker rm -f spoonate-ci-api spoonate-ci-worker spoonate-ci-student spoonate-ci-canteen >/dev/null 2>&1 || true' EXIT
+          npm --prefix backend run db:migrate
+          npm --prefix backend run db:seed
+          docker run -d --network host --name spoonate-ci-api --env NODE_ENV --env APP_ENV --env DATABASE_URL --env FRONTEND_ORIGIN --env CANTEEN_ORIGIN --env SESSION_SECRET --env OTP_SECRET --env LOG_LEVEL --env TRUST_PROXY_HOPS -e PORT=5440 spoonate-ci-api
+          docker run -d --network host --name spoonate-ci-worker --env NODE_ENV --env APP_ENV --env DATABASE_URL --env FRONTEND_ORIGIN --env CANTEEN_ORIGIN --env SESSION_SECRET --env OTP_SECRET --env LOG_LEVEL spoonate-ci-api node dist/outbox-worker.js
+          docker run -d --network host --name spoonate-ci-student -e PORT=5397 -e API_UPSTREAM=http://127.0.0.1:5440 spoonate-ci-student
+          docker run -d --network host --name spoonate-ci-canteen -e PORT=5398 -e API_UPSTREAM=http://127.0.0.1:5440 spoonate-ci-canteen
+          curl --fail --retry 30 --retry-connrefused --retry-delay 1 http://127.0.0.1:5440/health/ready
+          curl --fail --retry 30 --retry-connrefused --retry-delay 1 http://127.0.0.1:5397/dashboard/orders/example > /dev/null
+          CONTAINER_TEST_CANTEEN_URL=http://localhost:5398 node backend/scripts/container-smoke.mjs
+          test "$(docker inspect --format '{{.State.Running}}' spoonate-ci-worker)" = true

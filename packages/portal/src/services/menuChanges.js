@@ -37,7 +37,7 @@ export function mergeCanteenMenu(catalog, menu) {
   const canteens = catalog.canteens.some(canteen => canteen.id === id)
     ? catalog.canteens.map(canteen => canteen.id === id ? menu.canteen : canteen)
     : [...catalog.canteens, menu.canteen];
-  return { canteens,
+  return { ...catalog, canteens,
     categories: [...catalog.categories.filter(category => category.canteenId !== id), ...categories],
     items: [...catalog.items.filter(item => item.canteenId !== id), ...menu.items.filter(item => !item.archived && categoryIds.has(item.categoryId))] };
 }

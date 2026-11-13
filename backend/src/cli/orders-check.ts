@@ -5,14 +5,13 @@ import { createApp } from '../app.js';
 import { loadConfig } from '../config/env.js';
 import { createPrisma } from '../lib/prisma.js';
 import type { PrismaClient } from '../generated/prisma/client.js';
-import { hashSecret } from '../services/hash.js';
 import { cartSchema, orderSchema } from '../schemas/contracts.js';
 import { createOutboxWorker } from '../services/outbox.js';
 async function main() {
   const config = loadConfig();
   const db = createPrisma(config);
   const rollback = new Error('qualification rollback');
-  const canteenId = randomUUID();
+  const probeId = randomUUID();
   let stage = 'configuration';
   const started = Date.now();
   const progress = () => console.log('CHECK: ' + stage + ' (' + (Date.now() - started) + 'ms)');
@@ -20,13 +19,16 @@ async function main() {
     try {
       await db.$transaction(async tx => {
         stage = 'temporary database fixtures'; progress();
-        const canteen = await tx.canteen.create({ data: { id: canteenId, slug: 'check-' + canteenId, name: 'Qualification probe' } });
-        await tx.canteenAccessCode.create({ data: { canteenId, version: 1, codeHash: await hashSecret(randomBytes(32).toString('hex')) } });
-        const category = await tx.menuCategory.create({ data: { canteenId, name: 'Qualification probe' } });
-        const item = await tx.menuItem.create({ data: { canteenId, categoryId: category.id, name: 'Qualification probe', pricePaise: 1 } });
+        const canteen = await tx.canteen.findUniqueOrThrow({where:{slug:'canteen'}});
+        const canteenId=canteen.id;
+        await tx.$queryRaw`SELECT id FROM canteens WHERE id=${canteenId}::uuid FOR UPDATE`;
+        await tx.canteen.update({where:{id:canteenId},data:{operational:true,acceptingOrders:true}});
+        const code=await tx.canteenAccessCode.findFirstOrThrow({where:{canteenId,active:true},orderBy:{version:'desc'}});
+        const category = await tx.menuCategory.create({ data: { canteenId, name: 'Qualification '+probeId } });
+        const item = await tx.menuItem.create({ data: { id:probeId, canteenId, categoryId: category.id, name: 'Qualification '+probeId, pricePaise: 1 } });
         const student = await tx.user.create({ data: { email: 'probe-' + randomUUID() + '@banasthali.in', name: 'Qualification student', supabaseSubject: randomUUID(), emailVerifiedAt: new Date(), roles: { create: { role: 'STUDENT' } } } });
         const staff = await tx.user.create({ data: { email: 'probe-' + randomUUID() + '@example.invalid', name: 'Qualification staff', supabaseSubject: randomUUID(), emailVerifiedAt: new Date(), roles: { create: { role: 'CANTEEN' } } } });
-        const membership = await tx.canteenMembership.create({ data: { userId: staff.id, canteenId, codeVersion: 1 } });
+        const membership = await tx.canteenMembership.create({ data: { userId: staff.id, canteenId, codeVersion: code.version } });
         const studentToken = randomBytes(32).toString('hex'); const staffToken = randomBytes(32).toString('hex');
         for (const [userId, role, token] of [[student.id, 'STUDENT', studentToken], [staff.id, 'CANTEEN', staffToken]] as const) {
           await tx.session.create({ data: { userId, role, tokenHash: createHmac('sha256', config.SESSION_SECRET).update('session:' + token).digest('hex'),
@@ -109,7 +111,7 @@ async function main() {
       }, { maxWait: config.DB_TIMEOUT_MS, timeout: 180000 });
     } catch (error) { if (error !== rollback) throw error; }
     stage = 'rollback verification';
-    assert.equal(await db.canteen.count({ where: { id: canteenId } }), 0);
+    assert.equal(await db.menuItem.count({ where: { id: probeId } }), 0);
     console.log('PASS: live checkout, stable retry, scoped reads, accept/prepare/ready, rejection and student notification delivery');
     console.log('PASS: all temporary users, sessions, menus, orders, histories and outbox entries rolled back; no email sent');
   } catch (error) {

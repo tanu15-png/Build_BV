@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createMenuQueue } from '../src/services/menuQueue.js';
 
-const menu = { canteen: { id: 'canteen', slug: 'bella-bite', name: 'Bella Bite', version: 3, hours: '9 AM–5 PM' },
+const menu = { canteen: { id: 'canteen', slug: 'test-canteen-8', name: 'Test canteen 8', version: 3, hours: '9 AM–5 PM' },
   categories: [{ id: 'snacks', canteenId: 'canteen', name: 'Snacks', version: 1, archived: false }],
   items: [{ id: 'tea', canteenId: 'canteen', categoryId: 'snacks', category: 'Snacks', name: 'Tea', pricePaise: 1000, version: 1, available: true, archived: false }] };
 function setup() {

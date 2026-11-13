@@ -1,10 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cafes, foods } from "../src/data/mockData.js";
+import { cafes as singleCafes, foods as singleFoods } from "../src/data/mockData.js";
 import { canteenAccessCodes } from "../src/data/canteenAccess.js";
 import { studentAccount, canteenMember, revokeCanteenMember, canteenSessionActive } from "../src/utils/authRules.js";
 import { addCartItem, buildOrder, generateOrderId, normalizeStudentEmail, transitionOrder, visibleOrders, orderNotifications, campusDay, pickupLabel, orderInSection } from "../src/utils/orderRules.js";
 
+// A foreign fixture exercises scope guards; it is never part of the app directory.
+const cafes = [...singleCafes, { ...singleCafes[0], id: 'foreign', name: 'Foreign fixture' }];
+const foods = [...singleFoods, { ...singleFoods[0], id: 'foreign-food', cafeId: 'foreign' }];
 const available = { pausedCafes: [], disabledFoods: [] };
 
 test('rejected orders appear only in the rejected section', () => {
@@ -35,14 +38,13 @@ const now = new Date("2026-10-01T12:00:00Z");
 const orderInput = { cart: [{ ...food, quantity: 2 }], orders: [], user: student, cafes, foods, availability: available, pickupAt: "2026-10-01T12:20:00Z", now };
 const makeOrder = (overrides = {}) => buildOrder({ ...orderInput, ...overrides });
 
-test("directory includes all eight confirmed canteens with distinct menus and name-based test codes", () => {
-  assert.deepEqual(cafes.map((cafe) => cafe.name), ["Mukteshwari's Canteen", "Shanu's Canteen", "Spicy Bites", "Annapurna Canteen", "Agarwal Canteen", "Fun 'N' Frolic", "Desi Jayka", "Bella Bite"]);
-  for (const cafe of cafes) {
-    assert.equal(canteenAccessCodes[cafe.id], cafe.name);
-    assert.ok(foods.some((item) => item.cafeId === cafe.id));
-  }
-  assert.equal(new Set(foods.map((item) => item.id)).size, foods.length);
+test("the application directory contains only the single generic canteen", () => {
+  assert.deepEqual(singleCafes.map(cafe => cafe.name), ['Canteen']);
+  assert.equal(singleCafes.length, 1);
+  assert(singleFoods.every(item => item.cafeId === 'canteen'));
+  assert.equal(new Set(singleFoods.map(item => item.id)).size, singleFoods.length);
 });
+
 test("student email must match the exact campus domain", () => {
   assert.equal(normalizeStudentEmail(" Student@BANASTHALI.IN "), student.email);
   for (const email of ["student@gmail.com", "student@banasthali.in.evil.com", "student@sub.banasthali.in", "@banasthali.in", "student @banasthali.in"]) {
@@ -61,11 +63,11 @@ test("student signup requires name and password; login validates registered emai
   assert.throws(() => studentAccount({ ...credentials, password: "wrong", register: false }, users), /Incorrect password/);
 });
 test("canteen membership requires a selection, email, and the matching code", () => {
-  const credentials = { email: "Member@example.com", cafeId: "bella-bite", secretCode: "Bella Bite" };
-  assert.equal(canteenMember(credentials, cafes, canteenAccessCodes).cafeId, "bella-bite");
+  const credentials = { email: "Member@example.com", cafeId: "canteen", secretCode: "Canteen" };
+  assert.equal(canteenMember(credentials, cafes, canteenAccessCodes).cafeId, "canteen");
   assert.throws(() => canteenMember({ ...credentials, cafeId: "" }, cafes, canteenAccessCodes), /Select/);
   assert.throws(() => canteenMember({ ...credentials, email: "invalid" }, cafes, canteenAccessCodes), /valid member email/);
-  assert.throws(() => canteenMember({ ...credentials, secretCode: "Spicy Bites" }, cafes, canteenAccessCodes), /Incorrect/);
+  assert.throws(() => canteenMember({ ...credentials, secretCode: "Test canteen 3" }, cafes, canteenAccessCodes), /Incorrect/);
 });
 test("cart quantities increase within one canteen and reject mixed canteens", () => {
   const cart = addCartItem([], food, cafes, available);

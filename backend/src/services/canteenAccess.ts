@@ -15,7 +15,7 @@ export async function signInCanteenMember(db: PrismaClient, config: Config, inpu
 }) {
   const name = memberName(input.name);
   if (!name || name.length > 120) throw new AppError(422, 'NAME_INVALID', 'Enter your name (up to 120 characters).');
-  const candidates = await db.canteenAccessCode.findMany({ where: { active: true }, select: { canteenId: true, codeHash: true, version: true } });
+  const candidates = await db.canteenAccessCode.findMany({ where: { active: true, canteen: { slug: 'canteen' } }, select: { canteenId: true, codeHash: true, version: true } });
   const matches = [];
   // Bound the work per request with the route's IP rate limit.
   for (const candidate of candidates) if (await verifySecret(input.accessCode.trim().toLowerCase(), candidate.codeHash)) matches.push(candidate);

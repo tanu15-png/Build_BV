@@ -2,12 +2,13 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import type { Config } from '../config/env.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { AppError } from '../middleware/errorHandler.js';
-export const cartInclude = { canteen: true, items: { orderBy: { id: 'asc' as const }, include: { menuItem: { include: { category: true } } } } } satisfies Prisma.CartInclude;
+import { priceFor, nextOfferBoundary } from './offers.js';
+export const cartInclude = { canteen: true, items: { orderBy: { id: 'asc' as const }, include: { menuItem: { include: { category: true, offers: true } } } } } satisfies Prisma.CartInclude;
 type LoadedCart = Prisma.CartGetPayload<{ include: typeof cartInclude }>;
-export function cartResponse(cart: LoadedCart, config: Config) {
-  const canteenAvailable = Boolean(cart.canteen?.operational && cart.canteen.acceptingOrders);
+export function cartResponse(cart: LoadedCart, config: Config, now = Date.now()) {
+  const canteenAvailable = Boolean(cart.canteen?.slug === 'canteen' && cart.canteen.operational && cart.canteen.acceptingOrders);
   const items = cart.items.map(line => ({ id: line.id, menuItemId: line.menuItemId, canteenId: line.canteenId,
-    name: line.menuItem.name, quantity: line.quantity, unitPricePaise: line.menuItem.pricePaise,
+    name: line.menuItem.name, quantity: line.quantity, unitPricePaise: priceFor(line.menuItem, now).effectivePricePaise, originalUnitPricePaise: line.menuItem.pricePaise, offer: priceFor(line.menuItem, now).offer,
     categoryId: line.menuItem.categoryId, category: line.menuItem.category.name,
     description: line.menuItem.description, imageRef: line.menuItem.imageRef, menuVersion: line.menuItem.version,
     available: canteenAvailable && line.menuItem.available && !line.menuItem.archived && !line.menuItem.category.archived,
@@ -17,7 +18,7 @@ export function cartResponse(cart: LoadedCart, config: Config) {
     available: items.length > 0 && items.every(line => line.available) };
   const digest = createHash('sha256').update(JSON.stringify({ ...snapshot, canteenVersion: cart.canteen?.version,
     categories: cart.items.map(line => line.menuItem.category.version) })).digest('hex');
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+  const expiresAt = new Date(Math.min(now + 15 * 60 * 1000, Date.parse(nextOfferBoundary(cart.items.map(line => line.menuItem), now) || '') || Infinity)).toISOString();
   const payload = Buffer.from(JSON.stringify({ cartId: cart.id, studentId: cart.studentId, version: cart.version, digest, expiresAt })).toString('base64url');
   const signature = createHmac('sha256', config.SESSION_SECRET).update(`cart-quote:${payload}`).digest('base64url');
   return { ...snapshot, quote: `${payload}.${signature}`, quoteExpiresAt: expiresAt };

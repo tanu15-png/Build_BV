@@ -5,9 +5,9 @@ import { canteenMemberEmail, memberName } from '../src/services/canteenAccess.js
 
 test('canteen member entry requires only a name and access code', () => {
   const schema = contracts['POST /auth/canteen/access']!.body;
-  assert.deepEqual(schema.parse({ name: ' Tanu ', accessCode: ' shanu ' }), { name: 'Tanu', accessCode: 'shanu' });
-  for (const body of [{ name: '', accessCode: 'shanu' }, { name: 'Tanu' }, { name: 'Tanu', accessCode: 'abc' },
-    { name: 'Tanu', accessCode: 'shanu', email: 'unused@example.edu' }, { name: 'Tanu', accessCode: 'shanu', canteenId: 'untrusted' }]) {
+  assert.deepEqual(schema.parse({ name: ' Tanu ', accessCode: ' canteen ' }), { name: 'Tanu', accessCode: 'canteen' });
+  for (const body of [{ name: '', accessCode: 'canteen' }, { name: 'Tanu' }, { name: 'Tanu', accessCode: 'abc' },
+    { name: 'Tanu', accessCode: 'canteen', email: 'unused@example.edu' }, { name: 'Tanu', accessCode: 'canteen', canteenId: 'untrusted' }]) {
     assert.equal(schema.safeParse(body).success, false);
   }
 });

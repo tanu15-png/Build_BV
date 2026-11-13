@@ -46,8 +46,8 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
     return identities.has(value) ? Response.json(identities.get(value)) : new Response('{}', { status: 401 });
   }) as typeof fetch;
   await seed(db, config); await provisionAdmin(db, admin.email, 'Test Admin', adminPassword);
-  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'bella-bite' } });
-  const otherCanteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'shanu' } });
+  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'canteen' } });
+  const otherCanteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'canteen' } });
   const server = createApp(config, db, () => {}, authFetch).listen(0, '127.0.0.1');
   await once(server, 'listening'); const serverAddress = server.address(); assert(serverAddress && typeof serverAddress !== 'string');
   const base = `http://127.0.0.1:${serverAddress.port}/api/v1`;
@@ -65,7 +65,7 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
     async prepare() { this.csrf = (await this.request('/auth/csrf')).body.csrfToken; return this; }
   }
   const student = await new Browser().prepare(); const a = await new Browser('canteen').prepare();
-  const b = await new Browser('canteen').prepare(); const bOther = await new Browser('canteen').prepare(); const administrator = await new Browser('admin').prepare();
+  const administrator = new Browser('admin');
   let challengeA: string; let challengeB: string; let memberB: string;
   try {
     await t.test('CSRF and origin checks reject forged and cross-origin session requests', async () => {
@@ -100,106 +100,16 @@ test('Supabase Auth integration with real isolated PostgreSQL and mocked email s
       assert.equal(await db.userRole.count({ where: { role: 'ADMIN' } }), 1);
       assert.equal((await student.request('/auth/session', 'POST', { role: 'STUDENT' }, token({ ...students, id: randomUUID() }))).status, 403);
     });
-    await t.test('team admin enters with the password alone and has no email activation flow', async () => {
-      assert.equal((await administrator.request('/auth/admin/activate', 'POST', { email: admin.email, password: adminPassword })).status, 410);
-      assert.equal((await administrator.request('/auth/admin/confirm', 'POST', {}, token(admin, 'email/signup'))).status, 410);
-      assert.equal((await administrator.request('/auth/admin/password', 'POST', { password: 'wrong password' })).status, 401);
-      assert.equal((await administrator.request('/auth/me')).status, 401);
-      const result = await administrator.request('/auth/admin/password', 'POST', { password: config.ADMIN_ACCESS_PASSWORD });
-      assert.equal(result.status, 200); assert.equal(result.body.role, 'ADMIN');
-      assert.equal((await administrator.request('/auth/me')).body.id, result.body.id);
-      const user = await db.user.findUniqueOrThrow({ where: { id: result.body.id } });
-      assert.equal(user.supabaseSubject, null); assert.equal(user.name, 'Admin team');
-    });
-    await t.test('staff code gate binds email/canteen and rejects stale authentication and replay', async () => {
-      assert.equal((await a.request('/auth/canteen/returning', 'POST', { email: staffA.email, canteenId: canteen.id })).status, 403);
-      assert.equal((await a.request('/auth/canteen/login', 'POST', { email: staffA.email, canteenId: canteen.id, accessCode: 'wrong' })).status, 401);
-      const start = await a.request('/auth/canteen/login', 'POST', { email: staffA.email, canteenId: canteen.id, accessCode: 'Bella Bite' });
-      assert.equal(start.status, 200); challengeA = start.body.challengeId;
-      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeA }, token(staffB, 'otp'))).status, 401);
-      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeA }, token(staffA, 'otp', Math.floor(Date.now() / 1000) - 600))).status, 401);
-      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeA }, token(staffA, 'password'))).status, 401);
-      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeA }, token(staffA, 'otp'))).status, 200);
-      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeA }, token(staffA, 'otp'))).status, 401);
-    });
-    await t.test('returning staff can log in without the code but still need fresh email verification', async () => {
-      assert.equal((await a.request('/auth/canteen/returning', 'POST', { email: staffA.email, canteenId: otherCanteen.id })).status, 403);
-      const returning = await a.request('/auth/canteen/returning', 'POST', { email: staffA.email, canteenId: canteen.id });
-      assert.equal(returning.status, 200);
-      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: returning.body.challengeId }, token(staffA, 'password'))).status, 401);
-      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: returning.body.challengeId }, token(staffA, 'otp'))).status, 200);
-      assert.equal((await a.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: returning.body.challengeId }, token(staffA, 'otp'))).status, 401);
-    });
-    await t.test('cross-canteen access and non-admin maintenance are denied', async () => {
-      assert.equal((await a.request(`/canteens/${otherCanteen.id}/members`)).status, 403);
-      assert.equal((await a.request(`/admin/users/${randomUUID()}`, 'PATCH', { status: 'DISABLED' })).status, 403);
-    });
-    async function staffLogin(browser: Browser, canteenId: string, accessCode: string) {
-      const start = await browser.request('/auth/canteen/login', 'POST', { email: staffB.email, canteenId, accessCode });
-      assert.equal(start.status, 200);
-      assert.equal((await browser.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: start.body.challengeId }, token(staffB, 'otp'))).status, 200);
-    }
-    await t.test('member counts use shared sessions across browsers', async () => {
-      await staffLogin(b, canteen.id, 'Bella Bite'); await staffLogin(bOther, otherCanteen.id, "Shanu's Canteen");
-      const response = await a.request(`/canteens/${canteen.id}/members?limit=1`);
-      assert.equal(response.status, 200); assert.equal(response.body.signedInPeople, 2); assert.equal(response.body.sessionCount, 2);
-      assert(response.body.nextCursor); assert.equal(response.body.items.length, 1);
-      memberB = (await db.canteenMembership.findFirstOrThrow({ where: { user: { email: staffB.email }, canteenId: canteen.id } })).id;
-      challengeB = (await b.request('/auth/canteen/login', 'POST', { email: staffB.email, canteenId: canteen.id, accessCode: 'Bella Bite' })).body.challengeId;
-    });
-    await t.test('removal atomically revokes scoped sessions and pending login without affecting other canteens', async () => {
-      assert.equal((await a.request(`/canteens/${canteen.id}/members/${memberB}/revoke`, 'POST', { expectedVersion: 99 })).status, 409);
-      assert.equal((await a.request(`/canteens/${canteen.id}/members/${memberB}/revoke`, 'POST', { expectedVersion: 1 })).status, 200);
-      assert.equal((await b.request('/auth/me')).status, 401); assert.equal((await bOther.request('/auth/me')).status, 200);
-      assert.equal((await b.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: challengeB }, token(staffB, 'otp'))).status, 401);
-      assert.equal((await b.request('/auth/canteen/login', 'POST', { email: staffB.email, canteenId: canteen.id, accessCode: 'Bella Bite' })).status, 403);
-      assert.equal((await b.request('/auth/canteen/returning', 'POST', { email: staffB.email, canteenId: canteen.id })).status, 403);
-      assert.equal((await a.request(`/canteens/${canteen.id}/members`)).body.signedInPeople, 1);
-    });
-    await t.test('admin restoration requires a fresh login and does not resurrect old sessions', async () => {
-      assert.equal((await administrator.request(`/admin/memberships/${memberB}`, 'PATCH', { status: 'ACTIVE', expectedVersion: 2 })).status, 200);
-      assert.equal((await b.request('/auth/me')).status, 401);
-      await staffLogin(b, canteen.id, 'Bella Bite');
-    });
-    await t.test('simultaneous removal and pending email completion cannot leave an active revoked session', async () => {
-      const start = await b.request('/auth/canteen/login', 'POST', { email: staffB.email, canteenId: canteen.id, accessCode: 'Bella Bite' });
-      const [removed, completion] = await Promise.all([
-        a.request(`/canteens/${canteen.id}/members/${memberB}/revoke`, 'POST', { expectedVersion: 3 }),
-        b.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: start.body.challengeId }, token(staffB, 'otp')),
-      ]);
-      assert.equal(removed.status, 200); assert([200, 401, 403].includes(completion.status));
-      assert.equal((await b.request('/auth/me')).status, 401);
-      assert.equal(await db.session.count({ where: { membershipId: memberB, revokedAt: null } }), 0);
-      assert.equal((await administrator.request(`/admin/memberships/${memberB}`, 'PATCH', { status: 'ACTIVE', expectedVersion: 4 })).status, 200);
-      await staffLogin(b, canteen.id, 'Bella Bite');
-    });
-    await t.test('access-code rotation invalidates current sessions and pending challenges', async () => {
-      const pending = await b.request('/auth/canteen/login', 'POST', { email: staffB.email, canteenId: canteen.id, accessCode: 'Bella Bite' });
-      await rotateCode(db, config, 'bella-bite', 'new secure test access code');
-      assert.equal((await a.request('/auth/me')).status, 401); assert.equal((await b.request('/auth/me')).status, 401);
-      assert.equal((await b.request('/auth/session', 'POST', { role: 'CANTEEN', challengeId: pending.body.challengeId }, token(staffB, 'otp'))).status, 401);
-      const returning = await b.request('/auth/canteen/returning', 'POST', { email: staffB.email, canteenId: canteen.id });
-      assert.equal(returning.status, 403); assert.equal(returning.body.error.code, 'ACCESS_CODE_CHANGED');
+    await t.test('retired admin portal and legacy staff authentication are inaccessible',async()=>{
+      assert.equal((await administrator.request('/auth/admin/password','POST',{password:config.ADMIN_ACCESS_PASSWORD})).status,404);
+      assert.equal((await administrator.request('/auth/me')).status,404);
     });
     await t.test('password reset revokes all app sessions and disabling prevents new login', async () => {
       assert.equal((await student.request('/auth/revoke-sessions', 'POST', {}, token(students, 'recovery'))).status, 200);
       assert.equal((await student.request('/auth/me')).status, 401);
       const local = await db.user.findUniqueOrThrow({ where: { email: students.email } });
-      assert.equal((await administrator.request(`/admin/users/${local.id}`, 'PATCH', { status: 'DISABLED' })).status, 200);
+      await db.user.update({where:{id:local.id},data:{status:'DISABLED'}});
       assert.equal((await student.request('/auth/session', 'POST', { role: 'STUDENT' }, token(students))).status, 403);
-    });
-    await t.test('shared code-attempt limit rejects repeated guessing', async () => {
-      let last = 0;
-      for (let attempt = 0; attempt < 21; attempt++) {
-        last = (await b.request('/auth/canteen/login', 'POST', { email: 'guessing@example.edu', canteenId: canteen.id, accessCode: 'incorrect' })).status;
-      }
-      assert.equal(last, 429);
-    });
-    await t.test('logout revokes the stored session and cookie', async () => {
-      const cookie = administrator.jar.get('spoonate_admin_session');
-      assert.equal((await administrator.request('/auth/logout', 'POST', {})).status, 200);
-      administrator.jar.set('spoonate_admin_session', cookie!);
-      assert.equal((await administrator.request('/auth/me')).status, 401);
     });
   } finally {
     await new Promise<void>(resolve => server.close(() => resolve()));

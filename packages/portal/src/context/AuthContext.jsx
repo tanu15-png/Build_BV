@@ -1,7 +1,7 @@
 import { portal } from '../portal.js';
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { api } from '../services/api';
+import { api, setApiCacheScope } from '../services/api';
 import { supabase } from '../services/supabase';
 import { createAuthActions } from '../services/authActions';
 import { createLogoutRecovery } from '../services/logoutRecovery';
@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
   const [logoutRecovery] = useState(() => createLogoutRecovery({
     revoke: () => api('/auth/logout', { method: 'POST', body: {} }),
     onSuccess: () => {
-      setUser(null); setMembers([]); setMemberSummary(null); setMemberError(''); setNextCursor(null); setAuthError(''); actions.clear();
+      setApiCacheScope(''); setUser(null); setMembers([]); setMemberSummary(null); setMemberError(''); setNextCursor(null); setAuthError(''); actions.clear();
       // Only student and canteen portals have a Supabase browser session.
       // The application session has already been revoked at this point.
       void supabase?.auth.signOut({ scope: 'local' }).catch(() => {});
@@ -51,10 +51,10 @@ export function AuthProvider({ children }) {
       return;
     }
     const started = revision.current;
-    try { const next = await mapUser(await api('/auth/me')); if (started === revision.current) { setUser(next); setAuthError(''); } }
+    try { const next = await mapUser(await api('/auth/me')); if (started === revision.current) { setApiCacheScope(`${next.id}:${next.role}`); setUser(next); setAuthError(''); } }
     catch (error) {
       if (started !== revision.current) return;
-      if (sessionEnded(error)) { setUser(null); setAuthError(''); }
+      if (sessionEnded(error)) { setApiCacheScope(''); setUser(null); setAuthError(''); }
       else setAuthError(error.message);
     } finally { setLoading(false); }
   }, [mapUser, logoutRecovery, logout]);
@@ -89,7 +89,7 @@ export function AuthProvider({ children }) {
   }, [canteenId, refreshMembers]);
   const accept = async identity => {
     revision.current++;
-    const mapped = await mapUser(identity); if (mapped.role !== portal) throw new Error('Use the correct portal for this account.'); setUser(mapped); setAuthError(''); setLoading(false); return mapped;
+    const mapped = await mapUser(identity); if (mapped.role !== portal) throw new Error('Use the correct portal for this account.'); setApiCacheScope(`${mapped.id}:${mapped.role}`); setUser(mapped); setAuthError(''); setLoading(false); return mapped;
   };
   const login = async values => {
     values = { ...values, role: portal };

@@ -21,7 +21,7 @@ test('durable notifications, leased worker recovery, scoped pagination and read 
   const config = loadConfig({ DATABASE_URL: url, APP_ENV: 'test', NODE_ENV: 'test', FRONTEND_ORIGIN: 'http://localhost:5173',
     SESSION_SECRET: 's'.repeat(32), OTP_SECRET: 'o'.repeat(32), SEED_DEVELOPMENT_DATA: 'true', LOG_LEVEL: 'silent', DB_TIMEOUT_MS: '10000' });
   const db = createPrisma(config); await seed(db, config);
-  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'bella-bite' } });
+  const canteen = await db.canteen.findUniqueOrThrow({ where: { slug: 'canteen' } });
   const server = createApp(config, db, () => {}).listen(0, '127.0.0.1');
   await once(server, 'listening'); const port = server.address(); assert(port && typeof port !== 'string');
   const base = `http://127.0.0.1:${port.port}/api/v1`;

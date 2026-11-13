@@ -24,6 +24,14 @@ test('catalog events notify all open browsers and reconnects request a fresh sna
     for (const stream of [first, second]) {
       assert.match(new TextDecoder().decode((await stream.read()).value), /"canteenId":"saved-canteen"/);
     }
+    events.publishRewards();
+    for (const stream of [first, second]) {
+      assert.equal(new TextDecoder().decode((await stream.read()).value), 'event: rewards-change\ndata: {}\n\n');
+    }
+    events.publishOrders();
+    for (const stream of [first, second]) {
+      assert.equal(new TextDecoder().decode((await stream.read()).value), 'event: orders-change\ndata: {}\n\n');
+    }
     await first.cancel();
     const reconnected = await connect();
     events.publish('next-save');

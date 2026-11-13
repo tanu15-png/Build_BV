@@ -7,6 +7,12 @@ import { addCartItem } from '../src/services/cartChanges.js';
 const cart = { id: 'cart', canteenId: 'canteen', version: 1, totalPaise: 1000, available: true,
   quote: 'original-token', quoteExpiresAt: 'old-expiry',
   items: [{ id: 'line', menuItemId: 'tea', name: 'Tea', quantity: 1, unitPricePaise: 1000, available: true }] };
+
+test('single-step submission reports checking and submitting inline before creating the order', async () => {
+  const stages=[];
+  await submitCheckout({cart,onStage:value=>stages.push(value),review:async()=>{assert.deepEqual(stages,['Checking items and prices…']);return cart;},createOrder:async()=>{assert.equal(stages.at(-1),'Submitting…');return {id:'order'};}});
+  assert.deepEqual(stages,['Checking items and prices…','Submitting…']);
+});
 test('refreshing the verification token does not change the reviewed cart', async () => {
   const fresh = { ...cart, quote: 'new-token', quoteExpiresAt: 'new-expiry' };
   assert.equal(checkoutSnapshot(cart), checkoutSnapshot(fresh));

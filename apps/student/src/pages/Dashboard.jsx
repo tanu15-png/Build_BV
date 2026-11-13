@@ -1,3 +1,5 @@
+import StudentMenu from '@spoonate/portal/components/StudentMenu';
+import { RewardsPanel, PromotionBanners, ComboPanel } from '@spoonate/portal/components/RewardsAndCombos';
 import { orderCode, orderDay, statusLabels } from "@spoonate/portal/utils/orderRules";
 import {
   Bell,
@@ -17,7 +19,7 @@ import { useOrders } from "@spoonate/portal/context/OrderContext";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
-  const { cart, orders, cafes, foods, unreadNotificationCount, catalogLoading } = useOrders();
+  const { cart, orders, unreadNotificationCount } = useOrders();
   const [search, setSearch] = useState("");
   const query = search.trim().toLowerCase();
   const initials = user?.name?.split(" ").map((part) => part[0]).slice(0, 2).join("");
@@ -62,7 +64,7 @@ export default function Dashboard() {
           <SidebarLink
             to="/dashboard#cafes"
             icon={<Utensils size={18} />}
-            text="Cafés"
+            text="Menu"
           />
 
           <SidebarLink
@@ -111,10 +113,10 @@ export default function Dashboard() {
             />
 
             <input
-              aria-label="Search food or canteens"
+              aria-label="Search menu"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search food or canteens..."
+              placeholder="Search menu..."
               className="w-full bg-gray-50 rounded-xl py-3 pl-11 pr-4 outline-none"
             />
 
@@ -196,6 +198,9 @@ export default function Dashboard() {
 
           </section>
 
+          <RewardsPanel />
+          <PromotionBanners />
+
           {/* ACTIVE ORDER */}
 
           {activeOrder && (
@@ -255,63 +260,8 @@ export default function Dashboard() {
             </section>
           )}
 
-          {catalogLoading && !cafes.length && <p role="status">Loading canteens and menus…</p>}
-          {/* CAFES */}
-
-          <SectionHeader
-            title="Banasthali Canteens"
-            action="View all"
-            link="/dashboard#cafes"
-          />
-
-          <div id="cafes" className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-12 pb-16 scroll-mt-5">
-
-            {cafes.filter((cafe) => !query || cafe.name.toLowerCase().includes(query) || foods.some((food) => food.cafeId === cafe.id && food.name.toLowerCase().includes(query))).map((cafe) => (
-              <div
-                key={cafe.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-card"
-              >
-
-                <img
-                  src={cafe.image}
-                  alt={`${cafe.name} poster`}
-                  loading="lazy"
-                  className="h-56 w-full bg-white object-contain"
-                />
-
-                <div className="p-5">
-
-                  <div className="flex justify-between items-start">
-
-                    <h3 className="font-black text-lg">
-                      {cafe.name}
-                    </h3>
-
-                    <span
-                      className={`text-xs font-bold ${
-                        cafe.status === "Open"
-                          ? "text-green-600"
-                          : "text-red-500"
-                      }`}
-                    >
-                      ● {cafe.status}
-                    </span>
-
-                  </div>
-
-                  <Link
-                    to={`/dashboard/cafe/${cafe.id}`}
-                    className="block text-center mt-4 bg-[#0f8f73] text-white rounded-xl py-2.5 font-bold"
-                  >
-                    View Menu
-                  </Link>
-
-                </div>
-
-              </div>
-            ))}
-
-          </div>
+          <ComboPanel />
+          <StudentMenu query={query} />
 
 
         </div>
@@ -331,7 +281,7 @@ export default function Dashboard() {
         <MobileLink
           to="/dashboard#cafes"
           icon={<Utensils size={19} />}
-          text="Cafés"
+          text="Menu"
         />
 
         <MobileLink
@@ -400,28 +350,5 @@ function MobileLink({ to, icon, text }) {
       {icon}
       {text}
     </Link>
-  );
-}
-
-function SectionHeader({
-  title,
-  action,
-  link,
-}) {
-  return (
-    <div className="flex items-center justify-between mb-5">
-
-      <h2 className="text-2xl font-black">
-        {title}
-      </h2>
-
-      <a
-        href={link}
-        className="text-[#0f8f73] font-bold text-sm"
-      >
-        {action} →
-      </a>
-
-    </div>
   );
 }

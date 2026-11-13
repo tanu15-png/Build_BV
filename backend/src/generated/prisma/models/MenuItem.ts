@@ -264,6 +264,9 @@ export type MenuItemWhereInput = {
   canteen?: Prisma.XOR<Prisma.CanteenScalarRelationFilter, Prisma.CanteenWhereInput>
   cartItems?: Prisma.CartItemListRelationFilter
   orderItems?: Prisma.OrderItemListRelationFilter
+  rewards?: Prisma.RewardListRelationFilter
+  bannerItems?: Prisma.BannerItemListRelationFilter
+  offers?: Prisma.OfferListRelationFilter
 }
 
 export type MenuItemOrderByWithRelationInput = {
@@ -281,6 +284,9 @@ export type MenuItemOrderByWithRelationInput = {
   canteen?: Prisma.CanteenOrderByWithRelationInput
   cartItems?: Prisma.CartItemOrderByRelationAggregateInput
   orderItems?: Prisma.OrderItemOrderByRelationAggregateInput
+  rewards?: Prisma.RewardOrderByRelationAggregateInput
+  bannerItems?: Prisma.BannerItemOrderByRelationAggregateInput
+  offers?: Prisma.OfferOrderByRelationAggregateInput
 }
 
 export type MenuItemWhereUniqueInput = Prisma.AtLeast<{
@@ -302,6 +308,9 @@ export type MenuItemWhereUniqueInput = Prisma.AtLeast<{
   canteen?: Prisma.XOR<Prisma.CanteenScalarRelationFilter, Prisma.CanteenWhereInput>
   cartItems?: Prisma.CartItemListRelationFilter
   orderItems?: Prisma.OrderItemListRelationFilter
+  rewards?: Prisma.RewardListRelationFilter
+  bannerItems?: Prisma.BannerItemListRelationFilter
+  offers?: Prisma.OfferListRelationFilter
 }, "id" | "id_canteenId">
 
 export type MenuItemOrderByWithAggregationInput = {
@@ -351,6 +360,9 @@ export type MenuItemCreateInput = {
   canteen: Prisma.CanteenCreateNestedOneWithoutMenuItemsInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutMenuItemInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemUncheckedCreateInput = {
@@ -366,6 +378,9 @@ export type MenuItemUncheckedCreateInput = {
   imageRef?: string | null
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutMenuItemInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemUncheckedCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemUpdateInput = {
@@ -381,6 +396,9 @@ export type MenuItemUpdateInput = {
   canteen?: Prisma.CanteenUpdateOneRequiredWithoutMenuItemsNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutMenuItemNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemUncheckedUpdateInput = {
@@ -396,6 +414,9 @@ export type MenuItemUncheckedUpdateInput = {
   imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutMenuItemNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemCreateManyInput = {
@@ -593,6 +614,34 @@ export type MenuItemUncheckedUpdateManyWithoutCategoryNestedInput = {
   deleteMany?: Prisma.MenuItemScalarWhereInput | Prisma.MenuItemScalarWhereInput[]
 }
 
+export type MenuItemCreateNestedOneWithoutBannerItemsInput = {
+  create?: Prisma.XOR<Prisma.MenuItemCreateWithoutBannerItemsInput, Prisma.MenuItemUncheckedCreateWithoutBannerItemsInput>
+  connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutBannerItemsInput
+  connect?: Prisma.MenuItemWhereUniqueInput
+}
+
+export type MenuItemUpdateOneRequiredWithoutBannerItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.MenuItemCreateWithoutBannerItemsInput, Prisma.MenuItemUncheckedCreateWithoutBannerItemsInput>
+  connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutBannerItemsInput
+  upsert?: Prisma.MenuItemUpsertWithoutBannerItemsInput
+  connect?: Prisma.MenuItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MenuItemUpdateToOneWithWhereWithoutBannerItemsInput, Prisma.MenuItemUpdateWithoutBannerItemsInput>, Prisma.MenuItemUncheckedUpdateWithoutBannerItemsInput>
+}
+
+export type MenuItemCreateNestedOneWithoutOffersInput = {
+  create?: Prisma.XOR<Prisma.MenuItemCreateWithoutOffersInput, Prisma.MenuItemUncheckedCreateWithoutOffersInput>
+  connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutOffersInput
+  connect?: Prisma.MenuItemWhereUniqueInput
+}
+
+export type MenuItemUpdateOneRequiredWithoutOffersNestedInput = {
+  create?: Prisma.XOR<Prisma.MenuItemCreateWithoutOffersInput, Prisma.MenuItemUncheckedCreateWithoutOffersInput>
+  connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutOffersInput
+  upsert?: Prisma.MenuItemUpsertWithoutOffersInput
+  connect?: Prisma.MenuItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MenuItemUpdateToOneWithWhereWithoutOffersInput, Prisma.MenuItemUpdateWithoutOffersInput>, Prisma.MenuItemUncheckedUpdateWithoutOffersInput>
+}
+
 export type MenuItemCreateNestedOneWithoutCartItemsInput = {
   create?: Prisma.XOR<Prisma.MenuItemCreateWithoutCartItemsInput, Prisma.MenuItemUncheckedCreateWithoutCartItemsInput>
   connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutCartItemsInput
@@ -605,6 +654,20 @@ export type MenuItemUpdateOneRequiredWithoutCartItemsNestedInput = {
   upsert?: Prisma.MenuItemUpsertWithoutCartItemsInput
   connect?: Prisma.MenuItemWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.MenuItemUpdateToOneWithWhereWithoutCartItemsInput, Prisma.MenuItemUpdateWithoutCartItemsInput>, Prisma.MenuItemUncheckedUpdateWithoutCartItemsInput>
+}
+
+export type MenuItemCreateNestedOneWithoutRewardsInput = {
+  create?: Prisma.XOR<Prisma.MenuItemCreateWithoutRewardsInput, Prisma.MenuItemUncheckedCreateWithoutRewardsInput>
+  connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutRewardsInput
+  connect?: Prisma.MenuItemWhereUniqueInput
+}
+
+export type MenuItemUpdateOneRequiredWithoutRewardsNestedInput = {
+  create?: Prisma.XOR<Prisma.MenuItemCreateWithoutRewardsInput, Prisma.MenuItemUncheckedCreateWithoutRewardsInput>
+  connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutRewardsInput
+  upsert?: Prisma.MenuItemUpsertWithoutRewardsInput
+  connect?: Prisma.MenuItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MenuItemUpdateToOneWithWhereWithoutRewardsInput, Prisma.MenuItemUpdateWithoutRewardsInput>, Prisma.MenuItemUncheckedUpdateWithoutRewardsInput>
 }
 
 export type MenuItemCreateNestedOneWithoutOrderItemsInput = {
@@ -635,6 +698,9 @@ export type MenuItemCreateWithoutCanteenInput = {
   category: Prisma.MenuCategoryCreateNestedOneWithoutItemsInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutMenuItemInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemUncheckedCreateWithoutCanteenInput = {
@@ -649,6 +715,9 @@ export type MenuItemUncheckedCreateWithoutCanteenInput = {
   imageRef?: string | null
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutMenuItemInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemUncheckedCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemCreateOrConnectWithoutCanteenInput = {
@@ -705,6 +774,9 @@ export type MenuItemCreateWithoutCategoryInput = {
   canteen: Prisma.CanteenCreateNestedOneWithoutMenuItemsInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutMenuItemInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemUncheckedCreateWithoutCategoryInput = {
@@ -718,6 +790,9 @@ export type MenuItemUncheckedCreateWithoutCategoryInput = {
   imageRef?: string | null
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutMenuItemInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemUncheckedCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemCreateOrConnectWithoutCategoryInput = {
@@ -746,6 +821,174 @@ export type MenuItemUpdateManyWithWhereWithoutCategoryInput = {
   data: Prisma.XOR<Prisma.MenuItemUpdateManyMutationInput, Prisma.MenuItemUncheckedUpdateManyWithoutCategoryInput>
 }
 
+export type MenuItemCreateWithoutBannerItemsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  pricePaise: number
+  available?: boolean
+  archived?: boolean
+  version?: number
+  imageRef?: string | null
+  category: Prisma.MenuCategoryCreateNestedOneWithoutItemsInput
+  canteen: Prisma.CanteenCreateNestedOneWithoutMenuItemsInput
+  cartItems?: Prisma.CartItemCreateNestedManyWithoutMenuItemInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferCreateNestedManyWithoutMenuItemInput
+}
+
+export type MenuItemUncheckedCreateWithoutBannerItemsInput = {
+  id?: string
+  canteenId: string
+  name: string
+  description?: string | null
+  categoryId: string
+  pricePaise: number
+  available?: boolean
+  archived?: boolean
+  version?: number
+  imageRef?: string | null
+  cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutMenuItemInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutMenuItemInput
+}
+
+export type MenuItemCreateOrConnectWithoutBannerItemsInput = {
+  where: Prisma.MenuItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.MenuItemCreateWithoutBannerItemsInput, Prisma.MenuItemUncheckedCreateWithoutBannerItemsInput>
+}
+
+export type MenuItemUpsertWithoutBannerItemsInput = {
+  update: Prisma.XOR<Prisma.MenuItemUpdateWithoutBannerItemsInput, Prisma.MenuItemUncheckedUpdateWithoutBannerItemsInput>
+  create: Prisma.XOR<Prisma.MenuItemCreateWithoutBannerItemsInput, Prisma.MenuItemUncheckedCreateWithoutBannerItemsInput>
+  where?: Prisma.MenuItemWhereInput
+}
+
+export type MenuItemUpdateToOneWithWhereWithoutBannerItemsInput = {
+  where?: Prisma.MenuItemWhereInput
+  data: Prisma.XOR<Prisma.MenuItemUpdateWithoutBannerItemsInput, Prisma.MenuItemUncheckedUpdateWithoutBannerItemsInput>
+}
+
+export type MenuItemUpdateWithoutBannerItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pricePaise?: Prisma.IntFieldUpdateOperationsInput | number
+  available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.MenuCategoryUpdateOneRequiredWithoutItemsNestedInput
+  canteen?: Prisma.CanteenUpdateOneRequiredWithoutMenuItemsNestedInput
+  cartItems?: Prisma.CartItemUpdateManyWithoutMenuItemNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutMenuItemNestedInput
+}
+
+export type MenuItemUncheckedUpdateWithoutBannerItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  canteenId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  pricePaise?: Prisma.IntFieldUpdateOperationsInput | number
+  available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutMenuItemNestedInput
+}
+
+export type MenuItemCreateWithoutOffersInput = {
+  id?: string
+  name: string
+  description?: string | null
+  pricePaise: number
+  available?: boolean
+  archived?: boolean
+  version?: number
+  imageRef?: string | null
+  category: Prisma.MenuCategoryCreateNestedOneWithoutItemsInput
+  canteen: Prisma.CanteenCreateNestedOneWithoutMenuItemsInput
+  cartItems?: Prisma.CartItemCreateNestedManyWithoutMenuItemInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemCreateNestedManyWithoutMenuItemInput
+}
+
+export type MenuItemUncheckedCreateWithoutOffersInput = {
+  id?: string
+  canteenId: string
+  name: string
+  description?: string | null
+  categoryId: string
+  pricePaise: number
+  available?: boolean
+  archived?: boolean
+  version?: number
+  imageRef?: string | null
+  cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutMenuItemInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemUncheckedCreateNestedManyWithoutMenuItemInput
+}
+
+export type MenuItemCreateOrConnectWithoutOffersInput = {
+  where: Prisma.MenuItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.MenuItemCreateWithoutOffersInput, Prisma.MenuItemUncheckedCreateWithoutOffersInput>
+}
+
+export type MenuItemUpsertWithoutOffersInput = {
+  update: Prisma.XOR<Prisma.MenuItemUpdateWithoutOffersInput, Prisma.MenuItemUncheckedUpdateWithoutOffersInput>
+  create: Prisma.XOR<Prisma.MenuItemCreateWithoutOffersInput, Prisma.MenuItemUncheckedCreateWithoutOffersInput>
+  where?: Prisma.MenuItemWhereInput
+}
+
+export type MenuItemUpdateToOneWithWhereWithoutOffersInput = {
+  where?: Prisma.MenuItemWhereInput
+  data: Prisma.XOR<Prisma.MenuItemUpdateWithoutOffersInput, Prisma.MenuItemUncheckedUpdateWithoutOffersInput>
+}
+
+export type MenuItemUpdateWithoutOffersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pricePaise?: Prisma.IntFieldUpdateOperationsInput | number
+  available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.MenuCategoryUpdateOneRequiredWithoutItemsNestedInput
+  canteen?: Prisma.CanteenUpdateOneRequiredWithoutMenuItemsNestedInput
+  cartItems?: Prisma.CartItemUpdateManyWithoutMenuItemNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUpdateManyWithoutMenuItemNestedInput
+}
+
+export type MenuItemUncheckedUpdateWithoutOffersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  canteenId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  pricePaise?: Prisma.IntFieldUpdateOperationsInput | number
+  available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUncheckedUpdateManyWithoutMenuItemNestedInput
+}
+
 export type MenuItemCreateWithoutCartItemsInput = {
   id?: string
   name: string
@@ -758,6 +1001,9 @@ export type MenuItemCreateWithoutCartItemsInput = {
   category: Prisma.MenuCategoryCreateNestedOneWithoutItemsInput
   canteen: Prisma.CanteenCreateNestedOneWithoutMenuItemsInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemUncheckedCreateWithoutCartItemsInput = {
@@ -772,6 +1018,9 @@ export type MenuItemUncheckedCreateWithoutCartItemsInput = {
   version?: number
   imageRef?: string | null
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemUncheckedCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemCreateOrConnectWithoutCartItemsInput = {
@@ -802,6 +1051,9 @@ export type MenuItemUpdateWithoutCartItemsInput = {
   category?: Prisma.MenuCategoryUpdateOneRequiredWithoutItemsNestedInput
   canteen?: Prisma.CanteenUpdateOneRequiredWithoutMenuItemsNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemUncheckedUpdateWithoutCartItemsInput = {
@@ -816,6 +1068,93 @@ export type MenuItemUncheckedUpdateWithoutCartItemsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutMenuItemNestedInput
+}
+
+export type MenuItemCreateWithoutRewardsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  pricePaise: number
+  available?: boolean
+  archived?: boolean
+  version?: number
+  imageRef?: string | null
+  category: Prisma.MenuCategoryCreateNestedOneWithoutItemsInput
+  canteen: Prisma.CanteenCreateNestedOneWithoutMenuItemsInput
+  cartItems?: Prisma.CartItemCreateNestedManyWithoutMenuItemInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferCreateNestedManyWithoutMenuItemInput
+}
+
+export type MenuItemUncheckedCreateWithoutRewardsInput = {
+  id?: string
+  canteenId: string
+  name: string
+  description?: string | null
+  categoryId: string
+  pricePaise: number
+  available?: boolean
+  archived?: boolean
+  version?: number
+  imageRef?: string | null
+  cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutMenuItemInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemUncheckedCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutMenuItemInput
+}
+
+export type MenuItemCreateOrConnectWithoutRewardsInput = {
+  where: Prisma.MenuItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.MenuItemCreateWithoutRewardsInput, Prisma.MenuItemUncheckedCreateWithoutRewardsInput>
+}
+
+export type MenuItemUpsertWithoutRewardsInput = {
+  update: Prisma.XOR<Prisma.MenuItemUpdateWithoutRewardsInput, Prisma.MenuItemUncheckedUpdateWithoutRewardsInput>
+  create: Prisma.XOR<Prisma.MenuItemCreateWithoutRewardsInput, Prisma.MenuItemUncheckedCreateWithoutRewardsInput>
+  where?: Prisma.MenuItemWhereInput
+}
+
+export type MenuItemUpdateToOneWithWhereWithoutRewardsInput = {
+  where?: Prisma.MenuItemWhereInput
+  data: Prisma.XOR<Prisma.MenuItemUpdateWithoutRewardsInput, Prisma.MenuItemUncheckedUpdateWithoutRewardsInput>
+}
+
+export type MenuItemUpdateWithoutRewardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pricePaise?: Prisma.IntFieldUpdateOperationsInput | number
+  available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.MenuCategoryUpdateOneRequiredWithoutItemsNestedInput
+  canteen?: Prisma.CanteenUpdateOneRequiredWithoutMenuItemsNestedInput
+  cartItems?: Prisma.CartItemUpdateManyWithoutMenuItemNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutMenuItemNestedInput
+}
+
+export type MenuItemUncheckedUpdateWithoutRewardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  canteenId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  pricePaise?: Prisma.IntFieldUpdateOperationsInput | number
+  available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemCreateWithoutOrderItemsInput = {
@@ -830,6 +1169,9 @@ export type MenuItemCreateWithoutOrderItemsInput = {
   category: Prisma.MenuCategoryCreateNestedOneWithoutItemsInput
   canteen: Prisma.CanteenCreateNestedOneWithoutMenuItemsInput
   cartItems?: Prisma.CartItemCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemUncheckedCreateWithoutOrderItemsInput = {
@@ -844,6 +1186,9 @@ export type MenuItemUncheckedCreateWithoutOrderItemsInput = {
   version?: number
   imageRef?: string | null
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutMenuItemInput
+  rewards?: Prisma.RewardUncheckedCreateNestedManyWithoutMenuItemInput
+  bannerItems?: Prisma.BannerItemUncheckedCreateNestedManyWithoutMenuItemInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemCreateOrConnectWithoutOrderItemsInput = {
@@ -874,6 +1219,9 @@ export type MenuItemUpdateWithoutOrderItemsInput = {
   category?: Prisma.MenuCategoryUpdateOneRequiredWithoutItemsNestedInput
   canteen?: Prisma.CanteenUpdateOneRequiredWithoutMenuItemsNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemUncheckedUpdateWithoutOrderItemsInput = {
@@ -888,6 +1236,9 @@ export type MenuItemUncheckedUpdateWithoutOrderItemsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemCreateManyCanteenInput = {
@@ -914,6 +1265,9 @@ export type MenuItemUpdateWithoutCanteenInput = {
   category?: Prisma.MenuCategoryUpdateOneRequiredWithoutItemsNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutMenuItemNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemUncheckedUpdateWithoutCanteenInput = {
@@ -928,6 +1282,9 @@ export type MenuItemUncheckedUpdateWithoutCanteenInput = {
   imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutMenuItemNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemUncheckedUpdateManyWithoutCanteenInput = {
@@ -965,6 +1322,9 @@ export type MenuItemUpdateWithoutCategoryInput = {
   canteen?: Prisma.CanteenUpdateOneRequiredWithoutMenuItemsNestedInput
   cartItems?: Prisma.CartItemUpdateManyWithoutMenuItemNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemUncheckedUpdateWithoutCategoryInput = {
@@ -978,6 +1338,9 @@ export type MenuItemUncheckedUpdateWithoutCategoryInput = {
   imageRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutMenuItemNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  rewards?: Prisma.RewardUncheckedUpdateManyWithoutMenuItemNestedInput
+  bannerItems?: Prisma.BannerItemUncheckedUpdateManyWithoutMenuItemNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemUncheckedUpdateManyWithoutCategoryInput = {
@@ -999,11 +1362,17 @@ export type MenuItemUncheckedUpdateManyWithoutCategoryInput = {
 export type MenuItemCountOutputType = {
   cartItems: number
   orderItems: number
+  rewards: number
+  bannerItems: number
+  offers: number
 }
 
 export type MenuItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cartItems?: boolean | MenuItemCountOutputTypeCountCartItemsArgs
   orderItems?: boolean | MenuItemCountOutputTypeCountOrderItemsArgs
+  rewards?: boolean | MenuItemCountOutputTypeCountRewardsArgs
+  bannerItems?: boolean | MenuItemCountOutputTypeCountBannerItemsArgs
+  offers?: boolean | MenuItemCountOutputTypeCountOffersArgs
 }
 
 /**
@@ -1030,6 +1399,27 @@ export type MenuItemCountOutputTypeCountOrderItemsArgs<ExtArgs extends runtime.T
   where?: Prisma.OrderItemWhereInput
 }
 
+/**
+ * MenuItemCountOutputType without action
+ */
+export type MenuItemCountOutputTypeCountRewardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RewardWhereInput
+}
+
+/**
+ * MenuItemCountOutputType without action
+ */
+export type MenuItemCountOutputTypeCountBannerItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BannerItemWhereInput
+}
+
+/**
+ * MenuItemCountOutputType without action
+ */
+export type MenuItemCountOutputTypeCountOffersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OfferWhereInput
+}
+
 
 export type MenuItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1046,6 +1436,9 @@ export type MenuItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   canteen?: boolean | Prisma.CanteenDefaultArgs<ExtArgs>
   cartItems?: boolean | Prisma.MenuItem$cartItemsArgs<ExtArgs>
   orderItems?: boolean | Prisma.MenuItem$orderItemsArgs<ExtArgs>
+  rewards?: boolean | Prisma.MenuItem$rewardsArgs<ExtArgs>
+  bannerItems?: boolean | Prisma.MenuItem$bannerItemsArgs<ExtArgs>
+  offers?: boolean | Prisma.MenuItem$offersArgs<ExtArgs>
   _count?: boolean | Prisma.MenuItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["menuItem"]>
 
@@ -1098,6 +1491,9 @@ export type MenuItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   canteen?: boolean | Prisma.CanteenDefaultArgs<ExtArgs>
   cartItems?: boolean | Prisma.MenuItem$cartItemsArgs<ExtArgs>
   orderItems?: boolean | Prisma.MenuItem$orderItemsArgs<ExtArgs>
+  rewards?: boolean | Prisma.MenuItem$rewardsArgs<ExtArgs>
+  bannerItems?: boolean | Prisma.MenuItem$bannerItemsArgs<ExtArgs>
+  offers?: boolean | Prisma.MenuItem$offersArgs<ExtArgs>
   _count?: boolean | Prisma.MenuItemCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MenuItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1116,6 +1512,9 @@ export type $MenuItemPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     canteen: Prisma.$CanteenPayload<ExtArgs>
     cartItems: Prisma.$CartItemPayload<ExtArgs>[]
     orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
+    rewards: Prisma.$RewardPayload<ExtArgs>[]
+    bannerItems: Prisma.$BannerItemPayload<ExtArgs>[]
+    offers: Prisma.$OfferPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1526,6 +1925,9 @@ export interface Prisma__MenuItemClient<T, Null = never, ExtArgs extends runtime
   canteen<T extends Prisma.CanteenDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CanteenDefaultArgs<ExtArgs>>): Prisma.Prisma__CanteenClient<runtime.Types.Result.GetResult<Prisma.$CanteenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   cartItems<T extends Prisma.MenuItem$cartItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MenuItem$cartItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CartItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderItems<T extends Prisma.MenuItem$orderItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MenuItem$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  rewards<T extends Prisma.MenuItem$rewardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MenuItem$rewardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RewardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bannerItems<T extends Prisma.MenuItem$bannerItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MenuItem$bannerItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BannerItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  offers<T extends Prisma.MenuItem$offersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MenuItem$offersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2011,6 +2413,78 @@ export type MenuItem$orderItemsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.OrderItemScalarFieldEnum | Prisma.OrderItemScalarFieldEnum[]
+}
+
+/**
+ * MenuItem.rewards
+ */
+export type MenuItem$rewardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Reward
+   */
+  select?: Prisma.RewardSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Reward
+   */
+  omit?: Prisma.RewardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardInclude<ExtArgs> | null
+  where?: Prisma.RewardWhereInput
+  orderBy?: Prisma.RewardOrderByWithRelationInput | Prisma.RewardOrderByWithRelationInput[]
+  cursor?: Prisma.RewardWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RewardScalarFieldEnum | Prisma.RewardScalarFieldEnum[]
+}
+
+/**
+ * MenuItem.bannerItems
+ */
+export type MenuItem$bannerItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BannerItem
+   */
+  select?: Prisma.BannerItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BannerItem
+   */
+  omit?: Prisma.BannerItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BannerItemInclude<ExtArgs> | null
+  where?: Prisma.BannerItemWhereInput
+  orderBy?: Prisma.BannerItemOrderByWithRelationInput | Prisma.BannerItemOrderByWithRelationInput[]
+  cursor?: Prisma.BannerItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BannerItemScalarFieldEnum | Prisma.BannerItemScalarFieldEnum[]
+}
+
+/**
+ * MenuItem.offers
+ */
+export type MenuItem$offersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Offer
+   */
+  select?: Prisma.OfferSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Offer
+   */
+  omit?: Prisma.OfferOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OfferInclude<ExtArgs> | null
+  where?: Prisma.OfferWhereInput
+  orderBy?: Prisma.OfferOrderByWithRelationInput | Prisma.OfferOrderByWithRelationInput[]
+  cursor?: Prisma.OfferWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OfferScalarFieldEnum | Prisma.OfferScalarFieldEnum[]
 }
 
 /**

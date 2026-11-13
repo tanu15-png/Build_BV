@@ -17,7 +17,7 @@ test('admin maintenance contracts reject empty edits, unsupported fields and mal
   assert.equal(contracts['PATCH /admin/canteens/:id']!.body.safeParse({ expectedVersion: 1, location: 'unused' }).success, false);
   assert.equal(contracts['PATCH /admin/users/:id']!.body.safeParse({ status: 'DISABLED', expectedUpdatedAt: 'invalid' }).success, false);
   assert.equal(contracts['POST /admin/canteens/:id/access-code']!.body.safeParse({ accessCode: 'abc' }).success, false);
-  contracts['POST /admin/canteens/:id/access-code']!.body.parse({ accessCode: 'shanu' });
+  contracts['POST /admin/canteens/:id/access-code']!.body.parse({ accessCode: 'canteen' });
   contracts['POST /admin/canteens/:id/access-code']!.body.parse({ accessCode: 'new secure join phrase', expectedCodeVersion: 0 });
 });
 

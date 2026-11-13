@@ -17,11 +17,24 @@ export function createCatalogEvents() {
       }, 25000).unref();
       res.on('close', () => { clearInterval(heartbeat); clients.delete(res); });
     },
+    close() { for (const client of clients) client.end(); clients.clear(); },
     publish(canteenId: string) {
       const event = `event: catalog-change\ndata: ${JSON.stringify({ canteenId })}\n\n`;
       for (const client of clients) {
         if (client.destroyed || client.writableNeedDrain) { client.destroy(); clients.delete(client); }
         else client.write(event);
+      }
+    },
+    publishRewards() {
+      for (const client of clients) {
+        if (client.destroyed || client.writableNeedDrain) { client.destroy(); clients.delete(client); }
+        else client.write('event: rewards-change\ndata: {}\n\n');
+      }
+    },
+    publishOrders() {
+      for (const client of clients) {
+        if (client.destroyed || client.writableNeedDrain) { client.destroy(); clients.delete(client); }
+        else client.write('event: orders-change\ndata: {}\n\n');
       }
     },
   };
