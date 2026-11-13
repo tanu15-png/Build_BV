@@ -171,12 +171,13 @@ test('durable notifications, leased worker recovery, scoped pagination and read 
     });
     await t.test('the real worker process delivers using an application role with RLS and shuts down cleanly', async () => {
       const role = 'phase9_worker_' + randomBytes(6).toString('hex');
-      await db.$executeRawUnsafe(`CREATE ROLE ${role} LOGIN NOSUPERUSER NOBYPASSRLS`);
+      const rolePassword = randomBytes(24).toString('hex');
+      await db.$executeRawUnsafe(`CREATE ROLE ${role} LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '${rolePassword}'`);
       const grants = spawnSync('psql', ['-h', address.hostname, '-p', address.port || '5432', '-U', decodeURIComponent(address.username),
         '-d', address.pathname.slice(1), '-v', `app_role=${role}`, '-f', 'prisma/application-role.sql'], {
         env: { ...process.env, PGPASSWORD: decodeURIComponent(address.password) }, encoding: 'utf8', timeout: 30000 });
       assert.equal(grants.status, 0, grants.stderr);
-      const appUrl = new URL(url); appUrl.username = role; appUrl.password = '';
+      const appUrl = new URL(url); appUrl.username = role; appUrl.password = rolePassword;
       const created = await job();
       const child = spawn(process.execPath, ['--import', 'tsx', 'src/outbox-worker.ts'], { env: { ...process.env,
         DATABASE_URL: appUrl.toString(), APP_ENV: 'test', NODE_ENV: 'test', FRONTEND_ORIGIN: config.FRONTEND_ORIGIN,
