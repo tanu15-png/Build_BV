@@ -103,5 +103,15 @@ test('offers, combos, promotions, ordering and tokens work together through the 
       const item=await db.menuItem.findUniqueOrThrow({where:{id:comboId}});assert.equal((await staff.request(`/menu-items/${comboId}`,'DELETE',{expectedVersion:item.version})).status,200);
       assert.equal((await cart()).items.length,0);const historical=await student.request('/orders/'+paid.id);assert.equal(historical.body.items[0].menuItemId,null);assert.equal(historical.body.items[0].unitPricePaise,12000);assert.equal((await rewards()).balance,2);
     });
+    await t.test('sales analytics use collected IST dates, historical discounts and deleted-item snapshots, excluding rewards',async()=>{
+      await db.order.update({where:{id:paid.id},data:{collectedAt:new Date('2026-11-14T18:29:59.999Z')}});
+      await db.order.updateMany({where:{canteenId:canteen.id,executionMode:'REWARD',status:'COLLECTED'},data:{collectedAt:new Date('2026-11-14T18:30:00Z')}});
+      assert.equal((await student.request('/stats?period=day&date=2026-11-14')).status,403);
+      const day=await staff.request('/stats?period=day&date=2026-11-14');assert.equal(day.status,200);
+      assert.equal(day.body.orders,1);assert.equal(day.body.salesPaise,12000);assert.equal(day.body.grossPaise,15000);assert.equal(day.body.discountPaise,3000);assert.equal(day.body.quantity,1);assert.equal(day.body.rewards,0);
+      assert.equal(day.body.items[0].name,'Coffee and sandwich');assert.equal(day.body.items[0].salesPaise,12000);assert.equal(day.body.buckets[0].key,'23');
+      const next=await staff.request('/stats?period=day&date=2026-11-15');assert.equal(next.body.orders,0);assert.equal(next.body.salesPaise,0);assert.equal(next.body.rewards,1);assert.deepEqual(next.body.items,[]);
+      const week=await staff.request('/stats?period=week&date=2026-11-15');assert.equal(week.body.salesPaise,12000);assert.equal(week.body.rewards,1);assert.equal(week.body.buckets[0].key,'2026-11-14');
+    });
   }finally{await new Promise<void>(resolve=>server.close(()=>resolve()));await db.$disconnect();}
 });

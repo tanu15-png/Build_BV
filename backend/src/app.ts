@@ -1,4 +1,5 @@
 import { createOffersRouter } from './routes/offers.routes.js';
+import { createAnalyticsRouter } from './routes/analytics.routes.js';
 import { createBannersRouter } from './routes/banners.routes.js';
 import { createReadCache } from './services/readCache.js';
 import { portals, portalOrigin, setPortal, type Portal } from './services/portal.js';
@@ -92,6 +93,7 @@ export function createApp(config: Config, db: PrismaClient,
   api.use(createOffersRouter(config, db, catalogEvents, reads));
   api.use(createNotificationsRouter(config, db));
   api.use(createOrdersRouter(config, db, orderOptions));
+  api.use(createAnalyticsRouter(config, db));
   app.use('/api/v1/:portal', (req, _res, next) => {
     const portal = req.params.portal as Portal;
     if (!portals.includes(portal) || portal === 'admin') return next(new AppError(404, 'PORTAL_REQUIRED', 'Use a portal API address.'));

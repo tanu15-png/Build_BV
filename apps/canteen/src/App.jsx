@@ -2,6 +2,7 @@ import OfferManagement from './pages/OfferManagement.jsx';
 import BannerManagement from './pages/BannerManagement.jsx';
 import OrderSoundActivation from './components/OrderSoundActivation.jsx';
 import CanteenRewards from './pages/CanteenRewards.jsx';
+import CanteenAnalytics from './pages/CanteenAnalytics.jsx';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { PortalProviders, ProtectedRoute } from '@spoonate/portal/PortalShell.jsx';
 import Login from './pages/CanteenLogin.jsx';
@@ -14,6 +15,7 @@ export default function App() {
   return <PortalProviders><BrowserRouter><OrderSoundActivation /><Routes>
     <Route path="/login" element={<Login />} />
     <Route path="/canteen" element={<ProtectedRoute><CanteenDashboard /></ProtectedRoute>} />
+    <Route path="/canteen/stats" element={<ProtectedRoute><CanteenAnalytics /></ProtectedRoute>} />
     <Route path="/canteen/combos" element={<ProtectedRoute><MenuManagement combosOnly /></ProtectedRoute>} />
     <Route path="/canteen/rewards" element={<ProtectedRoute><CanteenRewards /></ProtectedRoute>} />
     <Route path="/canteen/offers" element={<ProtectedRoute><OfferManagement /></ProtectedRoute>} />

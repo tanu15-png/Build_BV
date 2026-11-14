@@ -304,6 +304,7 @@ model Order {
   @@unique([codeDay, orderCode])
   @@index([studentId, createdAt])
   @@index([canteenId, status, pickupAt])
+  @@index([canteenId, status, collectedAt])
   @@index([createdAt, id])
   @@map("orders")
 }
