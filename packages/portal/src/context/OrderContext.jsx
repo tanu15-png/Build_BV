@@ -46,7 +46,7 @@ export function OrderProvider({ children }) {
     removeFromCart: id => performCart(() => remote.changeQuantity(id, 0)),
     clearCart: () => performCart(remote.clearServerCart), toggleOrders, toggleFood,
   }}>
-    {user && <p role="status" className="relative z-50 bg-amber-100 px-4 py-2 text-center text-sm text-amber-950">Test mode: orders are shared across devices. No payment is collected.</p>}
+    {user && <p role="status" className="relative z-50 bg-amber-100 px-4 py-2 text-center text-sm text-amber-950">Test environment: no real money is collected. Orders are shared across devices.</p>}
     {user && remote.catalogError && <div role="alert" className="relative z-50 bg-red-50 p-3 text-center text-red-800">{remote.catalogError} <button onClick={remote.refreshCatalog} className="ml-3 font-bold underline">Refresh menus and cart</button></div>}
     {user && serverOrders.ordersError && <div role="alert" className="relative z-50 bg-red-50 p-3 text-center text-red-800">{serverOrders.ordersError} <button onClick={() => serverOrders.refreshOrders()} className="ml-3 font-bold underline">Refresh orders</button></div>}
     {children}

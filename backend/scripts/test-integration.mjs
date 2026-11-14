@@ -9,7 +9,9 @@ if(!raw)throw Error('Set INTEGRATION_DATABASE_URL to a dedicated localhost Postg
 const url=new URL(raw);
 if(!['localhost','127.0.0.1','[::1]'].includes(url.hostname)||!url.pathname.includes('test')||raw===process.env.DATABASE_URL)throw Error('Refusing a non-local or non-test database.');
 const pool=new Pool({connectionString:raw,max:1});
-const suites={database:'TEST_DATABASE_URL',auth:'AUTH_TEST_DATABASE_URL',canteenAccess:'CANTEEN_ACCESS_TEST_DATABASE_URL',catalog:'CATALOG_TEST_DATABASE_URL',orders:'ORDER_TEST_DATABASE_URL',pickup:'PICKUP_TEST_DATABASE_URL',notifications:'NOTIFICATION_TEST_DATABASE_URL',commerce:'COMMERCE_TEST_DATABASE_URL'};
+const suites={database:'TEST_DATABASE_URL',auth:'AUTH_TEST_DATABASE_URL',canteenAccess:'CANTEEN_ACCESS_TEST_DATABASE_URL',catalog:'CATALOG_TEST_DATABASE_URL',orders:'ORDER_TEST_DATABASE_URL',pickup:'PICKUP_TEST_DATABASE_URL',notifications:'NOTIFICATION_TEST_DATABASE_URL',commerce:'COMMERCE_TEST_DATABASE_URL',payments:'PAYMENT_TEST_DATABASE_URL'};
+const selected=process.env.INTEGRATION_SUITES?.split(',');
+if(selected?.some(name=>!Object.hasOwn(suites,name)))throw Error('Unknown integration suite.');
 const suffix=randomBytes(6).toString('hex'),created=[],env={...process.env};
 try{
   for(const [suite,key] of Object.entries(suites)){
@@ -18,8 +20,8 @@ try{
     await pool.query(`CREATE DATABASE "${name}"`);created.push(name);
     const target=new URL(raw);target.pathname='/'+name;env[key]=target.toString();
   }
-  const files=(await readdir('tests/integration')).filter(name=>name.endsWith('.test.ts')).map(name=>'tests/integration/'+name);
-  const child=spawn(process.execPath,['--import','tsx','--test',...files],{stdio:'inherit',env});
+  const files=(await readdir('tests/integration')).filter(name=>name.endsWith('.test.ts')&&(!selected||selected.includes(name.replace('.test.ts','')))).map(name=>'tests/integration/'+name);
+  const child=spawn(process.execPath,['--import','tsx','--test','--test-concurrency=2',...files],{stdio:'inherit',env});
   const code=await new Promise((resolve,reject)=>{child.on('error',reject);child.on('exit',resolve);});
   process.exitCode=code===0?0:1;
 }finally{

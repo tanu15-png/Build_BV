@@ -3,6 +3,13 @@ import assert from 'node:assert/strict';
 import { createIncomingOrderTracker } from '../src/services/incomingOrders.js';
 
 const order = (id, status='RECEIVED', createdAt='2026-11-13T10:00:00Z') => ({id,status,createdAt});
+test('a newly confirmed payment chimes once, without replay on reads or reload', () => {
+  const {create,sounds}=setup(); let tracker=create();
+  tracker.observe([{...order('accepted','ACCEPTED'),paymentStatus:'AWAITING_PAYMENT'}]);
+  const paid={...order('accepted','ACCEPTED'),paymentStatus:'PAID'};
+  tracker.observe([paid]); tracker.observe([paid]); assert.equal(sounds(),1);
+  tracker=create();tracker.observe([paid]);tracker.observe([paid]);assert.equal(sounds(),1);
+});
 function setup() {
   const values = new Map(); let sounds=0;
   const storage={getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)};

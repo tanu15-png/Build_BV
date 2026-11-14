@@ -1,3 +1,4 @@
+import OrderPayment from '@spoonate/portal/components/OrderPayment';
 import CanteenPoster from '@spoonate/portal/components/CanteenPoster';
 import { orderCode, orderDay, newestOrderFirst, orderReceivedTime } from "@spoonate/portal/utils/orderRules";
 import { useState } from "react";
@@ -31,9 +32,10 @@ export default function CanteenDashboard() {
         <div className="mx-auto max-w-7xl space-y-8 p-5 lg:p-10">
           <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-6 shadow-sm"><div><h2 className="flex items-center gap-2 text-xl font-black"><Store size={20} /> Incoming orders</h2><p className="mt-2 text-gray-500">{cafe?.status === "Paused" ? "New orders are paused. Continue fulfilling existing orders." : "Your canteen is accepting new orders."}</p></div><button onClick={() => perform(toggleOrders)} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{cafe?.status === "Paused" ? "Resume orders" : "Pause incoming orders"}</button></section>
           {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">{[
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-6">{[
             ["Awaiting acceptance", orders.filter((order) => order.status === "RECEIVED").length],
-            ["Preparing", orders.filter((order) => ["ACCEPTED", "PREPARING"].includes(order.status)).length],
+            ["Awaiting payment", orders.filter((order) => order.status === "ACCEPTED" && order.executionMode === "RAZORPAY_TEST" && order.paymentStatus !== "PAID").length],
+            ["Preparing / queued", orders.filter((order) => order.status === "PREPARING" || (order.status === "ACCEPTED" && (order.executionMode !== "RAZORPAY_TEST" || order.paymentStatus === "PAID"))).length],
             ["Ready for pickup", orders.filter((order) => order.status === "READY").length],
             ["Collected", orders.filter((order) => order.status === "COLLECTED").length],
             ["Rejected", orders.filter((order) => order.status === "REJECTED").length],
@@ -49,17 +51,17 @@ export default function CanteenDashboard() {
 export function CanteenOrderCard({ order }) {
   const { updateOrderStatus, collectOrder, orderActionErrors, retryOrderAction } = useOrders();
   const actionError = orderActionErrors[order.id];
-  const next = { RECEIVED: ["ACCEPTED", "Accept order"], ACCEPTED: ["PREPARING", "Start preparing"], PREPARING: ["READY", "Mark ready"] }[order.status];
+  const next = { RECEIVED: ["ACCEPTED", "Accept order"], ACCEPTED: order.executionMode === 'RAZORPAY_TEST' && order.paymentStatus !== 'PAID' ? null : ["PREPARING", "Start preparing"], PREPARING: ["READY", "Mark ready"] }[order.status];
   const advance = status => { void updateOrderStatus(order.id, status, order).catch(() => {}); };
   return <article className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
     <div className="flex flex-wrap items-start justify-between gap-5"><div><Link to={`/canteen/orders/${order.id}`} className="text-3xl font-black tracking-widest text-[#075d50]">{orderCode(order)}</Link><p className="mt-2 text-sm text-gray-500">Day: {orderDay(order)} · {order.cafeName}</p><p className="mt-2 text-sm text-gray-500">Received <time dateTime={order.createdAt}>{orderReceivedTime(order)}</time></p><p className="mt-2 text-sm font-bold text-[#0f8f73]">{statusLabels[order.status]}</p><p className="mt-3 text-gray-600">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(" · ")}</p><p className="mt-2 font-bold">Order value: ₹{order.total}</p></div><div>
       {!actionError && order.status === "RECEIVED" && <button onClick={() => advance("REJECTED")} className="mr-3 rounded-xl border border-red-600 px-5 py-3 font-bold text-red-700">Reject order</button>}
-      {!actionError && next && <button onClick={() => advance(next[0])} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{next[1]}</button>}
-      {order.status === "REJECTED" && <p className="mt-3 font-bold text-red-700">Order rejected. The customer will be notified.</p>}
+      {!actionError && next && <button onClick={() => advance(next[0])} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{order.executionMode === 'RAZORPAY_TEST' && order.status === 'RECEIVED' ? 'Accept & request payment' : next[1]}</button>}
+      {order.status === "REJECTED" && <p className="mt-3 font-bold text-red-700">{order.closedReason === 'PAYMENT_EXPIRED' ? 'Unpaid order expired.' : order.closedReason === 'STUDENT_CANCELLED' ? 'Student cancelled before payment.' : 'Order rejected. The customer will be notified.'}</p>}
       {!actionError && order.status === "READY" && <div className="mt-3 max-w-xs">
         <button onClick={() => { void collectOrder(order.id, order).catch(() => {}); }} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">Collected</button>
       </div>}
       {order.status === "COLLECTED" && <p role={order.collectionFeedback ? 'status' : undefined} className="font-bold text-green-700">{order.collectionFeedback ? 'Order marked collected' : 'Collected'}</p>}
-    </div></div>{actionError && <div role="alert" className="mt-4 text-sm text-red-600"><p>{actionError.message}</p><button disabled={actionError.recovering} onClick={() => { void retryOrderAction(order.id).catch(() => {}); }} className="mt-3 rounded-xl border px-4 py-2 font-bold disabled:opacity-50">Retry update</button></div>}
+    </div></div><OrderPayment order={order} staff />{actionError && <div role="alert" className="mt-4 text-sm text-red-600"><p>{actionError.message}</p><button disabled={actionError.recovering} onClick={() => { void retryOrderAction(order.id).catch(() => {}); }} className="mt-3 rounded-xl border px-4 py-2 font-bold disabled:opacity-50">Retry update</button></div>}
   </article>;
 }

@@ -8,7 +8,7 @@ export const orderInclude = {
   events: { orderBy: [{ newStatus: 'asc' as const }, { createdAt: 'asc' as const }, { id: 'asc' as const }] },
 } satisfies Prisma.OrderInclude;
 export type LoadedOrder = Prisma.OrderGetPayload<{ include: typeof orderInclude }>;
-export type OrderOptions = { clock?: (tx: Prisma.TransactionClient) => Promise<Date>; codeIndex?: () => number };
+export type OrderOptions = { clock?: (tx: Prisma.TransactionClient) => Promise<Date>; codeIndex?: () => number; paymentFetch?: typeof fetch };
 export const codeCapacity = 36 ** 3;
 export function campusDay(now: Date) {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now);
@@ -28,6 +28,9 @@ export function orderResponse(order: LoadedOrder) {
   return { id: order.id, studentId: order.studentId, canteenId: order.canteenId,
     canteenName: 'Canteen', studentName: order.student.name,
     status: order.status, executionMode: order.executionMode, paymentStatus: order.paymentStatus,
+    paymentDeadline: order.paymentDeadline?.toISOString() ?? null, paymentPaidAt: order.paymentPaidAt?.toISOString() ?? null,
+    closedReason: order.closedReason,
+    paymentStarted: Boolean(order.paymentKeyId),
     totalPaise: order.totalPaise, pickupAt: order.pickupAt.toISOString(), codeDay: order.codeDay.toISOString().slice(0, 10),
     orderCode: order.orderCode!, version: order.version, createdAt: order.createdAt.toISOString(),
     collectedAt: order.collectedAt?.toISOString() ?? null, pickupVerifiedBy: order.pickupVerifiedBy,

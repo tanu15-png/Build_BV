@@ -282,6 +282,14 @@ model Order {
   status OrderStatus @default(RECEIVED)
   executionMode String @default("TEST") @map("execution_mode")
   paymentStatus String @default("NOT_REQUIRED_TEST") @map("payment_status")
+  razorpayOrderId String? @unique @map("razorpay_order_id")
+  razorpayPaymentId String? @unique @map("razorpay_payment_id")
+  paymentKeyId String? @map("payment_key_id")
+  paymentDeadline DateTime? @map("payment_deadline") @db.Timestamptz
+  paymentPaidAt DateTime? @map("payment_paid_at") @db.Timestamptz
+  paymentLeaseUntil DateTime? @map("payment_lease_until") @db.Timestamptz
+  paymentNextCheckAt DateTime? @map("payment_next_check_at") @db.Timestamptz
+  closedReason String? @map("closed_reason")
   totalPaise Int @map("total_paise")
   rewardTokenCost Int? @map("reward_token_cost")
   pickupAt DateTime @map("pickup_at") @db.Timestamptz
@@ -305,6 +313,7 @@ model Order {
   @@index([studentId, createdAt])
   @@index([canteenId, status, pickupAt])
   @@index([canteenId, status, collectedAt])
+  @@index([executionMode, paymentStatus, paymentNextCheckAt])
   @@index([createdAt, id])
   @@map("orders")
 }

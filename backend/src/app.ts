@@ -1,4 +1,5 @@
 import { createOffersRouter } from './routes/offers.routes.js';
+import { createPaymentWebhook, createPaymentsRouter } from './routes/payments.routes.js';
 import { createAnalyticsRouter } from './routes/analytics.routes.js';
 import { createBannersRouter } from './routes/banners.routes.js';
 import { createReadCache } from './services/readCache.js';
@@ -78,6 +79,8 @@ export function createApp(config: Config, db: PrismaClient,
     }
     next();
   });
+  // Razorpay signatures cover the original bytes. Mount before JSON parsing and portal CSRF middleware.
+  app.use('/api/payments/razorpay/webhook', createPaymentWebhook(config, db, catalogEvents, orderOptions.paymentFetch));
   app.use(express.json({ limit: config.JSON_LIMIT_BYTES, strict: true }));
   app.use('/health', createHealthRouter(() => db.$queryRawUnsafe('SELECT 1'), config.DB_TIMEOUT_MS));
   const api = Router();
@@ -93,6 +96,7 @@ export function createApp(config: Config, db: PrismaClient,
   api.use(createOffersRouter(config, db, catalogEvents, reads));
   api.use(createNotificationsRouter(config, db));
   api.use(createOrdersRouter(config, db, orderOptions));
+  api.use(createPaymentsRouter(config, db, orderOptions.paymentFetch));
   api.use(createAnalyticsRouter(config, db));
   app.use('/api/v1/:portal', (req, _res, next) => {
     const portal = req.params.portal as Portal;

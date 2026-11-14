@@ -1,5 +1,7 @@
 # What you need to do
 
+For the accept-then-pay Razorpay sandbox flow, follow [RAZORPAY-TEST.md](RAZORPAY-TEST.md). It lists the API/worker variables, public webhook URL and test cases. The existing `ORDER_MODE=TEST` configuration remains payment-free until the operator enables `RAZORPAY_TEST` with fresh credentials.
+
 The release files are prepared locally. This workspace has no authenticated Railway connection, so no hosting project, public site or paid resource has been created. The application still uses payment-free TEST ordering.
 
 ## 1. Push the project

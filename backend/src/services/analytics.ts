@@ -21,6 +21,7 @@ export async function salesStats(db: PrismaClient, canteenId: string, range: Ret
     WITH collected AS (
       SELECT id, total_paise, execution_mode, collected_at FROM orders
       WHERE canteen_id = ${canteenId}::uuid AND status = 'COLLECTED'
+        AND (execution_mode <> 'RAZORPAY_TEST' OR payment_status = 'PAID')
         AND collected_at >= ${range.start} AND collected_at < ${range.end}
     ), sales AS (SELECT * FROM collected WHERE execution_mode <> 'REWARD'),
     lines AS (

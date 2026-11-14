@@ -1,3 +1,4 @@
+import OrderPayment from '@spoonate/portal/components/OrderPayment';
 import { orderCode, orderDay } from "@spoonate/portal/utils/orderRules";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Check, Circle } from "lucide-react";
@@ -16,9 +17,9 @@ export default function OrderTracking() {
         <div className="mt-8 rounded-[28px] bg-[#075d50] p-8 text-center text-white"><p className="text-sm text-white/60">ORDER REFERENCE</p><p className="mt-3 text-5xl font-black tracking-widest text-[#facc15]">{orderCode(order)}</p><p className="mt-2 text-sm">Day: {orderDay(order)}</p><p className="mt-5 font-bold">{order.cafeName}</p></div>
         <div className="mt-6 rounded-2xl bg-white p-8 shadow-card">
           <p className="mt-5 text-gray-500">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(" · ")}</p>
-          <div className="mt-8 space-y-4">{(order.status === "REJECTED" ? ["RECEIVED", "REJECTED"] : orderStatuses).map((status, index) => <div key={status} className="flex items-center gap-4"><span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${index <= currentIndex ? "bg-[#0f8f73] text-white" : "bg-gray-100 text-gray-400"}`}>{index <= currentIndex ? <Check size={18} /> : <Circle size={16} />}</span><div><p className="font-bold">{statusLabels[status]}</p>{status === order.status && <p className="text-sm text-[#0f8f73]">Current status</p>}</div></div>)}</div>
-          {order.status === "REJECTED" && <p role="status" className="mt-8 rounded-xl bg-red-50 p-5 font-bold text-red-700">The canteen rejected this order. Please place a new order.</p>}
-          
+          <OrderPayment order={order} /><div className="mt-8 space-y-4">{(order.status === "REJECTED" ? ["RECEIVED", "REJECTED"] : orderStatuses).map((status, index) => <div key={status} className="flex items-center gap-4"><span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${index <= currentIndex ? "bg-[#0f8f73] text-white" : "bg-gray-100 text-gray-400"}`}>{index <= currentIndex ? <Check size={18} /> : <Circle size={16} />}</span><div><p className="font-bold">{statusLabels[status]}</p>{status === order.status && <p className="text-sm text-[#0f8f73]">Current status</p>}</div></div>)}</div>
+          {order.status === "REJECTED" && <p role="status" className="mt-8 rounded-xl bg-red-50 p-5 font-bold text-red-700">{order.closedReason === 'PAYMENT_EXPIRED' ? 'The unpaid payment window expired.' : order.closedReason === 'STUDENT_CANCELLED' ? 'You cancelled this unpaid order.' : 'The canteen rejected this order. No payment is required.'}</p>}
+
           {order.status === "COLLECTED" && <p className="mt-8 rounded-xl bg-green-50 p-5 font-bold text-green-700">Collected. Enjoy your food!</p>}
         </div>
       </main>

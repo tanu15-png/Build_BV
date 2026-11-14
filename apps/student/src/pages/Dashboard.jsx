@@ -221,7 +221,7 @@ export default function Dashboard() {
                     </span>
 
                     <span className="px-3 py-1 rounded-full bg-orange-400/20 text-orange-300 text-sm font-bold">
-                      {statusLabels[activeOrder.status]}
+                      {activeOrder.executionMode === 'RAZORPAY_TEST' && activeOrder.status === 'ACCEPTED' && activeOrder.paymentStatus !== 'PAID' ? 'Accepted · Pay now' : statusLabels[activeOrder.status]}
                     </span>
 
                   </div>
@@ -249,14 +249,14 @@ export default function Dashboard() {
                     to={`/dashboard/orders/${activeOrder.id}`}
                     className="mt-2 bg-[#facc15] text-[#075d50] px-5 py-2.5 rounded-xl font-bold"
                   >
-                    Track Order
+                    View order / Pay
                   </Link>
 
                 </div>
 
               </div>
 
-              
+
             </section>
           )}
 

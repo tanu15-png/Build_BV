@@ -18,6 +18,7 @@ export default function PlaceOrderButton() {
     finally { guard.current = false; setStage(''); }
   }
   return <div className="mt-6">
+    <p className="mb-3 text-sm text-slate-600">Send your order for acceptance first. If payment is required, pay after the canteen accepts. Paid orders cannot be cancelled or refunded.</p>
     {pendingCheckout && <p role="status" className="mb-3 text-sm text-amber-800">Retry to confirm your previous submission without creating a duplicate order.</p>}
     <button onClick={submit} disabled={Boolean(stage) || orderBusy || (!pendingCheckout && (!cart.length || !cartState?.available))} className="w-full rounded-xl bg-[#075d50] px-4 py-3 font-bold text-white disabled:opacity-50">{stage || (orderBusy ? 'Submitting…' : pendingCheckout ? 'Retry submission' : 'Place order')}</button>
     {stage && <p role="status" className="sr-only">{stage}</p>}

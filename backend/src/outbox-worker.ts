@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 import { loadConfig } from './config/env.js';
 import { createPrisma } from './lib/prisma.js';
 import { createOutboxWorker } from './services/outbox.js';
+import { reconcilePaymentBatch } from './services/payments.js';
 
 async function main() {
   const config = loadConfig();
@@ -22,6 +23,10 @@ async function main() {
       let processed = 0;
       try { processed = await worker.runBatch(() => stopping); }
       catch { console.error(JSON.stringify({ event: 'outbox_worker_database_error' })); }
+      if (!stopping) {
+        try { await reconcilePaymentBatch(config, db, () => stopping); }
+        catch { console.error(JSON.stringify({ event: 'payment_worker_pending' })); }
+      }
       if (!stopping && processed < config.OUTBOX_BATCH_SIZE) {
         await setTimeout(config.OUTBOX_POLL_MS, undefined, { signal: wake.signal }).catch(() => {});
       }

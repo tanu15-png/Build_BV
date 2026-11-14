@@ -15,7 +15,11 @@ export const envSchema = z.object({
   CANTEEN_ORIGIN: origin.default('http://localhost:5174'),
   ADMIN_ORIGIN: origin.default('http://localhost:5175'),
   ADMIN_ACCESS_PASSWORD: z.string().min(8).max(256).optional(),
-  ORDER_MODE: z.literal('TEST').default('TEST'),
+  ORDER_MODE: z.enum(['TEST', 'RAZORPAY_TEST']).default('TEST'),
+  RAZORPAY_KEY_ID: z.string().regex(/^rzp_test_[A-Za-z0-9]+$/).optional(),
+  RAZORPAY_KEY_SECRET: z.string().min(16).optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().min(32).optional(),
+  PAYMENT_WINDOW_MINUTES: z.coerce.number().int().min(1).max(30).default(5),
   SEED_DEVELOPMENT_DATA: flag,
   EMAIL_VERIFICATION_BYPASS: z.literal('false').default('false'),
   SESSION_SECRET: z.string().min(32),
@@ -35,6 +39,7 @@ export const envSchema = z.object({
   EMAIL_FROM: z.email().optional(),
   LOG_LEVEL: z.enum(['info', 'silent']).default('info'),
 }).superRefine((v, ctx) => {
+  if (v.ORDER_MODE === 'RAZORPAY_TEST' && (!v.RAZORPAY_KEY_ID || !v.RAZORPAY_KEY_SECRET || !v.RAZORPAY_WEBHOOK_SECRET)) ctx.addIssue({ code: 'custom', message: 'Razorpay test checkout requires test keys and a webhook secret' });
   if (Boolean(v.SUPABASE_URL) !== Boolean(v.SUPABASE_PUBLISHABLE_KEY) || (v.EMAIL_PROVIDER === 'supabase' && !v.SUPABASE_URL)) {
     ctx.addIssue({ code: 'custom', message: 'Supabase requires project URL and publishable key together' });
   }

@@ -13,6 +13,14 @@ export function notificationData(event: Prisma.OrderEventGetPayload<{ include: {
   const order = event.order;
   if (!order.orderCode) throw new Error('Order code missing');
   const reference = `${order.orderCode} (${order.codeDay.toISOString().slice(0, 10)})`;
+  if (order.executionMode === 'RAZORPAY_TEST') {
+    const paid = event.newStatus === 'ACCEPTED' && event.previousStatus !== 'RECEIVED' && order.paymentStatus === 'PAID';
+    return { recipientId: order.studentId, sourceEventId: event.id, orderId: order.id, type: paid ? 'PAID' : event.newStatus, createdAt: event.createdAt,
+      message: paid ? `Payment confirmed for order ${reference}. The canteen can now prepare it.`
+        : event.newStatus === 'READY' ? `Order ${reference} is ready to collect.`
+          : event.newStatus === 'REJECTED' ? `Order ${reference} was closed without confirmed payment. Open the order for details.`
+            : `Order ${reference} was accepted. Open it to pay before the payment deadline. Paid orders cannot be cancelled or refunded.` };
+  }
   return { recipientId: order.studentId, sourceEventId: event.id, orderId: order.id, type: event.newStatus,
     createdAt: event.createdAt,
     message: event.newStatus === 'READY'

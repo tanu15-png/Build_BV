@@ -6,6 +6,7 @@ import type { Prisma, PrismaClient, OrderStatus } from '../generated/prisma/clie
 import { AppError } from '../middleware/errorHandler.js';
 import { validate } from '../middleware/validate.js';
 import { contracts } from '../schemas/contracts.js';
+import { requiresPayment } from '../services/payments.js';
 import { createSessionReader, type Actor } from '../services/session.js';
 import { cartInclude, cartResponse, verifyCartQuote } from '../services/cart.js';
 import { allocateOrder, orderInclude, orderResponse, orderTransaction, pickupTime, requestHash, serverNow, type OrderOptions } from '../services/orders.js';
@@ -76,6 +77,10 @@ export function createOrdersRouter(config: Config, db: PrismaClient, options: Or
       verifyCartQuote(body.quote, summary, actor.id, config);
       const pickupAt = pickupTime(body.pickupAt, now);
       const orderId = await allocateOrder(tx, { studentId: actor.id, canteenId: cart.canteenId!, totalPaise: summary.totalPaise, pickupAt, now }, options);
+      if (config.ORDER_MODE === 'RAZORPAY_TEST') {
+        if (summary.totalPaise < 100) throw new AppError(422, 'PAYMENT_AMOUNT_INVALID', 'The minimum paid order value is ₹1. Redeem token rewards separately.');
+        await tx.order.update({ where: { id: orderId }, data: { executionMode: 'RAZORPAY_TEST', paymentStatus: 'AWAITING_ACCEPTANCE' } });
+      }
       await tx.orderItem.createMany({ data: summary.items.map(line => ({
         orderId, menuItemId: line.menuItemId, name: line.name, quantity: line.quantity, unitPricePaise: line.unitPricePaise, originalUnitPricePaise: line.originalUnitPricePaise, offerId: line.offer?.id, offerName: line.offer?.name,
       })) });
@@ -110,7 +115,12 @@ export function createOrdersRouter(config: Config, db: PrismaClient, options: Or
         }
         const claim = await tx.idempotencyKey.create({ data: { actorId: actor.id, action: scope, key: value, requestHash: hash } });
         const now = await serverNow(tx, options);
-        await tx.order.update({ where: { id }, data: { status: after, version: { increment: 1 }, updatedAt: now } });
+        if (['prepare', 'ready'].includes(action) && requiresPayment(order)) throw new AppError(409, 'PAYMENT_REQUIRED', 'Wait for verified payment before preparing this order.');
+        if (action === 'reject' && order.paymentStatus === 'PAID') throw new AppError(409, 'PAID_ORDER_FINAL', 'Paid orders cannot be rejected, cancelled or refunded.');
+        await tx.order.update({ where: { id }, data: { status: after, version: { increment: 1 }, updatedAt: now,
+          ...(action === 'accept' && order.executionMode === 'RAZORPAY_TEST' ? { paymentStatus: 'AWAITING_PAYMENT', paymentDeadline: new Date(now.getTime() + config.PAYMENT_WINDOW_MINUTES * 60000), paymentNextCheckAt: now } : {}),
+          ...(action === 'reject' && order.executionMode === 'RAZORPAY_TEST' ? { paymentStatus: 'CANCELLED', closedReason: 'CANTEEN_REJECTED' } : {}),
+        } });
         await event(tx, id, actor.id, before, after, now);
         return complete(tx, claim.id, id, 200);
       });
@@ -143,6 +153,7 @@ export function createOrdersRouter(config: Config, db: PrismaClient, options: Or
       const saved = await replay(tx, actor.id, action, value, hash);
       if (saved) return saved;
       const order = await tx.order.findUniqueOrThrow({ where: { id } });
+      if (requiresPayment(order)) throw new AppError(409, 'PAYMENT_REQUIRED', 'Only a paid order can be collected.');
       if (order.status === 'COLLECTED') throw new AppError(409, 'ORDER_ALREADY_COLLECTED', 'This order has already been collected.', { order: orderResponse(await tx.order.findUniqueOrThrow({ where: { id }, include: orderInclude })) });
       if (order.status !== 'READY' || order.version !== req.body.expectedVersion) throw new AppError(409, 'ORDER_STATE_CONFLICT', 'Only a ready order at its current version can be collected.', { order: orderResponse(await tx.order.findUniqueOrThrow({ where: { id }, include: orderInclude })) });
       const now = await serverNow(tx, options);

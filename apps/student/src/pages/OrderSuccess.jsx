@@ -1,3 +1,4 @@
+import OrderPayment from '@spoonate/portal/components/OrderPayment';
 import { orderCode, orderDay, statusLabels } from "@spoonate/portal/utils/orderRules";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
@@ -12,8 +13,8 @@ export default function OrderSuccess() {
         <CheckCircle size={60} className="mx-auto text-green-500" /><h1 className="mt-6 text-3xl font-black">Order submitted!</h1>
         <p className="mt-2 text-gray-500">{statusLabels[order.status]}</p>
         <div className="mt-7 rounded-2xl bg-[#075d50] p-7 text-white"><p className="text-sm text-white/60">ORDER REFERENCE</p><p className="mt-3 text-5xl font-black tracking-widest text-[#facc15]">{orderCode(order)}</p><p className="mt-2 text-sm">Day: {orderDay(order)}</p><p className="mt-4 font-bold">{order.cafeName}</p></div>
-        
-        <p className="mt-6 text-gray-500">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")}</p>
+
+        <OrderPayment order={order} /><p className="mt-6 text-gray-500">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")}</p>
         <p className="mt-5 rounded-xl bg-green-50 p-4 text-sm text-green-800">Track this order to see when it is ready. The canteen will mark it collected when you pick up your food.</p>
         <Link to={`/dashboard/orders/${order.id}`} className="mt-6 block rounded-xl bg-[#0f8f73] py-3 font-black text-white">Track order</Link>
         <Link to="/dashboard" className="mt-4 inline-block text-sm font-bold text-[#075d50]">Back to canteens</Link>
