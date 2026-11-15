@@ -1,3 +1,4 @@
+import MenuImageField from '../components/MenuImageField';
 import OfferPrice from '../components/OfferPrice';
 import CanteenPoster from '../components/CanteenPoster';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -50,7 +51,7 @@ export default function MenuManagement({ combosOnly = false }) {
       setEditing(null); setAddingTo(null);
       if (method === 'POST' && path.endsWith('/categories')) {
         setCategoryName(''); setAddingTo(queued.id);
-        requestAnimationFrame(() => document.getElementById(`category-${queued.id}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+        requestAnimationFrame(() => { const category = document.getElementById(`category-${queued.id}`); if (category) { category.open = true; category.scrollIntoView({ block: 'center', behavior: 'smooth' }); } });
       }
       void queued.completion.then(() => setSuccess(message)).catch(issue => {
         setError(`Unable to save: ${issue.message}`);
@@ -92,13 +93,16 @@ export default function MenuManagement({ combosOnly = false }) {
       {combosOnly ? (!activeCategories.length && <button onClick={() => perform(`/canteens/${canteenId}/categories`, 'POST', { name: 'Combos' }, 'Combos section created. Add your first combo below.')} className={`${button} mb-6`}>Set up combos</button>) : (<form onSubmit={async event => { event.preventDefault(); if (await perform(`/canteens/${canteenId}/categories`, 'POST', { name: categoryName }, 'Category created. Add its first item below.')) setCategoryName(''); }} className="mb-8 rounded-2xl bg-white p-6"><fieldset className="flex flex-wrap items-end gap-4"><label className="min-w-0 flex-1 font-bold">New category<input required maxLength={80} placeholder="e.g. Chinese or Snacks" value={categoryName} onChange={event => setCategoryName(event.target.value)} className={input} /></label><button className={button}>Add category</button></fieldset></form>)}
 
       {!activeCategories.length && <p className="mb-6 text-gray-600">{combosOnly ? 'Set up your combos section to add the first bundle.' : 'Your menu has no categories yet. Add one above to get started.'}</p>}
-      <div className="space-y-6">{activeCategories.map(category => <section id={`category-${category.clientId || category.id}`} key={category.clientId || category.id} className="rounded-2xl bg-white p-6">
+      <div className="space-y-3">{activeCategories.map(category => <details id={`category-${category.clientId || category.id}`} key={category.clientId || category.id} className="rounded-2xl bg-white p-5">
+        <summary className="cursor-pointer text-lg font-black text-[#075d50]">{category.name}<span className="ml-3 text-sm font-normal text-gray-500">{menu.items.filter(item => item.categoryId === category.id && !item.archived).length} items</span></summary>
+        <div className="mt-5">
         {combosOnly ? <h2 className="text-xl font-black">Your combos</h2> : (<CategoryEditor key={`${category.clientId || category.id}:${category.version}`} category={category} itemCount={menu.items.filter(item => item.categoryId === category.id && !item.archived).length} save={data => patchCategory(category, data)} remove={() => deleteEntry('category', category)} />)}
         <div className="mt-4 divide-y">{menu.items.filter(item => item.categoryId === category.id && !item.archived).map(item => <article key={item.clientId || item.id} className="py-4">
           {(editing === item.id || editing === item.clientId) ? <ItemEditor key={`${item.clientId || item.id}:${item.version}`} item={item} initialDraft={failedDraft} categories={activeCategories} cancel={() => { setEditing(null); setFailedDraft(null); }} save={async data => { if (await patchItem(item, data)) setEditing(null); }} /> : <div className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-black">{item.name}</h3><p className="mt-1 text-sm text-gray-600">{item.description}</p><p className="mt-2 font-bold text-[#075d50]"><OfferPrice item={item} /> · {item.available ? 'Available' : 'Unavailable'}</p></div><div className="flex flex-wrap gap-3"><button onClick={() => { setEditing(item.id); setAddingTo(null); setFailedDraft(null); }} className="rounded-xl border px-3 py-2">Edit</button><button onClick={() => patchItem(item, { available: !item.available })} className={`rounded-xl border px-3 py-2 ${item.available ? 'border-gray-300 bg-white text-black' : 'border-black bg-black text-white'}`}>{item.available ? 'Mark unavailable' : 'Mark available'}</button><button onClick={() => patchItem(item, { archived: true })} className="rounded-xl border px-3 py-2 text-red-700">Archive item</button><DeleteButton label={`Delete item ${item.name}`} onClick={() => deleteEntry('item', item)} /></div></div>}
         </article>)}</div>
         {(addingTo === category.id || addingTo === category.clientId) ? <div className="mt-4 border-t pt-4"><h3 className="mb-4 font-black">Add an item to {category.name}</h3><ItemEditor categoryId={category.id} initialDraft={failedDraft} categories={activeCategories} cancel={() => { setAddingTo(null); setFailedDraft(null); }} save={async data => { if (await perform(`/canteens/${canteenId}/menu`, 'POST', data, 'Item added.')) setAddingTo(null); }} /></div> : <button onClick={() => { setAddingTo(category.id); setEditing(null); setFailedDraft(null); }} className={`${button} mt-4`}>{combosOnly ? 'Add combo' : `Add item to ${category.name}`}</button>}
-      </section>)}</div>
+        </div>
+      </details>)}</div>
 
     </>}
   </main></div>;
@@ -113,13 +117,14 @@ function CategoryEditor({ category, itemCount, save, remove }) {
 function ItemEditor({ item, categoryId, initialDraft, categories, save, cancel }) {
   const [draft, setDraft] = useState({ name: initialDraft?.name || item?.name || '', description: initialDraft ? initialDraft.description || '' : item?.description || '', categoryId: initialDraft?.categoryId || item?.categoryId || categoryId, price: initialDraft?.price ?? (item ? (item.pricePaise / 100).toFixed(2) : ''), imageRef: initialDraft ? initialDraft.imageRef || '' : item?.imageRef || '' });
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
   const change = event => setDraft(current => ({ ...current, [event.target.name]: event.target.value }));
-  return <form onSubmit={async event => { event.preventDefault(); setError(''); try { await save({ name: draft.name, description: draft.description.trim() || null, categoryId: draft.categoryId, pricePaise: rupeesToPaise(draft.price), imageRef: draft.imageRef.trim() || null }); } catch (issue) { setError(issue.message); } }}><fieldset className="grid gap-4 sm:grid-cols-2">
+  return <form onSubmit={async event => { event.preventDefault(); if (uploading) return; setError(''); try { await save({ name: draft.name, description: draft.description.trim() || null, categoryId: draft.categoryId, pricePaise: rupeesToPaise(draft.price), imageRef: draft.imageRef.trim() || null }); } catch (issue) { setError(issue.message); } }}><fieldset className="grid gap-4 sm:grid-cols-2">
     <label className="font-bold">Item name<input name="name" required maxLength={120} value={draft.name} onChange={change} className={input} /></label>
     <label className="font-bold">Category<select name="categoryId" required value={categories.find(category => category.id === draft.categoryId || category.clientId === draft.categoryId)?.id || draft.categoryId} onChange={change} className={input}>{categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
     <label className="font-bold">Price (₹)<input name="price" required inputMode="decimal" pattern="[0-9]+([.][0-9]{1,2})?" value={draft.price} onChange={change} className={input} /></label>
-    <label className="font-bold">Image URL (optional)<input name="imageRef" type="url" maxLength={2000} placeholder="https://…" value={draft.imageRef} onChange={change} className={input} /></label>
+    <MenuImageField value={draft.imageRef} onChange={imageRef => setDraft(current => ({ ...current, imageRef }))} onBusy={setUploading} />
     <label className="font-bold sm:col-span-2">Description<textarea name="description" maxLength={2000} value={draft.description} onChange={change} className={input} /></label>
-    <div className="flex gap-3 sm:col-span-2"><button className={button}>{item ? 'Save changes' : 'Add item'}</button><button type="button" onClick={cancel} className="rounded-xl border px-4 py-2">Cancel</button></div>
+    <div className="flex gap-3 sm:col-span-2"><button disabled={uploading} className={button}>{item ? 'Save changes' : 'Add item'}</button><button type="button" onClick={cancel} className="rounded-xl border px-4 py-2">Cancel</button></div>
   </fieldset>{error && <p role="alert" className="mt-3 text-red-700">{error}</p>}</form>;
 }

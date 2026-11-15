@@ -20,6 +20,9 @@ export function createCatalogRouter(config: Config, db: PrismaClient, events = c
     return [validate(contract.params, 'params'), validate(contract.query, 'query'), ...(key.startsWith('GET ') ? [] : [validate(contract.body)])];
   }
   const conflict = () => new AppError(409, 'VERSION_CONFLICT', 'This record changed. Refresh and retry.');
+  async function uploadedImage(tx: Tx, ref?: string | null) {
+    if (ref?.startsWith('/banners/images/') && !await tx.bannerImage.findUnique({ where: { id: ref.slice('/banners/images/'.length) }, select: { id: true } })) throw new AppError(422, 'IMAGE_INVALID', 'Upload the image again before saving.');
+  }
   const menuItem = (row: Prisma.MenuItemGetPayload<{ include: { category: true } }>, now = Date.now()) => { const { offers, ...item } = row as typeof row & { offers?: Parameters<typeof priceFor>[0]['offers'] }; return { ...item, category: row.category.name, ...priceFor({ ...row, offers }, now) }; };
   async function menu(tx: Tx, id: string, manage: boolean) {
     const canteen = await tx.canteen.findUnique({ where: { id } });
@@ -125,6 +128,7 @@ export function createCatalogRouter(config: Config, db: PrismaClient, events = c
   router.post('/canteens/:id/menu', ...route('POST /canteens/:id/menu'), async (req, res) => {
     res.status(201).json(await staffWrite(req, res.locals.params.id, async tx => {
       await category(tx, req.body.categoryId, res.locals.params.id);
+      await uploadedImage(tx, req.body.imageRef);
       return menuItem(await tx.menuItem.create({ data: { ...req.body, canteenId: res.locals.params.id }, include: { category: true, offers: true } }));
     }));
   });
@@ -134,6 +138,7 @@ export function createCatalogRouter(config: Config, db: PrismaClient, events = c
     res.json(await staffWrite(req, initial.canteenId, async tx => {
       const existing = await tx.menuItem.findUniqueOrThrow({ where: { id: initial.id } });
       if (existing.version !== expectedVersion) throw conflict();
+      await uploadedImage(tx, data.imageRef);
       if (data.categoryId || data.archived === false || !existing.archived) await category(tx, data.categoryId ?? existing.categoryId, existing.canteenId);
       return menuItem(await tx.menuItem.update({ where: { id: initial.id }, data: { ...data, version: { increment: 1 } }, include: { category: true, offers: true } }));
     }));

@@ -30,7 +30,7 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
     constructor(readonly target = base, readonly portal = 'student') {}
     jar = new Map<string, string>(); csrf = '';
     async request(path: string, method = 'GET', body?: object) {
-      const response = await fetch(this.target + '/' + this.portal + path, { method, headers: { Origin: this.portal === 'student' ? config.FRONTEND_ORIGIN : this.portal === 'canteen' ? config.CANTEEN_ORIGIN : config.ADMIN_ORIGIN, Cookie: [...this.jar].map(([key, value]) => `${key}=${value}`).join('; '), ...(body ? { 'Content-Type': 'application/json' } : {}), ...(method !== 'GET' ? { 'X-CSRF-Token': this.csrf } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
+      const response = await fetch(this.target + '/' + this.portal + path, { method, headers: { Origin: this.portal === 'student' ? config.FRONTEND_ORIGIN : this.portal === 'canteen' ? config.CANTEEN_ORIGIN : config.ADMIN_ORIGIN, Cookie: [...this.jar].map(([key, value]) => `${key}=${value}`).join('; '), ...(body ? { 'Content-Type': Buffer.isBuffer(body) ? 'image/png' : 'application/json' } : {}), ...(method !== 'GET' ? { 'X-CSRF-Token': this.csrf } : {}) }, ...(body ? { body: Buffer.isBuffer(body) ? body : JSON.stringify(body) } : {}) });
       for (const cookie of response.headers.getSetCookie()) { const [name, value] = cookie.split(';')[0]!.split('='); this.jar.set(name!, value!); }
       return { status: response.status, body: await response.json() };
     }
@@ -75,6 +75,20 @@ test('catalog categories and persistent carts with isolated PostgreSQL', { skip:
       const menu = await student.browser.request(`/canteens/${canteen.id}/menu`); contracts['GET /canteens/:id/menu']!.response.parse(menu.body);
       assert(menu.body.categories.some((c: { id: string }) => c.id === categoryId));
       assert(menu.body.items.some((i: { categoryId: string }) => i.categoryId === categoryId));
+    });
+    await t.test('staff upload menu photos, persist them and serve them across portals; invalid references and student uploads are rejected', async () => {
+      const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64');
+      assert.equal((await student.browser.request('/banners/images', 'POST', png)).status, 403);
+      assert.equal((await staff.browser.request('/banners/images', 'POST', Buffer.from('<svg/>'))).status, 422);
+      const upload = await staff.browser.request('/banners/images', 'POST', png); assert.equal(upload.status, 201);
+      const imageRef = upload.body.imageRef;
+      const read = await fetch(base + '/student' + imageRef); assert.equal(read.status, 200); assert.match(read.headers.get('content-type')!, /image\/png/); assert.match(read.headers.get('cache-control')!, /immutable/); assert.deepEqual(Buffer.from(await read.arrayBuffer()), png);
+      const missing = await staff.browser.request(`/canteens/${canteen.id}/menu`, 'POST', { name: 'Bad photo', categoryId, pricePaise: 1000, imageRef: '/banners/images/' + randomUUID() }); assert.equal(missing.status, 422);
+      const created = await staff.browser.request(`/canteens/${canteen.id}/menu`, 'POST', { name: 'Uploaded photo fixture', categoryId, pricePaise: 1000, imageRef }); assert.equal(created.status, 201); assert.equal(created.body.imageRef, imageRef);
+      const catalog = await student.browser.request('/catalog'); assert.equal(catalog.body.items.find((row: { id: string }) => row.id === created.body.id).imageRef, imageRef);
+      const removed = await staff.browser.request(`/menu-items/${created.body.id}`, 'PATCH', { expectedVersion: 1, imageRef: null }); assert.equal(removed.status, 200); assert.equal(removed.body.imageRef, null);
+      const replaced = await staff.browser.request(`/menu-items/${created.body.id}`, 'PATCH', { expectedVersion: 2, imageRef }); assert.equal(replaced.status, 200);
+      assert.equal((await staff.browser.request(`/menu-items/${created.body.id}`, 'DELETE', { expectedVersion: 3 })).status, 200);
     });
     await t.test('committed menu writes notify other browsers immediately through the catalog stream', async () => {
       const response = await fetch(`${base}/student/catalog/events`, { signal: AbortSignal.timeout(10000) });

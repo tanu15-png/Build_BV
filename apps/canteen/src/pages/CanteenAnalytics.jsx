@@ -6,7 +6,7 @@ import { api } from '@spoonate/portal/services/api';
 const money = paise => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(paise / 100);
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const dateLabel = date => new Date(date + 'T00:00:00Z').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-const links = [['Dashboard', '/canteen'], ['All orders', '/canteen/orders'], ['Stats', '/canteen/stats'], ['Manage menu', '/canteen/menu'], ['Manage combos', '/canteen/combos'], ['Manage offers', '/canteen/offers'], ['Manage banners', '/canteen/banners'], ['Manage rewards', '/canteen/rewards'], ['Members', '/canteen/members']];
+const links = [['Dashboard', '/canteen'], ['Manage menu', '/canteen/menu'], ['Manage combos', '/canteen/combos'], ['Manage offers', '/canteen/offers'], ['Manage banners', '/canteen/banners'], ['Manage rewards', '/canteen/rewards'], ['Stats', '/canteen/stats'], ['Members', '/canteen/members']];
 
 function SalesChart({ data, period, date }) {
   const titleId = useId();

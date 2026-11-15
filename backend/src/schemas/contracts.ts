@@ -27,7 +27,8 @@ const notification = z.object({ id: uuid, orderId: uuid, type: z.enum(['ACCEPTED
 const member = z.object({ id: uuid, email, name: z.string().optional(), userId: uuid.optional(), status: z.enum(['ACTIVE', 'REVOKED']), version, sessionCount: z.number().int().nonnegative() }).strict();
 const list = <T extends z.ZodType>(schema: T) => z.object({ items: z.array(schema), nextCursor: uuid.nullable() }).strict();
 const expected = z.object({ expectedVersion: version }).strict();
-const menuWrite = z.object({ name: z.string().trim().min(1).max(120), description: z.string().max(2000).nullable().optional(), categoryId: uuid, pricePaise: money.max(10000000), imageRef: z.url({ protocol: /^https$/ }).max(2000).nullable().optional() }).strict();
+const menuImage = z.union([z.url({ protocol: /^https$/ }).max(2000), z.string().refine(value => value.startsWith('/banners/images/') && z.uuid().safeParse(value.slice('/banners/images/'.length)).success, 'Choose a valid uploaded image.')]);
+const menuWrite = z.object({ name: z.string().trim().min(1).max(120), description: z.string().max(2000).nullable().optional(), categoryId: uuid, pricePaise: money.max(10000000), imageRef: menuImage.nullable().optional() }).strict();
 const filters = pageQuery.extend({ canteenId: uuid.optional(), status: status.optional(), search: z.string().max(120).optional(), from: date.optional(), to: date.optional() });
 const safeCount = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const adminCanteen = canteenSchema.extend({ totalOrders: safeCount, activeOrders: safeCount, collectedOrders: safeCount,
