@@ -15,6 +15,8 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
   if (order.executionMode !== 'RAZORPAY_TEST') return null;
   const paid = order.paymentStatus === 'PAID';
   const deadlinePassed = !paid && order.paymentDeadline && new Date(order.paymentDeadline).getTime() <= now;
+  const secondsRemaining = order.paymentDeadline ? Math.max(0, Math.ceil((new Date(order.paymentDeadline).getTime() - now) / 1000)) : 0;
+  const remainingTime = `${String(Math.floor(secondsRemaining / 60)).padStart(2, '0')}:${String(secondsRemaining % 60).padStart(2, '0')}`;
   // The server checks Razorpay before reopening the same checkout. Keep that
   // recovery action available even if an earlier setup request was interrupted.
   const canPay = !staff && order.status === 'ACCEPTED' && !paid && !deadlinePassed;
@@ -60,6 +62,10 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
   }
   return <section aria-label="Order payment" className={`${compact ? 'mt-3 p-4' : 'my-5 p-5'} rounded-xl border border-[#dce9df] bg-[#f2f7f3] text-[#173d32]`}>
     <p className="font-bold">{deadlinePassed ? 'Payment window ended' : labels[order.paymentStatus] || 'Payment status unavailable'}</p>
+    {order.paymentDeadline && !paid && order.status === 'ACCEPTED' && <div className={`mt-3 inline-flex items-center gap-3 rounded-xl border px-4 py-2 ${secondsRemaining <= 60 ? 'border-red-200 bg-red-50 text-red-700' : 'border-[#dce9df] bg-white text-[#075d50]'}`}>
+      <span className="text-sm font-medium">{deadlinePassed ? 'Time expired' : 'Time left to pay'}</span>
+      <span role="timer" aria-label="Payment time remaining" aria-live="off" className="font-mono text-2xl font-bold tabular-nums">{remainingTime}</span>
+    </div>}
     {deadlinePassed && <p className="mt-2 text-sm">This unpaid order closes automatically. If a payment was already started, its status will still be checked. A verified late payment restores the order for preparation.</p>}
     {order.paymentDeadline && !paid && order.status === 'ACCEPTED' && <p className="mt-2 text-sm">Pay by {new Date(order.paymentDeadline).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit' })} IST.</p>}
     {!compact && !paid && <p className="mt-2 text-sm">{staff ? 'Preparation starts only after verified payment.' : 'Payment is requested only after acceptance. Once paid, orders cannot be cancelled or refunded.'}</p>}
