@@ -60,16 +60,19 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
     catch (issue) { safe(() => setError(issue.message)); }
     finally { guard.current = false; safe(() => setPhase('')); }
   }
+  if (deadlinePassed || (!paid && order.closedReason === 'PAYMENT_EXPIRED')) return <p className="my-2 text-sm font-bold text-[#173d32]">Payment window ended</p>;
+  if (staff) return order.status === 'RECEIVED' ? null : <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#075d50]">
+    <span className="font-semibold">{paid ? 'Paid' : labels[order.paymentStatus] || 'Awaiting payment'}</span>
+    {order.paymentDeadline && !paid && order.status === 'ACCEPTED' && <span className={secondsRemaining <= 60 ? 'font-semibold text-red-700' : ''}>Time left <span role="timer" aria-label="Payment time remaining" aria-live="off" className="font-mono font-bold tabular-nums">{remainingTime}</span></span>}
+  </div>;
   return <section aria-label="Order payment" className={`${compact ? 'mt-3 p-4' : 'my-5 p-5'} rounded-xl border border-[#dce9df] bg-[#f2f7f3] text-[#173d32]`}>
     <p className="font-bold">{deadlinePassed ? 'Payment window ended' : labels[order.paymentStatus] || 'Payment status unavailable'}</p>
     {order.paymentDeadline && !paid && order.status === 'ACCEPTED' && <div className={`mt-3 inline-flex items-center gap-3 rounded-xl border px-4 py-2 ${secondsRemaining <= 60 ? 'border-red-200 bg-red-50 text-red-700' : 'border-[#dce9df] bg-white text-[#075d50]'}`}>
       <span className="text-sm font-medium">{deadlinePassed ? 'Time expired' : 'Time left to pay'}</span>
       <span role="timer" aria-label="Payment time remaining" aria-live="off" className="font-mono text-2xl font-bold tabular-nums">{remainingTime}</span>
     </div>}
-    {deadlinePassed && <p className="mt-2 text-sm">This unpaid order closes automatically. If a payment was already started, its status will still be checked. A verified late payment restores the order for preparation.</p>}
     {order.paymentDeadline && !paid && order.status === 'ACCEPTED' && <p className="mt-2 text-sm">Pay by {new Date(order.paymentDeadline).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit' })} IST.</p>}
-    {!compact && !paid && <p className="mt-2 text-sm">{staff ? 'Preparation starts only after verified payment.' : 'Payment is requested only after acceptance. Once paid, orders cannot be cancelled or refunded.'}</p>}
-    {order.closedReason === 'PAYMENT_EXPIRED' && <p className="mt-2 text-sm">Payment was not confirmed before the deadline. Any payment already started is checked automatically. A verified late payment reactivates the accepted order.</p>}
+    {!compact && !paid && <p className="mt-2 text-sm">Payment is requested only after acceptance. Once paid, orders cannot be cancelled or refunded.</p>}
     {order.closedReason === 'STUDENT_CANCELLED' && <p className="mt-2 text-sm">You cancelled before starting payment.</p>}
     <div className="mt-3 flex flex-wrap items-center gap-3">
       {canPay && <button disabled={Boolean(phase)} onClick={pay} className="rounded-lg bg-[#075d50] px-4 py-2 font-bold text-white disabled:opacity-50">{action === 'pay' && phase ? phase : order.paymentStatus === 'PROCESSING' ? 'Resume payment' : `${order.paymentStatus === 'FAILED' ? 'Retry payment' : 'Pay'} ₹${(order.totalPaise / 100).toFixed(2)}`}</button>}

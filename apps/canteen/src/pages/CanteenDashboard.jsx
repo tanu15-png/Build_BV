@@ -32,15 +32,7 @@ export default function CanteenDashboard() {
         <div className="mx-auto max-w-7xl space-y-8 p-5 lg:p-10">
           <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-6 shadow-sm"><div><h2 className="flex items-center gap-2 text-xl font-black"><Store size={20} /> Incoming orders</h2><p className="mt-2 text-gray-500">{cafe?.status === "Paused" ? "New orders are paused. Continue fulfilling existing orders." : "Your canteen is accepting new orders."}</p></div><button onClick={() => perform(toggleOrders)} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{cafe?.status === "Paused" ? "Resume orders" : "Pause incoming orders"}</button></section>
           {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-7">{[
-            ["Awaiting acceptance", orders.filter((order) => order.status === "RECEIVED").length],
-            ["Awaiting payment", orders.filter((order) => order.status === "ACCEPTED" && order.executionMode === "RAZORPAY_TEST" && order.paymentStatus !== "PAID").length],
-            ["Preparing / queued", orders.filter((order) => order.status === "PREPARING" || (order.status === "ACCEPTED" && (order.executionMode !== "RAZORPAY_TEST" || order.paymentStatus === "PAID"))).length],
-            ["Ready for pickup", orders.filter((order) => order.status === "READY").length],
-            ["Collected", orders.filter((order) => order.status === "COLLECTED").length],
-            ["Unpaid", orders.filter(isUnpaidOrder).length],
-            ["Rejected", orders.filter((order) => order.status === "REJECTED" && !isUnpaidOrder(order)).length],
-          ].map(([label, value]) => <div key={label} className="rounded-2xl bg-white p-5 shadow-sm"><p className="text-sm text-gray-500">{label}</p><p className="mt-2 text-3xl font-black">{value}</p></div>)}</div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{canteenOrderSections.map(label => <button key={label} onClick={() => setSection(label)} className="rounded-xl bg-white p-4 text-left shadow-sm"><p className="text-sm text-gray-500">{label}</p><p className="mt-1 text-2xl font-black">{orders.filter(order => canteenOrderInSection(order, label)).length}</p></button>)}</div>
           <section><OrderSectionTabs sections={canteenOrderSections} selected={section} onChange={setSection} /><h2 className="mt-5 text-2xl font-black">{section} orders</h2>{loadMoreOrders && <button onClick={loadMoreOrders} className="mt-3 font-bold underline">Load more orders</button>}<p className="mt-2 text-gray-500">Newest orders are shown first.</p><div className="mt-5 space-y-4">{filtered.length === 0 ? <div className="rounded-2xl bg-white p-10 text-center"><ClipboardList className="mx-auto text-gray-300" size={36} /><p className="mt-4 font-bold">No {section.toLowerCase()} orders</p></div> : filtered.map((order) => <CanteenOrderCard key={order.id} order={order} />)}</div></section>
 
         </div>
@@ -54,15 +46,24 @@ export function CanteenOrderCard({ order }) {
   const actionError = orderActionErrors[order.id];
   const next = { RECEIVED: ["ACCEPTED", "Accept order"], ACCEPTED: order.executionMode === 'RAZORPAY_TEST' && order.paymentStatus !== 'PAID' ? null : ["PREPARING", "Start preparing"], PREPARING: ["READY", "Mark ready"] }[order.status];
   const advance = status => { void updateOrderStatus(order.id, status, order).catch(() => {}); };
-  return <article className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-    <div className="flex flex-wrap items-start justify-between gap-5"><div><Link to={`/canteen/orders/${order.id}`} className="text-3xl font-black tracking-widest text-[#075d50]">{orderCode(order)}</Link><p className="mt-2 text-sm text-gray-500">Day: {orderDay(order)} · {order.cafeName}</p><p className="mt-2 text-sm text-gray-500">Received <time dateTime={order.createdAt}>{orderReceivedTime(order)}</time></p><p className="mt-2 text-sm font-bold text-[#0f8f73]">{isUnpaidOrder(order) ? "Unpaid · Expired" : statusLabels[order.status]}</p><p className="mt-3 text-gray-600">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(" · ")}</p><p className="mt-2 font-bold">Order value: ₹{order.total}</p></div><div>
-      {!actionError && order.status === "RECEIVED" && <button onClick={() => advance("REJECTED")} className="mr-3 rounded-xl border border-red-600 px-5 py-3 font-bold text-red-700">Reject order</button>}
-      {!actionError && next && <button onClick={() => advance(next[0])} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{order.executionMode === 'RAZORPAY_TEST' && order.status === 'RECEIVED' ? 'Accept & request payment' : next[1]}</button>}
-      {order.status === "REJECTED" && <p className="mt-3 font-bold text-red-700">{order.closedReason === 'PAYMENT_EXPIRED' ? 'Unpaid order expired.' : order.closedReason === 'STUDENT_CANCELLED' ? 'Student cancelled before payment.' : 'Order rejected. The customer will be notified.'}</p>}
-      {!actionError && order.status === "READY" && <div className="mt-3 max-w-xs">
-        <button onClick={() => { void collectOrder(order.id, order).catch(() => {}); }} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">Collected</button>
-      </div>}
-      {order.status === "COLLECTED" && <p role={order.collectionFeedback ? 'status' : undefined} className="font-bold text-green-700">{order.collectionFeedback ? 'Order marked collected' : 'Collected'}</p>}
-    </div></div><OrderPayment order={order} staff />{actionError && <div role="alert" className="mt-4 text-sm text-red-600"><p>{actionError.message}</p><button disabled={actionError.recovering} onClick={() => { void retryOrderAction(order.id).catch(() => {}); }} className="mt-3 rounded-xl border px-4 py-2 font-bold disabled:opacity-50">Retry update</button></div>}
+  return <article className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <Link to={`/canteen/orders/${order.id}`} className="text-2xl font-black tracking-wider text-[#075d50]">{orderCode(order)}</Link>
+        <span className="rounded-full bg-[#e9f5ef] px-2 py-1 text-xs font-bold text-[#075d50]">{isUnpaidOrder(order) ? "Unpaid" : statusLabels[order.status]}</span>
+        <span className="text-sm font-bold">₹{order.total}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {!actionError && order.status === "RECEIVED" && <button onClick={() => advance("REJECTED")} className="rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-700">Reject</button>}
+        {!actionError && next && <button onClick={() => advance(next[0])} className="rounded-lg bg-[#075d50] px-3 py-2 text-sm font-bold text-white">{order.executionMode === 'RAZORPAY_TEST' && order.status === 'RECEIVED' ? 'Accept & request payment' : next[1]}</button>}
+        {!actionError && order.status === "READY" && <button onClick={() => { void collectOrder(order.id, order).catch(() => {}); }} className="rounded-lg bg-[#075d50] px-3 py-2 text-sm font-bold text-white">Collected</button>}
+        {order.status === "COLLECTED" && order.collectionFeedback && <span role="status" className="text-sm font-bold text-green-700">Order marked collected</span>}
+      </div>
+    </div>
+    <p className="mt-1 text-xs text-gray-500">Day: {orderDay(order)} · Received <time dateTime={order.createdAt}>{orderReceivedTime(order)}</time></p>
+    <p className="mt-2 text-sm text-gray-600">{order.items.map(item => `${item.name} × ${item.quantity}`).join(" · ")}</p>
+    <OrderPayment order={order} staff compact />
+    {order.status === "REJECTED" && !isUnpaidOrder(order) && <p className="mt-2 text-sm text-red-700">{order.closedReason === 'STUDENT_CANCELLED' ? 'Student cancelled before payment.' : 'Order rejected.'}</p>}
+    {actionError && <div role="alert" className="mt-3 text-sm text-red-600"><p>{actionError.message}</p><button disabled={actionError.recovering} onClick={() => { void retryOrderAction(order.id).catch(() => {}); }} className="mt-2 rounded-lg border px-3 py-2 font-bold disabled:opacity-50">Retry update</button></div>}
   </article>;
 }
