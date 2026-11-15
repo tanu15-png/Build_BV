@@ -143,6 +143,22 @@ test('accept first, Razorpay test payment, verified fulfilment, expiry and no re
       assert.equal((await student.request('/orders/' + order.id)).body.closedReason, 'PAYMENT_EXPIRED');
       assert.equal((await advance(order.id, 'prepare')).status, 409);
     });
+    await t.test('pending payments and gateway outages cannot keep expired orders active', async () => {
+      const order = await newOrder(); await advance(order.id, 'accept'); const ready = await checkout(order.id);
+      const pending = payment(ready.razorpayOrderId, 'created');
+      await db.order.update({ where: { id: order.id }, data: { paymentDeadline: new Date(0), paymentNextCheckAt: new Date(0) } });
+      await reconcilePaymentBatch(config, db, () => false, gateway);
+      const expired = (await student.request('/orders/' + order.id)).body;
+      assert.equal(expired.status, 'REJECTED'); assert.equal(expired.closedReason, 'PAYMENT_EXPIRED');
+      pending.status = 'captured'; pending.captured = true;
+      assert.equal((await webhook(pending)).status, 200);
+      assert.equal((await student.request('/orders/' + order.id)).body.paymentStatus, 'PAID');
+      const interrupted = await newOrder(); await advance(interrupted.id, 'accept');
+      await db.order.update({ where: { id: interrupted.id }, data: { paymentDeadline: new Date(0), paymentKeyId: config.RAZORPAY_KEY_ID, paymentStatus: 'PROCESSING' } });
+      failDiscovery = true;
+      await reconcilePaymentBatch(config, db, () => false, gateway);
+      assert.equal((await student.request('/orders/' + interrupted.id)).body.closedReason, 'PAYMENT_EXPIRED');
+    });
     await t.test('late capture reactivates an expired order; wrong amounts never unlock preparation', async () => {
       const order = await newOrder(); await advance(order.id, 'accept'); const ready = await checkout(order.id);
       await db.order.update({ where: { id: order.id }, data: { paymentDeadline: new Date(0) } });

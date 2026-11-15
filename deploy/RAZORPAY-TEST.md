@@ -10,11 +10,13 @@ After this release is deployed, add the following **to both `api` and `worker`**
 RAZORPAY_KEY_ID=<fresh test Key ID starting rzp_test_>
 RAZORPAY_KEY_SECRET=<fresh test Key Secret>
 RAZORPAY_WEBHOOK_SECRET=<a separate random secret of at least 32 characters>
-PAYMENT_WINDOW_MINUTES=5
+PAYMENT_WINDOW_MINUTES=15
 ORDER_MODE=RAZORPAY_TEST
 ```
 
 Set all variables together and deploy both services. No payment credentials belong in student/canteen frontend variables, Git, or chat. The API returns only the public Key ID and the current student's checkout reference. The worker needs the same test account so it can reconcile payments after the student closes their browser. Keep automatic payment capture enabled in Razorpay; the backend can also capture a correctly matched authorized payment.
+
+The default window is 15 minutes. If Railway already has `PAYMENT_WINDOW_MINUTES=5`, update it to `15` on both services; environment overrides take priority. Existing orders keep their saved deadline; the new duration applies when staff accept an order after the configuration change.
 
 In the Razorpay **Test Mode** dashboard, configure a webhook:
 
@@ -37,7 +39,7 @@ Do not switch accounts while unpaid test orders exist. Finish/expire the old acc
 
 An unpaid student order can be cancelled before payment checkout starts. Once checkout has started, cancellation is disabled because a delayed payment could still complete. Failed/closed checkout may be retried within the deadline using the same Razorpay order. The student can always explicitly check an initiated payment status.
 
-Unpaid accepted orders expire after the deadline. A payment already processing is reconciled rather than blindly cancelled. If a delayed captured payment arrives after unpaid expiry, the same order is restored to Accepted/Paid for fulfilment. The app does not discard a paid order or automatically refund it. An ambiguous order-creation response is recovered through its stable receipt, without creating an unrelated payment/order.
+Unpaid accepted orders close after the deadline and leave the active queue, including orders with pending payments or interrupted checkout setup. Background payment checks continue even after closure; a gateway outage cannot keep the food request active indefinitely. If a delayed captured payment arrives after unpaid expiry, the same order is restored to Accepted/Paid for fulfilment. The app does not discard a paid order or automatically refund it. An ambiguous order-creation response is recovered through its stable receipt, without creating an unrelated payment/order.
 
 ## Acceptance checks after entering credentials
 

@@ -84,6 +84,15 @@ export function createPayments(config: Config, db: PrismaClient, fetcher: typeof
   async function reconcile(order: Order) {
     if (order.executionMode !== 'RAZORPAY_TEST' || order.paymentStatus === 'PAID') return order;
     assertAccount(order);
+    // Expiry closes the food request even if the gateway is unavailable or a
+    // payment remains pending. Continue reconciliation so late capture is honoured.
+    if (order.status === 'ACCEPTED' && order.paymentDeadline && order.paymentDeadline <= new Date()) {
+      order = await locked(order, async (tx, fresh) => {
+        if (fresh.status !== 'ACCEPTED' || fresh.paymentStatus === 'PAID' || !fresh.paymentDeadline || fresh.paymentDeadline > new Date()) return fresh;
+        const updated = await tx.order.update({ where: { id: fresh.id }, data: { status: 'REJECTED', closedReason: 'PAYMENT_EXPIRED', paymentStatus: 'PAYMENT_EXPIRED', version: { increment: 1 } } });
+        await changed(tx, fresh, 'REJECTED'); return updated;
+      });
+    }
     if (!order.razorpayOrderId && order.paymentKeyId) order = await discover(order);
     let payments: z.infer<typeof gatewayPayment>[] = [];
     if (order.razorpayOrderId) {
@@ -186,8 +195,8 @@ export async function reconcilePaymentBatch(config: Config, db: PrismaClient, st
   const rows = await db.order.findMany({ where: { executionMode: 'RAZORPAY_TEST', paymentStatus: { in: ['AWAITING_PAYMENT', 'PROCESSING', 'FAILED', 'PAYMENT_EXPIRED'] },
     paymentKeyId: { in: [config.RAZORPAY_KEY_ID] }, OR: [{ paymentNextCheckAt: null }, { paymentNextCheckAt: { lte: new Date() } }] }, orderBy: { paymentNextCheckAt: 'asc' }, take: 2 });
   // Orders with no checkout still need an unpaid-acceptance deadline.
-  const expired = await db.order.findMany({ where: { executionMode: 'RAZORPAY_TEST', status: 'ACCEPTED', paymentStatus: 'AWAITING_PAYMENT', paymentKeyId: null, paymentDeadline: { lte: new Date() } }, take: 10 });
-  for (const order of [...rows, ...expired]) {
+  const expired = await db.order.findMany({ where: { executionMode: 'RAZORPAY_TEST', status: 'ACCEPTED', paymentStatus: { not: 'PAID' }, paymentDeadline: { lte: new Date() } }, orderBy: { paymentDeadline: 'asc' }, take: 10 });
+  for (const order of new Map([...expired, ...rows].map(order => [order.id, order])).values()) {
     if (stopping()) break;
     const claimed = await db.order.updateMany({ where: { id: order.id, version: order.version }, data: { paymentNextCheckAt: new Date(Date.now() + (order.status === 'REJECTED' ? 300000 : 30000)), version: { increment: 1 } } });
     if (!claimed.count) continue;

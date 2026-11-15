@@ -19,7 +19,7 @@ export const envSchema = z.object({
   RAZORPAY_KEY_ID: z.string().regex(/^rzp_test_[A-Za-z0-9]+$/).optional(),
   RAZORPAY_KEY_SECRET: z.string().min(16).optional(),
   RAZORPAY_WEBHOOK_SECRET: z.string().min(32).optional(),
-  PAYMENT_WINDOW_MINUTES: z.coerce.number().int().min(1).max(30).default(5),
+  PAYMENT_WINDOW_MINUTES: z.coerce.number().int().min(1).max(30).default(15),
   SEED_DEVELOPMENT_DATA: flag,
   EMAIL_VERIFICATION_BYPASS: z.literal('false').default('false'),
   SESSION_SECRET: z.string().min(32),
