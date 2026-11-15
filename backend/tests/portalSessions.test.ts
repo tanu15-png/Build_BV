@@ -37,6 +37,7 @@ test('student and Canteen sessions coexist, logout is isolated and retired staff
     $transaction: async (run: (tx: unknown) => unknown) => run(db),
     session: sessionModel,
     order: {
+      findMany: async () => [], // No expired unpaid orders in this session fixture.
       findFirst: async () => ({ id: canteenId, studentId: users[0]!.id, canteenId, canteen: { name: 'Test canteen' }, student: { name: 'Private customer name' }, status: 'READY', executionMode: 'TEST', paymentStatus: 'NOT_REQUIRED_TEST', totalPaise: 100, pickupAt: new Date(), codeDay: new Date(), orderCode: 'ABC', version: 1, createdAt: new Date(), collectedAt: null, pickupVerifiedBy: null, items: [], events: [] }),
     },
     auditLog: { create: async () => ({}) },
