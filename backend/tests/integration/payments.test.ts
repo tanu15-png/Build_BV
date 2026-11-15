@@ -22,7 +22,7 @@ test('accept first, Razorpay test payment, verified fulfilment, expiry and no re
   type GatewayOrder = { id: string; receipt: string; amount: number; currency: string; status: string };
   type Payment = { id: string; order_id: string; amount: number; currency: string; status: string; captured: boolean; amount_refunded: number };
   const gatewayOrders = new Map<string, GatewayOrder>(), gatewayPayments = new Map<string, Payment>(), calls: string[] = [];
-  let lostCreate = false;
+  let lostCreate = false, failDiscovery = false;
   const gateway = (async (input: string | URL | Request, options?: RequestInit) => {
     const target = new URL(String(input)), path = target.pathname.slice(4), method = options?.method || 'GET'; calls.push(`${method} ${path}`);
     assert(!path.includes('refund'), 'The app must never request a refund');
@@ -36,7 +36,10 @@ test('accept first, Razorpay test payment, verified fulfilment, expiry and no re
       if (lostCreate) { lostCreate = false; throw new Error('Simulated lost create response'); }
       return json(value);
     }
-    if (path === 'orders') return json({ items: [...gatewayOrders.values()].filter(row => row.receipt === target.searchParams.get('receipt')) });
+    if (path === 'orders') {
+      if (failDiscovery) { failDiscovery = false; throw new Error('Simulated checkout setup outage'); }
+      return json({ items: [...gatewayOrders.values()].filter(row => row.receipt === target.searchParams.get('receipt')) });
+    }
     const orderPayments = path.match(/^orders\/(order_[A-Za-z0-9]+)\/payments$/);
     if (orderPayments) return json({ items: [...gatewayPayments.values()].filter(row => row.order_id === orderPayments[1]) });
     const payment = path.match(/^payments\/(pay_[A-Za-z0-9]+)(\/capture)?$/);
@@ -118,6 +121,20 @@ test('accept first, Razorpay test payment, verified fulfilment, expiry and no re
       assert.equal((await student.request(`/orders/${order.id}/payment/checkout`, 'POST', {})).status, 503);
       assert.equal((await student.request(`/orders/${order.id}/payment/cancel`, 'POST', {})).body.error.code, 'PAYMENT_STARTED');
       await student.request(`/orders/${order.id}/payment/check`, 'POST', {}); await checkout(order.id); assert.equal(gatewayOrders.size, before + 1);
+    });
+    await t.test('setup failure can retry after its lease; pending bank payments cannot reopen checkout', async () => {
+      const order = await newOrder(); await advance(order.id, 'accept'); const before = gatewayOrders.size; failDiscovery = true;
+      assert.equal((await student.request(`/orders/${order.id}/payment/checkout`, 'POST', {})).status, 503);
+      assert.equal((await student.request(`/orders/${order.id}/payment/checkout`, 'POST', {})).body.error.code, 'PAYMENT_PROCESSING');
+      await db.order.update({ where: { id: order.id }, data: { paymentLeaseUntil: new Date(0) } });
+      assert.equal((await student.request(`/orders/${order.id}/payment/check`, 'POST', {})).body.paymentStatus, 'AWAITING_PAYMENT');
+      const ready = await checkout(order.id); assert.equal(gatewayOrders.size, before + 1);
+      const pending = payment(ready.razorpayOrderId, 'created');
+      assert.equal((await student.request(`/orders/${order.id}/payment/check`, 'POST', {})).body.paymentStatus, 'PROCESSING');
+      assert.equal((await student.request(`/orders/${order.id}/payment/checkout`, 'POST', {})).body.error.code, 'PAYMENT_PROCESSING');
+      assert.equal(gatewayOrders.size, before + 1);
+      pending.status = 'failed';
+      assert.equal((await checkout(order.id)).razorpayOrderId, ready.razorpayOrderId);
     });
     await t.test('unpaid orders can be cancelled before checkout; accepted unpaid orders expire', async () => {
       const cancelled = await newOrder(); assert.equal((await student.request(`/orders/${cancelled.id}/payment/cancel`, 'POST', {})).body.closedReason, 'STUDENT_CANCELLED');

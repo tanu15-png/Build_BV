@@ -11,7 +11,9 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
   useEffect(() => { active.current = true; return () => { active.current = false; dialog.current?.close(); }; }, []);
   if (order.executionMode !== 'RAZORPAY_TEST') return null;
   const paid = order.paymentStatus === 'PAID';
-  const canPay = !staff && order.status === 'ACCEPTED' && !paid && order.paymentStatus !== 'PROCESSING';
+  // The server checks Razorpay before reopening the same checkout. Keep that
+  // recovery action available even if an earlier setup request was interrupted.
+  const canPay = !staff && order.status === 'ACCEPTED' && !paid;
   const canCancel = !staff && !order.paymentStarted && !paid && ['RECEIVED', 'ACCEPTED'].includes(order.status);
   const safe = callback => { if (active.current) callback(); };
   async function check() {
@@ -19,7 +21,9 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
     guard.current = true; setPhase('Checking…'); setError('');
     try {
       const fresh = await api(`/orders/${order.id}/payment/check`, { method: 'POST', body: {} });
-      safe(() => setMessage(fresh.paymentStatus === 'PAID' ? 'Payment confirmed.' : 'Payment is not confirmed yet. If you were debited, wait and check again.'));
+      safe(() => setMessage(fresh.paymentStatus === 'PAID' ? 'Payment confirmed.'
+        : ['AWAITING_PAYMENT', 'FAILED'].includes(fresh.paymentStatus) ? 'No completed payment found. You can resume checkout before the deadline. If you were debited, wait and check again.'
+          : 'Payment is not confirmed yet. If you were debited, wait and check again.'));
       await refreshOrders();
     } catch (issue) { safe(() => setError(issue.message)); }
     finally { guard.current = false; safe(() => setPhase('')); }
@@ -69,7 +73,7 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
     {order.closedReason === 'PAYMENT_EXPIRED' && <p className="mt-2 text-sm">Payment was not confirmed before the deadline. If you already paid, check its status. A verified late payment reactivates the accepted order.</p>}
     {order.closedReason === 'STUDENT_CANCELLED' && <p className="mt-2 text-sm">You cancelled before starting payment.</p>}
     <div className="mt-3 flex flex-wrap items-center gap-3">
-      {canPay && <button disabled={Boolean(phase)} onClick={pay} className="rounded-lg bg-[#075d50] px-4 py-2 font-bold text-white disabled:opacity-50">{phase || `Pay ₹${(order.totalPaise / 100).toFixed(2)}`}</button>}
+      {canPay && <button disabled={Boolean(phase)} onClick={pay} className="rounded-lg bg-[#075d50] px-4 py-2 font-bold text-white disabled:opacity-50">{phase || (order.paymentStatus === 'PROCESSING' ? 'Check & resume payment' : `Pay ₹${(order.totalPaise / 100).toFixed(2)}`)}</button>}
       {!paid && order.paymentStarted && <button disabled={Boolean(phase)} onClick={check} className="rounded-lg border border-[#075d50] px-4 py-2 font-bold disabled:opacity-50">{phase || 'Check payment status'}</button>}
       {canCancel && <button disabled={Boolean(phase)} onClick={cancel} className="rounded-lg px-2 py-2 text-sm underline disabled:opacity-50">Cancel unpaid order</button>}
     </div>

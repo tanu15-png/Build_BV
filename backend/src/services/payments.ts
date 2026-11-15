@@ -107,7 +107,10 @@ export function createPayments(config: Config, db: PrismaClient, fetcher: typeof
         const updated = await tx.order.update({ where: { id: fresh.id }, data: { status: 'REJECTED', closedReason: 'PAYMENT_EXPIRED', paymentStatus: 'PAYMENT_EXPIRED', version: { increment: 1 } } });
         await changed(tx, fresh, 'REJECTED'); return updated;
       }
-      const next = processing ? 'PROCESSING' : payments.length ? 'FAILED' : fresh.razorpayOrderId ? 'AWAITING_PAYMENT' : fresh.paymentStatus;
+      // A failed checkout setup is not an in-flight payment. Once its creation
+      // lease ends, a successful receipt lookup with no match permits retry.
+      const creationPending = !fresh.razorpayOrderId && fresh.paymentKeyId && fresh.paymentLeaseUntil && fresh.paymentLeaseUntil > new Date();
+      const next = processing || creationPending ? 'PROCESSING' : payments.length ? 'FAILED' : fresh.razorpayOrderId || (fresh.paymentKeyId && !expired) ? 'AWAITING_PAYMENT' : fresh.paymentStatus;
       return next === fresh.paymentStatus ? fresh : tx.order.update({ where: { id: fresh.id }, data: { paymentStatus: next, version: { increment: 1 } } });
     });
   }
