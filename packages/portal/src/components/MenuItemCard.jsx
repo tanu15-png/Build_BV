@@ -10,7 +10,7 @@ export default function MenuItemCard({ food, staff = false }) {
   const available = isFoodAvailable(food), quantity = cart.find(item => item.id === food.id)?.quantity;
   const discounted = food.offer && (food.price ?? food.effectivePricePaise / 100) < food.pricePaise / 100;
   const imageAlt = food.illustrative ? `Illustrative image of ${food.name}` : food.name;
-  const imageError = event => { event.currentTarget.onerror = null; event.currentTarget.src = '/food-placeholder.svg'; };
+  const imageError = event => { if (!event.currentTarget.src.endsWith('/food-placeholder.svg')) event.currentTarget.src = '/food-placeholder.svg'; };
   const add = () => { addToCart(food); details.current?.close(); };
   return <article className="grid min-h-[132px] min-w-0 grid-cols-[104px_minmax(0,1fr)] gap-3 rounded-xl border border-[#e0e8e4] bg-white p-2 transition-colors hover:border-[#9bcbbb] sm:grid-cols-[96px_minmax(0,1fr)] xl:grid-cols-[104px_minmax(0,1fr)]">
     <button type="button" onClick={() => details.current?.showModal()} aria-label={`View ${food.name} details`} className="aspect-square w-full self-center overflow-hidden rounded-lg bg-[#f3f5f1]">
