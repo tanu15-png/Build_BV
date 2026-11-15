@@ -7,7 +7,7 @@ import { ClipboardList, LogOut, Store } from "lucide-react";
 import { useAuth } from "@spoonate/portal/context/AuthContext";
 import { useOrders } from "@spoonate/portal/context/OrderContext";
 import OrderSectionTabs from "@spoonate/portal/components/OrderSectionTabs";
-import { canteenOrderInSection, statusLabels } from "@spoonate/portal/utils/orderRules";
+import { isUnpaidOrder, canteenOrderSections, canteenOrderInSection, statusLabels } from "@spoonate/portal/utils/orderRules";
 
 export default function CanteenDashboard() {
   const { user, logout } = useAuth();
@@ -32,15 +32,16 @@ export default function CanteenDashboard() {
         <div className="mx-auto max-w-7xl space-y-8 p-5 lg:p-10">
           <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-6 shadow-sm"><div><h2 className="flex items-center gap-2 text-xl font-black"><Store size={20} /> Incoming orders</h2><p className="mt-2 text-gray-500">{cafe?.status === "Paused" ? "New orders are paused. Continue fulfilling existing orders." : "Your canteen is accepting new orders."}</p></div><button onClick={() => perform(toggleOrders)} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{cafe?.status === "Paused" ? "Resume orders" : "Pause incoming orders"}</button></section>
           {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-6">{[
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-7">{[
             ["Awaiting acceptance", orders.filter((order) => order.status === "RECEIVED").length],
             ["Awaiting payment", orders.filter((order) => order.status === "ACCEPTED" && order.executionMode === "RAZORPAY_TEST" && order.paymentStatus !== "PAID").length],
             ["Preparing / queued", orders.filter((order) => order.status === "PREPARING" || (order.status === "ACCEPTED" && (order.executionMode !== "RAZORPAY_TEST" || order.paymentStatus === "PAID"))).length],
             ["Ready for pickup", orders.filter((order) => order.status === "READY").length],
             ["Collected", orders.filter((order) => order.status === "COLLECTED").length],
-            ["Rejected", orders.filter((order) => order.status === "REJECTED").length],
+            ["Unpaid", orders.filter(isUnpaidOrder).length],
+            ["Rejected", orders.filter((order) => order.status === "REJECTED" && !isUnpaidOrder(order)).length],
           ].map(([label, value]) => <div key={label} className="rounded-2xl bg-white p-5 shadow-sm"><p className="text-sm text-gray-500">{label}</p><p className="mt-2 text-3xl font-black">{value}</p></div>)}</div>
-          <section><OrderSectionTabs selected={section} onChange={setSection} /><h2 className="mt-5 text-2xl font-black">{section} orders</h2>{loadMoreOrders && <button onClick={loadMoreOrders} className="mt-3 font-bold underline">Load more orders</button>}<p className="mt-2 text-gray-500">Newest orders are shown first.</p><div className="mt-5 space-y-4">{filtered.length === 0 ? <div className="rounded-2xl bg-white p-10 text-center"><ClipboardList className="mx-auto text-gray-300" size={36} /><p className="mt-4 font-bold">No {section.toLowerCase()} orders</p></div> : filtered.map((order) => <CanteenOrderCard key={order.id} order={order} />)}</div></section>
+          <section><OrderSectionTabs sections={canteenOrderSections} selected={section} onChange={setSection} /><h2 className="mt-5 text-2xl font-black">{section} orders</h2>{loadMoreOrders && <button onClick={loadMoreOrders} className="mt-3 font-bold underline">Load more orders</button>}<p className="mt-2 text-gray-500">Newest orders are shown first.</p><div className="mt-5 space-y-4">{filtered.length === 0 ? <div className="rounded-2xl bg-white p-10 text-center"><ClipboardList className="mx-auto text-gray-300" size={36} /><p className="mt-4 font-bold">No {section.toLowerCase()} orders</p></div> : filtered.map((order) => <CanteenOrderCard key={order.id} order={order} />)}</div></section>
 
         </div>
       </main>
@@ -54,7 +55,7 @@ export function CanteenOrderCard({ order }) {
   const next = { RECEIVED: ["ACCEPTED", "Accept order"], ACCEPTED: order.executionMode === 'RAZORPAY_TEST' && order.paymentStatus !== 'PAID' ? null : ["PREPARING", "Start preparing"], PREPARING: ["READY", "Mark ready"] }[order.status];
   const advance = status => { void updateOrderStatus(order.id, status, order).catch(() => {}); };
   return <article className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-    <div className="flex flex-wrap items-start justify-between gap-5"><div><Link to={`/canteen/orders/${order.id}`} className="text-3xl font-black tracking-widest text-[#075d50]">{orderCode(order)}</Link><p className="mt-2 text-sm text-gray-500">Day: {orderDay(order)} · {order.cafeName}</p><p className="mt-2 text-sm text-gray-500">Received <time dateTime={order.createdAt}>{orderReceivedTime(order)}</time></p><p className="mt-2 text-sm font-bold text-[#0f8f73]">{statusLabels[order.status]}</p><p className="mt-3 text-gray-600">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(" · ")}</p><p className="mt-2 font-bold">Order value: ₹{order.total}</p></div><div>
+    <div className="flex flex-wrap items-start justify-between gap-5"><div><Link to={`/canteen/orders/${order.id}`} className="text-3xl font-black tracking-widest text-[#075d50]">{orderCode(order)}</Link><p className="mt-2 text-sm text-gray-500">Day: {orderDay(order)} · {order.cafeName}</p><p className="mt-2 text-sm text-gray-500">Received <time dateTime={order.createdAt}>{orderReceivedTime(order)}</time></p><p className="mt-2 text-sm font-bold text-[#0f8f73]">{isUnpaidOrder(order) ? "Unpaid · Expired" : statusLabels[order.status]}</p><p className="mt-3 text-gray-600">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(" · ")}</p><p className="mt-2 font-bold">Order value: ₹{order.total}</p></div><div>
       {!actionError && order.status === "RECEIVED" && <button onClick={() => advance("REJECTED")} className="mr-3 rounded-xl border border-red-600 px-5 py-3 font-bold text-red-700">Reject order</button>}
       {!actionError && next && <button onClick={() => advance(next[0])} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{order.executionMode === 'RAZORPAY_TEST' && order.status === 'RECEIVED' ? 'Accept & request payment' : next[1]}</button>}
       {order.status === "REJECTED" && <p className="mt-3 font-bold text-red-700">{order.closedReason === 'PAYMENT_EXPIRED' ? 'Unpaid order expired.' : order.closedReason === 'STUDENT_CANCELLED' ? 'Student cancelled before payment.' : 'Order rejected. The customer will be notified.'}</p>}

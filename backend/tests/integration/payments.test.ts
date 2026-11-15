@@ -8,6 +8,7 @@ import { loadConfig } from '../../src/config/env.js';
 import { createPrisma } from '../../src/lib/prisma.js';
 import { seed } from '../../src/services/provision.js';
 import { createPayments, reconcilePaymentBatch } from '../../src/services/payments.js';
+import { notificationData } from '../../src/services/outbox.js';
 import { orderSchema } from '../../src/schemas/contracts.js';
 
 const url = process.env.PAYMENT_TEST_DATABASE_URL;
@@ -158,6 +159,21 @@ test('accept first, Razorpay test payment, verified fulfilment, expiry and no re
       failDiscovery = true;
       await reconcilePaymentBatch(config, db, () => false, gateway);
       assert.equal((await student.request('/orders/' + interrupted.id)).body.closedReason, 'PAYMENT_EXPIRED');
+    });
+    await t.test('expiry works without worker payment credentials and scoped reads repair old active orders once', async () => {
+      const order = await newOrder(); await advance(order.id, 'accept');
+      await db.order.update({ where: { id: order.id }, data: { paymentDeadline: new Date(0) } });
+      await reconcilePaymentBatch({ ...config, RAZORPAY_KEY_ID: undefined, RAZORPAY_KEY_SECRET: undefined }, db, () => false, gateway);
+      assert.equal((await student.request('/orders/' + order.id)).body.closedReason, 'PAYMENT_EXPIRED');
+      const stale = await newOrder(); await advance(stale.id, 'accept');
+      await db.order.update({ where: { id: stale.id }, data: { paymentDeadline: new Date(0), paymentStatus: 'PROCESSING' } });
+      await other.request('/orders');
+      assert.equal((await db.order.findUniqueOrThrow({ where: { id: stale.id } })).status, 'ACCEPTED');
+      await student.request('/orders'); await student.request('/orders');
+      assert.equal((await db.order.findUniqueOrThrow({ where: { id: stale.id } })).closedReason, 'PAYMENT_EXPIRED');
+      const events = await db.orderEvent.findMany({ where: { orderId: stale.id, newStatus: 'REJECTED' }, include: { order: { include: { canteen: true } } } });
+      assert.equal(events.length, 1);
+      assert.match(notificationData(events[0]!)!.message, /removed from active orders/);
     });
     await t.test('late capture reactivates an expired order; wrong amounts never unlock preparation', async () => {
       const order = await newOrder(); await advance(order.id, 'accept'); const ready = await checkout(order.id);

@@ -6,7 +6,7 @@ import type { Prisma, PrismaClient, OrderStatus } from '../generated/prisma/clie
 import { AppError } from '../middleware/errorHandler.js';
 import { validate } from '../middleware/validate.js';
 import { contracts } from '../schemas/contracts.js';
-import { requiresPayment } from '../services/payments.js';
+import { requiresPayment, expireUnpaidOrders } from '../services/payments.js';
 import { createSessionReader, type Actor } from '../services/session.js';
 import { cartInclude, cartResponse, verifyCartQuote } from '../services/cart.js';
 import { allocateOrder, orderInclude, orderResponse, orderTransaction, pickupTime, requestHash, serverNow, type OrderOptions } from '../services/orders.js';
@@ -175,12 +175,14 @@ export function createOrdersRouter(config: Config, db: PrismaClient, options: Or
   }
   router.get('/orders/:id', ...route('GET /orders/:id'), async (req, res) => {
     const { actor } = await current(req);
+    await expireUnpaidOrders(config, db, { AND: [scope(actor), { id: res.locals.params.id }] });
     const order = await db.order.findFirst({ where: { ...scope(actor), id: res.locals.params.id }, include: orderInclude });
     if (!order) throw new AppError(404, 'ORDER_NOT_FOUND', 'Order not found.');
     res.json(orderResponse(order));
   });
   router.get('/orders', ...route('GET /orders'), async (req, res) => {
     const { actor } = await current(req);
+    await expireUnpaidOrders(config, db, scope(actor));
     const q = res.locals.query as { cursor?: string; limit: number; canteenId?: string; status?: OrderStatus; search?: string; from?: string; to?: string };
     if (actor.role === 'CANTEEN' && q.canteenId && q.canteenId !== actor.canteenId) throw new AppError(403, 'CANTEEN_DENIED', 'You can only view your own canteen orders.');
     if (q.from && q.to && q.from > q.to) throw new AppError(422, 'DATE_RANGE_INVALID', 'The start date must precede the end date.');

@@ -9,6 +9,8 @@ export const statusLabels = {
 };
 
 export const orderSections = ["Active", "Completed", "Rejected"];
+export const canteenOrderSections = ["Active", "Completed", "Unpaid", "Rejected"];
+export const isUnpaidOrder = order => order.paymentStatus !== 'PAID' && order.closedReason === 'PAYMENT_EXPIRED';
 export function newestOrderFirst(a, b) {
   return new Date(b.createdAt) - new Date(a.createdAt) || b.id.localeCompare(a.id);
 }
@@ -27,6 +29,8 @@ export function orderInSection(order, section) {
 }
 
 export function canteenOrderInSection(order, section) {
+  if (isUnpaidOrder(order)) return section === 'Unpaid';
+  if (section === 'Unpaid') return false;
   if (order.status === 'COLLECTED' && order.collectionFeedback) return section === 'Active';
   return orderInSection(order, section);
 }

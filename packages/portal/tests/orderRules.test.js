@@ -3,12 +3,19 @@ import assert from "node:assert/strict";
 import { cafes as singleCafes, foods as singleFoods } from "../src/data/mockData.js";
 import { canteenAccessCodes } from "../src/data/canteenAccess.js";
 import { studentAccount, canteenMember, revokeCanteenMember, canteenSessionActive } from "../src/utils/authRules.js";
-import { addCartItem, buildOrder, generateOrderId, normalizeStudentEmail, transitionOrder, visibleOrders, orderNotifications, campusDay, pickupLabel, orderInSection } from "../src/utils/orderRules.js";
+import { addCartItem, buildOrder, generateOrderId, normalizeStudentEmail, transitionOrder, visibleOrders, orderNotifications, campusDay, pickupLabel, orderInSection, canteenOrderInSection } from "../src/utils/orderRules.js";
 
 // A foreign fixture exercises scope guards; it is never part of the app directory.
 const cafes = [...singleCafes, { ...singleCafes[0], id: 'foreign', name: 'Foreign fixture' }];
 const foods = [...singleFoods, { ...singleFoods[0], id: 'foreign-food', cafeId: 'foreign' }];
 const available = { pausedCafes: [], disabledFoods: [] };
+test('expired unpaid orders have a separate staff section and leave both active lists', () => {
+  const expired = { status: 'REJECTED', closedReason: 'PAYMENT_EXPIRED', paymentStatus: 'PAYMENT_EXPIRED' };
+  for (const section of ['Active', 'Completed', 'Rejected', 'Unpaid']) assert.equal(canteenOrderInSection(expired, section), section === 'Unpaid');
+  assert.equal(orderInSection(expired, 'Active'), false);
+  assert.equal(canteenOrderInSection({ status: 'REJECTED' }, 'Unpaid'), false);
+  assert.equal(canteenOrderInSection({ ...expired, status: 'ACCEPTED', paymentStatus: 'PAID', closedReason: null }, 'Active'), true);
+});
 
 test('rejected orders appear only in the rejected section', () => {
   for (const status of ['RECEIVED', 'ACCEPTED', 'PREPARING', 'READY', 'COLLECTED', 'REJECTED']) {

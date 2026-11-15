@@ -81,9 +81,8 @@ export function createPayments(config: Config, db: PrismaClient, fetcher: typeof
       return updated;
     });
   }
-  async function reconcile(order: Order) {
+  async function expire(order: Order) {
     if (order.executionMode !== 'RAZORPAY_TEST' || order.paymentStatus === 'PAID') return order;
-    assertAccount(order);
     // Expiry closes the food request even if the gateway is unavailable or a
     // payment remains pending. Continue reconciliation so late capture is honoured.
     if (order.status === 'ACCEPTED' && order.paymentDeadline && order.paymentDeadline <= new Date()) {
@@ -93,6 +92,12 @@ export function createPayments(config: Config, db: PrismaClient, fetcher: typeof
         await changed(tx, fresh, 'REJECTED'); return updated;
       });
     }
+    return order;
+  }
+  async function reconcile(order: Order) {
+    if (order.executionMode !== 'RAZORPAY_TEST' || order.paymentStatus === 'PAID') return order;
+    order = await expire(order);
+    assertAccount(order);
     if (!order.razorpayOrderId && order.paymentKeyId) order = await discover(order);
     let payments: z.infer<typeof gatewayPayment>[] = [];
     if (order.razorpayOrderId) {
@@ -186,10 +191,20 @@ export function createPayments(config: Config, db: PrismaClient, fetcher: typeof
     const order = await db.order.findUnique({ where: { razorpayOrderId: reference.order_id } });
     if (order?.executionMode === 'RAZORPAY_TEST') await reconcile(order);
   }
-  return { checkout, check, verify, cancel, response, webhook, reconcile };
+  return { checkout, check, verify, cancel, response, webhook, reconcile, expire };
+}
+
+// Expiry requires only the database, never gateway credentials or connectivity.
+// Also run on scoped reads so an outdated/misconfigured worker cannot strand orders.
+export async function expireUnpaidOrders(config: Config, db: PrismaClient, scope: Prisma.OrderWhereInput = {}) {
+  const expired = await db.order.findMany({ where: { AND: [scope, { executionMode: 'RAZORPAY_TEST', status: 'ACCEPTED', paymentStatus: { not: 'PAID' }, paymentDeadline: { lte: new Date() } }] }, orderBy: { paymentDeadline: 'asc' }, take: 100 });
+  const payments = createPayments(config, db);
+  for (const order of expired) await payments.expire(order);
 }
 
 export async function reconcilePaymentBatch(config: Config, db: PrismaClient, stopping = () => false, fetcher: typeof fetch = fetch) {
+  if (stopping()) return;
+  await expireUnpaidOrders(config, db);
   if (!config.RAZORPAY_KEY_ID || !config.RAZORPAY_KEY_SECRET) return;
   const payments = createPayments(config, db, fetcher);
   const rows = await db.order.findMany({ where: { executionMode: 'RAZORPAY_TEST', paymentStatus: { in: ['AWAITING_PAYMENT', 'PROCESSING', 'FAILED', 'PAYMENT_EXPIRED'] },

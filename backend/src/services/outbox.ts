@@ -15,10 +15,12 @@ export function notificationData(event: Prisma.OrderEventGetPayload<{ include: {
   const reference = `${order.orderCode} (${order.codeDay.toISOString().slice(0, 10)})`;
   if (order.executionMode === 'RAZORPAY_TEST') {
     const paid = event.newStatus === 'ACCEPTED' && event.previousStatus !== 'RECEIVED' && order.paymentStatus === 'PAID';
-    return { recipientId: order.studentId, sourceEventId: event.id, orderId: order.id, type: paid ? 'PAID' : event.newStatus, createdAt: event.createdAt,
+    return { recipientId: order.studentId, sourceEventId: event.id, orderId: order.id, type: paid ? 'PAID' : event.newStatus === 'REJECTED' && order.closedReason === 'PAYMENT_EXPIRED' ? 'PAYMENT_EXPIRED' : event.newStatus, createdAt: event.createdAt,
       message: paid ? `Payment confirmed for order ${reference}. The canteen can now prepare it.`
         : event.newStatus === 'READY' ? `Order ${reference} is ready to collect.`
-          : event.newStatus === 'REJECTED' ? `Order ${reference} was closed without confirmed payment. Open the order for details.`
+          : event.newStatus === 'REJECTED' ? order.closedReason === 'PAYMENT_EXPIRED'
+            ? `Order ${reference} expired because payment was not completed before the deadline. It has been removed from active orders. If you already paid, open the order to check payment status.`
+            : `Order ${reference} was closed without confirmed payment. Open the order for details.`
             : `Order ${reference} was accepted. Open it to pay before the payment deadline. Paid orders cannot be cancelled or refunded.` };
   }
   return { recipientId: order.studentId, sourceEventId: event.id, orderId: order.id, type: event.newStatus,
