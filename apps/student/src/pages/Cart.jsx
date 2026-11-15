@@ -1,3 +1,4 @@
+import { isComboCategory } from '@spoonate/portal/utils/menuRules';
 import OfferPrice from '@spoonate/portal/components/OfferPrice';
 import PlaceOrderButton from '../components/PlaceOrderButton';
 import {
@@ -94,10 +95,10 @@ export default function Cart() {
                 className="bg-white rounded-2xl p-4 flex gap-4 shadow-card"
               >
 
-                <img
+                {!isComboCategory(item.category) && <img
                   src={item.image}
                   className="w-24 h-24 rounded-xl object-cover"
-                />
+                />}
 
                 <div className="flex-1">
 

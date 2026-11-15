@@ -1,3 +1,4 @@
+import { isComboCategory } from '../utils/menuRules';
 import MenuItemCard, { menuGrid } from './MenuItemCard';
 import OfferPrice from './OfferPrice';
 import { useRef, useState } from 'react';
@@ -22,7 +23,7 @@ export default function Promotions({staff=false}) {
       return <article key={banner.id} className="mt-3 flex flex-col gap-3 overflow-hidden rounded-2xl border border-[#dce7df] bg-gradient-to-r from-[#e8f2eb] via-white to-[#fff7df] p-3 sm:flex-row sm:items-center sm:p-4">
         {staff&&<img src={bannerImageSrc(banner.imageRef)} alt={banner.title} className="w-40 rounded-lg object-contain"/>}
         <div className="min-w-0 sm:w-44 sm:shrink-0"><p className="text-[10px] font-bold uppercase tracking-widest text-[#65836d]">Featured menu · {current+1}/{banners.length}</p><h3 className="font-black text-[#174b3b]">{banner.title}</h3><p className="mt-1 line-clamp-1 text-xs text-gray-500">{banner.description}</p></div>
-        <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto">{selected.slice(0,3).map(food=><div key={food.id} className="flex min-w-36 shrink-0 items-center gap-2 rounded-xl bg-white/80 p-2 sm:min-w-0 sm:flex-1"><img src={food.image} alt="" className="h-10 w-10 rounded-lg object-cover"/><div className="min-w-0"><p className="truncate text-xs font-bold">{food.name}</p><OfferPrice item={food} compact/></div></div>)}</div>
+        <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto">{selected.slice(0,3).map(food=><div key={food.id} className="flex min-w-36 shrink-0 items-center gap-2 rounded-xl bg-white/80 p-2 sm:min-w-0 sm:flex-1">{!isComboCategory(food.category) && <img src={food.image} alt="" className="h-10 w-10 rounded-lg object-cover"/>}<div className="min-w-0"><p className="truncate text-xs font-bold">{food.name}</p><OfferPrice item={food} compact/></div></div>)}</div>
         <Link to={staff?`/canteen/banners?edit=${banner.id}`:bannerHref(banner)} className="shrink-0 rounded-full bg-[#075d50] px-4 py-2 text-center text-xs font-bold text-white">{staff?'Edit banner':`View menu · ${selected.length} items`} →</Link>
       </article>;
     })()}
