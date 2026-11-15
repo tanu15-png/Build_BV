@@ -105,23 +105,6 @@ export default function Dashboard() {
 
         <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-5 lg:px-10">
 
-          <div className="relative w-full max-w-md hidden sm:block">
-
-            <Search
-              size={18}
-              className="absolute left-4 top-3.5 text-gray-400"
-            />
-
-            <input
-              aria-label="Search menu"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search menu..."
-              className="w-full bg-gray-50 rounded-xl py-3 pl-11 pr-4 outline-none"
-            />
-
-          </div>
-
           <div className="flex items-center gap-5 ml-auto">
 
             <Link
@@ -261,6 +244,23 @@ export default function Dashboard() {
           )}
 
           <ComboPanel />
+          <div className="relative mb-4 w-full">
+
+            <Search
+              size={18}
+              className="absolute left-4 top-3.5 text-gray-400"
+            />
+
+            <input
+              aria-label="Search menu"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search menu..."
+              className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-11 pr-4 outline-none focus:border-[#0f8f73] focus:ring-2 focus:ring-[#0f8f73]/20"
+            />
+
+          </div>
+
           <StudentMenu query={query} />
 
 
