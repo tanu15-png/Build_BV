@@ -1,0 +1,1604 @@
+{
+  "aloo patties": {
+    "image": "/menu-images/generated-aloo-patties-05c80a11af01.webp",
+    "replacesImageRef": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaYPFjCMmaNqZqfzJ6XRFnzNFVg4BgHtZY3pgqpP-ZfsE18y78J-LWf0T4&s=10",
+    "source": null,
+    "kind": "AI-generated reference"
+  },
+  "bread pakoda": {
+    "image": "/menu-images/web-8e5ce33a2a4f857456b9-d1d3d6058f69.webp",
+    "replacesImageRef": "https://www.kuchpakrahahai.in/wp-content/uploads/2026/03/bread-pakoda.jpg",
+    "source": "https://www.dailymotion.com/video/x82g3fz",
+    "kind": "Dish-name candidate"
+  },
+  "cheese patties": {
+    "image": "/menu-images/web-2bacd9671c7bfbac1467-be1c5499983b.webp",
+    "replacesImageRef": "https://gemini.google.com/share/4f396fc85d43?social_preview=true&skid=1112a3be-878a-4886-9dbf-0ca2f70303f7",
+    "source": "https://www.snapcalorie.com/nutrition/cheese_patties_nutrition.html",
+    "kind": "Dish-name candidate"
+  },
+  "golu molu": {
+    "image": "/menu-images/2112e3238c8420d26b-620458fbcb51.webp",
+    "replacesImageRef": "https://binjalsvegkitchen.com/wp-content/uploads/2021/11/Dahi-Vada-H1.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Egg_Puff2.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "paneer patties": {
+    "image": "/menu-images/web-43e8c898934fea9e424d-85cae563458b.webp",
+    "replacesImageRef": "https://aromaticessence.co/wp-content/uploads/2022/08/paneer_puff_featured.jpg",
+    "source": "https://cupofyum.com/recipes/paneer-patties-recipe-paneer-tikki-110249",
+    "kind": "Dish-name candidate"
+  },
+  "samosa": {
+    "image": "/menu-images/web-d9a2938226a6179c2309-df50b10bde3e.webp",
+    "replacesImageRef": "https://static.toiimg.com/thumb/61050397.cms?imgsize=246859&width=800&height=800",
+    "source": "https://www.orderocks.com/veg-samosa-6",
+    "kind": "Dish-name candidate"
+  },
+  "spiral roll": {
+    "image": "/menu-images/web-fded6eb2dd2a7450f916-053dac8a1480.webp",
+    "replacesImageRef": "https://www.elloras.in/cdn/shop/products/Paneer-spiral-roll-2_22_11zon.jpg?v=1663513165",
+    "source": "https://www.swiggy.com/city/mumbai/bhakri-vashi-vashi-rest209168",
+    "kind": "Dish-name candidate"
+  },
+  "butterscotch pastry": {
+    "image": "/menu-images/web-aa904387cfe9b474c822-b825ee1bcf40.webp",
+    "replacesImageRef": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlqcroT7YFm908lPqZ5IFYPRkeU5amPyLjLH0Jop2xyZ54XdrwkDC9C8t&s=10",
+    "source": "https://storage.googleapis.com/dajlgzvbifuaze/butterscotch-pastry.html",
+    "kind": "Dish-name candidate"
+  },
+  "choco delight box": {
+    "image": "/menu-images/bcf824b33fa0a3cec7-ebfe9d2a245d.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Piece_of_chocolate_cake_on_a_white_plate_decorated_with_chocolate_sauce.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "choco lava cake": {
+    "image": "/menu-images/web-fc8e2c8c046616d020b1-36cfe6869966.webp",
+    "replacesImageRef": "https://www.crowdedkitchen.com/wp-content/uploads/2026/02/Chocolate-Lava-Cakes-11.jpg",
+    "source": "https://www.swiggy.com/city/pune/choco-lava-cake-dish-restaurants",
+    "kind": "Dish-name candidate"
+  },
+  "choco truffle box": {
+    "image": "/menu-images/bcf824b33fa0a3cec7-ebfe9d2a245d.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Piece_of_chocolate_cake_on_a_white_plate_decorated_with_chocolate_sauce.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "chocolate truffle pastry": {
+    "image": "/menu-images/web-1e2f3044b361a0bfb1ec-9c1834922e91.webp",
+    "replacesImageRef": null,
+    "source": "https://bdayfy.com/cake/classic-chocolate-truffle-pastry",
+    "kind": "Dish-name candidate"
+  },
+  "chocolate truffle with ice cream": {
+    "image": "/menu-images/web-baa85587e76c8fc66873-f2cadc53ae46.webp",
+    "replacesImageRef": null,
+    "source": "https://local.yahoo.com/info-240618433-thermia-providence-providence/",
+    "kind": "Dish-name candidate"
+  },
+  "doughnut (any flavour)": {
+    "image": "/menu-images/web-016033441ce91a2cbaca-8b7233d80a1c.webp",
+    "replacesImageRef": "https://sallysbakingaddiction.com/wp-content/uploads/2016/07/homemade-doughnuts-frostings-2.jpg",
+    "source": "https://www.thebotanicproject.net/product-page/plant-based-raspberry-doughnut",
+    "kind": "Dish-name candidate"
+  },
+  "light chocolate pastry": {
+    "image": "/menu-images/web-0e53c526d4e1d5ea0d4b-5a09d2322b08.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/delhi/the-cakecity-patisserie-safdarjung-rest385089",
+    "kind": "Dish-name candidate"
+  },
+  "pineapple pastry": {
+    "image": "/menu-images/web-745f5cd29f14eab83d53-0f674895a019.webp",
+    "replacesImageRef": "https://bakewithshivesh.com/wp-content/uploads/2021/07/IMG_0745-scaled.jpg",
+    "source": "https://www.swiggy.com/city/hyderabad/ks-bakers-kukatpally-rest65882",
+    "kind": "Dish-name candidate"
+  },
+  "strawberry pastry": {
+    "image": "/menu-images/web-94ff8e3151993f20c037-c27fa539d090.webp",
+    "replacesImageRef": "https://kreamz.in/wp-content/uploads/2024/07/strawberry-pastry.webp",
+    "source": "https://www.carina-wohlleben.de/post/schnelle-erdbeer-teilchen",
+    "kind": "Dish-name candidate"
+  },
+  "cheese blast burger": {
+    "image": "/menu-images/web-98138a6f4c68c676e9b3-5f79f02628ab.webp",
+    "replacesImageRef": "https://img.magnific.com/free-photo/delicious-double-cheeseburger-with-melted-cheese_84443-86133.jpg?semt=ais_hybrid&w=740&q=80",
+    "source": "https://www.crazycheesy.com/product/crispy-cheese-blast-burger/",
+    "kind": "Dish-name candidate"
+  },
+  "cheese veggie burger": {
+    "image": "/menu-images/web-25be05c2ea68880d735b-e4740c9b8203.webp",
+    "replacesImageRef": "https://www.recipetineats.com/tachyon/2019/08/Avocado-Chicken-Burgers_9.jpg",
+    "source": "https://www.zomato.com/ncr/tea-amore-cafe-chander-nagar-new-delhi",
+    "kind": "Dish-name candidate"
+  },
+  "crunchy corn burger": {
+    "image": "/menu-images/web-5e470f91863907efd211-c4fcf9d687a2.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/mumbai/jumboking-indian-burger-weh-metro-station-andheri-east-rest21241",
+    "kind": "Dish-name candidate"
+  },
+  "great veggie cheese burger": {
+    "image": "/menu-images/web-b33f4643b1838ba19ed0-fb4f3b8e50ab.webp",
+    "replacesImageRef": null,
+    "source": "https://gofood.co.id/en/purwakarta/restaurant/a-w-rest-area-km72a-jakarta-bandung-7008e3d5-8970-48ec-a2eb-487d309c9e93",
+    "kind": "Dish-name candidate"
+  },
+  "mexican burger": {
+    "image": "/menu-images/web-49f47fd413e01d3e36df-bc9720a19ebe.webp",
+    "replacesImageRef": null,
+    "source": "https://www.tivall.co.il/product/tbwl-bwrgr-snssywnl",
+    "kind": "Dish-name candidate"
+  },
+  "mushroom cheese burger": {
+    "image": "/menu-images/web-ce17fb4d5640eb43e8c6-409f526e1277.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/bangalore/mash-cafe-central-bangalore-rest1319082",
+    "kind": "Dish-name candidate"
+  },
+  "paneer burger": {
+    "image": "/menu-images/web-b4f00fa3204c7ddc3418-da5b6865c11c.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/noida-1/teamax-cafe-sector-64-rest1127852",
+    "kind": "Dish-name candidate"
+  },
+  "spicy burger": {
+    "image": "/menu-images/web-46b098c611687222612e-dc894aaf5c4f.webp",
+    "replacesImageRef": null,
+    "source": "https://www.yumello.com/products/smoky-harissa-peanut-butter-6-x-285g",
+    "kind": "Dish-name candidate"
+  },
+  "veggie burger": {
+    "image": "/menu-images/web-64f7078cad9c85f8c967-80a0e9bf3301.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/dhule/biryani-cuisine-order-online",
+    "kind": "Dish-name candidate"
+  },
+  "chocolate truffle cake (500 g)": {
+    "image": "/menu-images/web-07d2d7af5366d2992c56-0be90a1791b4.webp",
+    "replacesImageRef": "https://assets.winni.in/product/primary/2026/4/109504.jpeg?dpr=1&w=1000",
+    "source": "https://lamara.in/cat/2",
+    "kind": "Dish-name candidate"
+  },
+  "economic cake - chocolate (500 g)": {
+    "image": "/menu-images/web-a060d87fc77b338075c2-374560daac08.webp",
+    "replacesImageRef": null,
+    "source": "https://gatesc.ro/recipes/10152/prajitura-economica",
+    "kind": "Dish-name candidate"
+  },
+  "economic cake - pineapple (500 g)": {
+    "image": "/menu-images/web-22203aca6d18f9e96ffb-d2f5588a9113.webp",
+    "replacesImageRef": null,
+    "source": "https://bakemission.com.sg/yueyan-vegetarian-pineapple-cake-24pcs-economy-pack",
+    "kind": "Dish-name candidate"
+  },
+  "economic cake - vanilla (500 g)": {
+    "image": "/menu-images/web-9a415ed6c35f532c26a2-b5a379e19a93.webp",
+    "replacesImageRef": null,
+    "source": "https://mybakers.in/chennai/vanilla-cake",
+    "kind": "Dish-name candidate"
+  },
+  "fancy cake (500 g)": {
+    "image": "/menu-images/bcf824b33fa0a3cec7-ebfe9d2a245d.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Piece_of_chocolate_cake_on_a_white_plate_decorated_with_chocolate_sauce.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "fondant cake (500 g)": {
+    "image": "/menu-images/bcf824b33fa0a3cec7-ebfe9d2a245d.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Piece_of_chocolate_cake_on_a_white_plate_decorated_with_chocolate_sauce.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "bhalla papdi chaat": {
+    "image": "/menu-images/web-a976132255c0f32188e1-d14dce0eca93.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/delhi/bobby-tikki-wala-savita-vihar-anand-vihar-rest40333",
+    "kind": "Dish-name candidate"
+  },
+  "dahi bhalla": {
+    "image": "/menu-images/web-e60807ac6b7b9fda1f5d-bfde8b7b58bf.webp",
+    "replacesImageRef": null,
+    "source": "https://www.indiatv.in/lifestyle/recipes/how-to-make-dahi-bhalla-recipe-at-home-in-a-easy-way-in-hindi-2025-07-15-1149451",
+    "kind": "Dish-name candidate"
+  },
+  "dahi puri": {
+    "image": "/menu-images/web-7143b574d3ceefb9d917-a20410a32f13.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/bongaigaon/chaat-ka-chaska-mahabirstan-paglasthan-bongaigaon-rest417003",
+    "kind": "Dish-name candidate"
+  },
+  "golu molu chaat": {
+    "image": "/menu-images/ce5b1669cd7ea8e290-6c916377b534.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Dahi_Vada_and_Papdi_Chaat.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "papdi chaat": {
+    "image": "/menu-images/web-710596c1d1ae86834980-917def19c941.webp",
+    "replacesImageRef": null,
+    "source": "https://www.thekitchn.com/recipes/cooking-methods?page=10",
+    "kind": "Dish-name candidate"
+  },
+  "pindi masala aloo tikki": {
+    "image": "/menu-images/web-159f923d5e6f9b3da4c9-8af861178017.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/patiala/gopals-urban-estate/order",
+    "kind": "Dish-name candidate"
+  },
+  "raj kachori": {
+    "image": "/menu-images/web-f8cac692b72d7cbac38d-9b8a7c60e1a8.webp",
+    "replacesImageRef": null,
+    "source": "https://rsporter90.wixsite.com/mysite/post/indian-food-dishes",
+    "kind": "Dish-name candidate"
+  },
+  "samosa chaat": {
+    "image": "/menu-images/web-d80fa712d08fd6e73597-f1dcc2675d24.webp",
+    "replacesImageRef": null,
+    "source": "https://www.happycow.net/reviews/punjabi-dhaba-muscat-20969",
+    "kind": "Dish-name candidate"
+  },
+  "vada pav": {
+    "image": "/menu-images/web-8c3864639f7fddf16cdb-288aebf68aa8.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/vadodara/tastey-vada-pav-yakutpura",
+    "kind": "Dish-name candidate"
+  },
+  "chilli garlic fried rice": {
+    "image": "/menu-images/web-1e9718e41fa3e77a8c54-0e0046779594.webp",
+    "replacesImageRef": null,
+    "source": "https://orders.popskitchen.in/chinese/menu/veg-chilli-garlic-fried-rice/",
+    "kind": "Dish-name candidate"
+  },
+  "chilli garlic noodles": {
+    "image": "/menu-images/web-625e7043b06098af9aae-982a08ea26c3.webp",
+    "replacesImageRef": null,
+    "source": "https://danachoga.com/product-detail/veg-chilli-garlic-noodles",
+    "kind": "Dish-name candidate"
+  },
+  "chilli mushroom dry": {
+    "image": "/menu-images/web-5fe08e250569ce318bfa-416ef7ef2771.webp",
+    "replacesImageRef": null,
+    "source": "https://amaarkashi.com/product-detail/chilli-mushroom-dry",
+    "kind": "Dish-name candidate"
+  },
+  "chilli paneer (dry)": {
+    "image": "/menu-images/web-03093638852b0ceb90d3-3a2ef10ce697.webp",
+    "replacesImageRef": null,
+    "source": "https://www.artofit.org/image-gallery/457889487125226018/chilli-paneer-recipe-dry-gravy/",
+    "kind": "Dish-name candidate"
+  },
+  "chilli paneer (gravy)": {
+    "image": "/menu-images/web-03093638852b0ceb90d3-3a2ef10ce697.webp",
+    "replacesImageRef": null,
+    "source": "https://www.artofit.org/image-gallery/457889487125226018/chilli-paneer-recipe-dry-gravy/",
+    "kind": "Dish-name candidate"
+  },
+  "chilli potato": {
+    "image": "/menu-images/web-bc69dd0d223288687ad2-9a5584bb4844.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/varanasi/mr-jalapenos-lanka-rest407406",
+    "kind": "Dish-name candidate"
+  },
+  "chinese bhel": {
+    "image": "/menu-images/web-eb00299c9545bd0071be-90f24e459fb8.webp",
+    "replacesImageRef": null,
+    "source": "https://in.pinterest.com/pin/564357397059944902/",
+    "kind": "Dish-name candidate"
+  },
+  "crispy baby corn": {
+    "image": "/menu-images/web-8d815dcf0a42f8f376ff-17ebcdbf5303.webp",
+    "replacesImageRef": null,
+    "source": "https://foodtrails25.com/salt-and-pepper-baby-corn/",
+    "kind": "Dish-name candidate"
+  },
+  "hakka fried rice": {
+    "image": "/menu-images/web-6fea41695d8ca9dfc88b-6c1814acfff8.webp",
+    "replacesImageRef": null,
+    "source": "https://www.tangrasdaughter.com/",
+    "kind": "Dish-name candidate"
+  },
+  "hakka noodles": {
+    "image": "/menu-images/web-cea1081c74e485c17737-77311bac4a40.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/chandigarh/darjeeling-kitchen-authentic-food-south-chd-sas-nagar-rest1214710",
+    "kind": "Dish-name candidate"
+  },
+  "honey chilli potato": {
+    "image": "/menu-images/web-86071b103075df329671-1b3877439349.webp",
+    "replacesImageRef": null,
+    "source": "https://h-id.vyaparify.com/nook-n-vista-restaurant/product/nook-n-vista-restaurant-ramayan-arcade-01-landmark-honey-chilli-potato-in-katara-hill-sweet-and-spicy-delight",
+    "kind": "Dish-name candidate"
+  },
+  "mushroom fried rice": {
+    "image": "/menu-images/web-9966be37af5522b0b52d-b3e03e17992e.webp",
+    "replacesImageRef": null,
+    "source": "https://www.foodpanda.my/restaurant/uknt/awana-seafood-penaga",
+    "kind": "Dish-name candidate"
+  },
+  "paneer fried rice": {
+    "image": "/menu-images/web-28bf805570e9a94a74fa-7659c823b6bd.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/chennai/the-momo-truck-anna-salai-rd-kottivakkam-rest776641",
+    "kind": "Dish-name candidate"
+  },
+  "singapore noodles": {
+    "image": "/menu-images/web-d35410224a07b1ed8fe3-b2f7d7225f0d.webp",
+    "replacesImageRef": null,
+    "source": "https://app.samsungfood.com/recipes/1014fff6cc371b8e2b51fca4cc7159eea7ede9e5c96",
+    "kind": "Dish-name candidate"
+  },
+  "veg fried rice": {
+    "image": "/menu-images/web-06dab9aaeb49306885b5-aea1dd67978d.webp",
+    "replacesImageRef": null,
+    "source": "https://www.cafeso.in/products/veg-fried-rice-chinese-chhuti-restaurant",
+    "kind": "Dish-name candidate"
+  },
+  "veg manchurian (dry)": {
+    "image": "/menu-images/web-b9aacbdd43c3d894a1a4-671f8711c12f.webp",
+    "replacesImageRef": null,
+    "source": "https://indianhealthyrecipe.com/veg-manchurian-dry-recipe/",
+    "kind": "Dish-name candidate"
+  },
+  "veg manchurian (gravy)": {
+    "image": "/menu-images/web-3d65a0b6b0e5bc27936c-6243dee164ed.webp",
+    "replacesImageRef": null,
+    "source": "https://www.chefadora.com/recipe/veg-manchurian-recipe-dry-and-gravy-indo-chinese-classic-made-easy-e3uo9qbh6m",
+    "kind": "Dish-name candidate"
+  },
+  "veg noodles": {
+    "image": "/menu-images/web-ecb30442c31504e6eaa6-4093c8a1aabb.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/pune/veg-hakka-noodles-dish-restaurants",
+    "kind": "Dish-name candidate"
+  },
+  "cafe frappe": {
+    "image": "/menu-images/web-2db37f93866ea7ee5013-c3058624edf0.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/jaipur/coffee-grand-sindhi-camp-shastri-nagar-rest1059050",
+    "kind": "Dish-name candidate"
+  },
+  "cafe milky": {
+    "image": "/menu-images/906de767a45d7b091e-212fde5971e3.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Iced_coffee_(Eiskaffee).jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "choco cafe frappe": {
+    "image": "/menu-images/web-14c1b90d738bf37509ff-9bc0077f3d50.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/patna/cafe-hideout-saguna-more-rest381368",
+    "kind": "Dish-name candidate"
+  },
+  "frappe caramel": {
+    "image": "/menu-images/web-03a21aba88da9202e039-51745d8091a7.webp",
+    "replacesImageRef": null,
+    "source": "https://www.tripoto.com/bangalore/trips/that-one-coffee-hack-at-this-cafe-chain-stores-made-my-bangalore-trip-pretty-interesting-3b48129a8544aa74",
+    "kind": "Dish-name candidate"
+  },
+  "frappe choco delight": {
+    "image": "/menu-images/web-bf8649277b8eef872d41-e4df027156f8.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/mumbai/coffee-by-di-bella-versova/order",
+    "kind": "Dish-name candidate"
+  },
+  "frappe hazelnut": {
+    "image": "/menu-images/web-da008db83c1d698bb922-b092452e1cb2.webp",
+    "replacesImageRef": null,
+    "source": "https://www.talabat.com/egypt/restaurant/762074/raksha-el-shorouk--9th-area?aid=7816",
+    "kind": "Dish-name candidate"
+  },
+  "frappe irish": {
+    "image": "/menu-images/web-c0b327ea0aaaca141ae8-0e5a38c220f5.webp",
+    "replacesImageRef": null,
+    "source": "https://www.freepressjournal.in/lifestyle/international-coffee-day-2022-five-easy-to-make-coffee-recipes-that-you-must-try",
+    "kind": "Dish-name candidate"
+  },
+  "frappe mocha": {
+    "image": "/menu-images/web-e24ac96f9e6a67e28a37-cf1bc7bc959a.webp",
+    "replacesImageRef": null,
+    "source": "https://fdgroupsrl.com/recipes/vegan-frappe-recipe",
+    "kind": "Dish-name candidate"
+  },
+  "iced cold coffee": {
+    "image": "/menu-images/web-74abae4c61888974e209-d3fd31cee382.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/mumbai/boojee-cafe-lower-parel-worli-rest1298049",
+    "kind": "Dish-name candidate"
+  },
+  "cheese veggie burger combo": {
+    "image": "/menu-images/f57c493dffb16688f3-099b0215f542.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_meal.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "farm fresh pizza combo": {
+    "image": "/menu-images/f57c493dffb16688f3-099b0215f542.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_meal.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "roll and coke combo": {
+    "image": "/menu-images/f57c493dffb16688f3-099b0215f542.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_meal.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "south indian platter": {
+    "image": "/menu-images/f57c493dffb16688f3-099b0215f542.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_meal.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "veg cheese grilled sandwich combo": {
+    "image": "/menu-images/f57c493dffb16688f3-099b0215f542.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_meal.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "black currant crusher": {
+    "image": "/menu-images/web-320c6857ed36addba1a1-62c2648856cc.webp",
+    "replacesImageRef": null,
+    "source": "https://www.thelazeez.in/products/black-current-mocktails-SKU-0284",
+    "kind": "Dish-name candidate"
+  },
+  "mango crusher": {
+    "image": "/menu-images/web-c6be528cf0fe68b437c2-45a7d36d1f14.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/central-goa/santosh-cold-drink-and-snacks-nor-baga-calangute-rest1158641",
+    "kind": "Dish-name candidate"
+  },
+  "orange fizz": {
+    "image": "/menu-images/web-6c9fe3aaa24160c18397-f2f664fc2e0f.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/ahmedabad/salad-it-celebration-city-centre-bopal-rest1144053",
+    "kind": "Dish-name candidate"
+  },
+  "strawberry crusher": {
+    "image": "/menu-images/web-1b2179b462d1153bb578-b7978ee5ff4d.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/hyderabad/bombay-juice-serilingampally-kondapur-rest399480",
+    "kind": "Dish-name candidate"
+  },
+  "cheese shots (10 pcs)": {
+    "image": "/menu-images/web-549c2719f86121183f13-4d6a783eb043.webp",
+    "replacesImageRef": null,
+    "source": "https://www.mockmeatindia.com/products-2",
+    "kind": "Dish-name candidate"
+  },
+  "masala fries": {
+    "image": "/menu-images/web-3d75cf3b9b0df731430e-62e80165b95a.webp",
+    "replacesImageRef": null,
+    "source": "https://www.currycabin.ca/menu.html",
+    "kind": "Dish-name candidate"
+  },
+  "piri piri fries": {
+    "image": "/menu-images/web-76d1104f368a9aa8d906-4ea3666eb3ad.webp",
+    "replacesImageRef": null,
+    "source": "https://www.snapcalorie.com/nutrition/peri_peri_french_fries_nutrition.html",
+    "kind": "Dish-name candidate"
+  },
+  "plain french fries": {
+    "image": "/menu-images/web-763b94f2c873a6a34f4c-80cfea5aa55d.webp",
+    "replacesImageRef": null,
+    "source": "https://www.ubereats.com/gb/store/eat-well-cafe/iy1YPdlYRja_r66Cqo6JLg",
+    "kind": "Dish-name candidate"
+  },
+  "potato pops (12 pcs)": {
+    "image": "/menu-images/web-984842390a015326460d-a763f7b654e2.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/karimnagar/the-food-project-islampura-rest1221686",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori fries": {
+    "image": "/menu-images/web-6a39207d4620d7c8bb30-d60b16a9fa1a.webp",
+    "replacesImageRef": null,
+    "source": "https://www.jcookingodyssey.com/tandoori-fries/",
+    "kind": "Dish-name candidate"
+  },
+  "garlic bread supreme": {
+    "image": "/menu-images/web-ed7ad1e6c16300c308da-82349721cd8b.webp",
+    "replacesImageRef": null,
+    "source": "https://martinozpizza.com/order/3/bardoli/baben-gam",
+    "kind": "Dish-name candidate"
+  },
+  "garlic bread with cheese": {
+    "image": "/menu-images/web-c899df8ee75a459858d1-e39ea5451eb3.webp",
+    "replacesImageRef": null,
+    "source": "https://hasthi-wallsend.nextorder.com/",
+    "kind": "Dish-name candidate"
+  },
+  "garlic sticks": {
+    "image": "/menu-images/web-7ba27e2fa75c240c3e14-ae2a136148d1.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/chennai/dominos-pizza-koyambedu",
+    "kind": "Dish-name candidate"
+  },
+  "garlic sticks with cheese dip": {
+    "image": "/menu-images/web-6fd4f743c3ef632f9956-3c2e8ef50a74.webp",
+    "replacesImageRef": null,
+    "source": "https://www.1112.com/th/appetizers",
+    "kind": "Dish-name candidate"
+  },
+  "plain garlic bread": {
+    "image": "/menu-images/web-35c790db4124c45dcbb8-8956555cba3c.webp",
+    "replacesImageRef": null,
+    "source": "https://guelphpizzawingsandburgers.com/plain-garlic-bread/",
+    "kind": "Dish-name candidate"
+  },
+  "cheese chilla": {
+    "image": "/menu-images/web-6e9c7d83805209816ab7-1f84f957f05c.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/noida/moonglet-singh-crossing-republic-rest1069650",
+    "kind": "Dish-name candidate"
+  },
+  "hot garlic chilla": {
+    "image": "/menu-images/web-be2f2f45dc1320fb5431-9083f8ccf2a5.webp",
+    "replacesImageRef": null,
+    "source": "https://soul-foods.in/blogs/news/besan-chilla-recipe",
+    "kind": "Dish-name candidate"
+  },
+  "moong dal chilla": {
+    "image": "/menu-images/web-caaf352ada8081d12ed5-9883b3875cfe.webp",
+    "replacesImageRef": null,
+    "source": "https://m.economictimes.com/news/india/7-comforting-yet-healthy-indian-breakfasts-for-cold-mornings/idli-with-hot-sambar/slideshow/126502459.cms",
+    "kind": "Dish-name candidate"
+  },
+  "mushroom cheese chilla": {
+    "image": "/menu-images/web-a4dc11639439d5758d15-ead51b80d0b4.webp",
+    "replacesImageRef": null,
+    "source": "https://www.kokilabenhospital.com/health/healthtip/mushroom-chilla-healthy-indian-breakfast.html",
+    "kind": "Dish-name candidate"
+  },
+  "paneer chilla": {
+    "image": "/menu-images/web-5fdd847cb1211c47280c-9e6ceef3a34c.webp",
+    "replacesImageRef": null,
+    "source": "https://www.jagran.com/khana-khazana/indian-breakfast-recipe-in-hindi-how-to-make-paneer-chilla-3435KK.html",
+    "kind": "Dish-name candidate"
+  },
+  "paneer lababdar sub": {
+    "image": "/menu-images/43a2d9844741fbddb6-61be619bcdcb.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Korean_fried_tofu_sandwich_and_vegetarian_poutine.jpg",
+    "kind": "Related-dish reference"
+  },
+  "tandoori paneer sub": {
+    "image": "/menu-images/web-e9145eab890c47e00251-9a790b6df5f8.webp",
+    "replacesImageRef": null,
+    "source": "https://in.pinterest.com/pin/tandoori-paneer-tikka--9218374215718476/",
+    "kind": "Dish-name candidate"
+  },
+  "vegetable sub": {
+    "image": "/menu-images/web-aece972b38e78bf32ade-07e35faa67ce.webp",
+    "replacesImageRef": null,
+    "source": "https://www.snapcalorie.com/nutrition/veggie_sub_nutrition.html",
+    "kind": "Dish-name candidate"
+  },
+  "cafe latte": {
+    "image": "/menu-images/web-d9d72a7ab076a7c06bd0-54f5cc7e9b93.webp",
+    "replacesImageRef": null,
+    "source": "https://www.getsurrey.co.uk/news/surrey-news/woking-redhill-dont-deserve-crowned-26042774",
+    "kind": "Dish-name candidate"
+  },
+  "cappuccino": {
+    "image": "/menu-images/web-2b5539b42ee7eaeaccf8-3d6dc0a4f5ec.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/chennai/the-entrance-cafe-taylors-road-kilpauk-rest893491",
+    "kind": "Dish-name candidate"
+  },
+  "espresso": {
+    "image": "/menu-images/web-e340bb4600ef02ed16d9-781ab864428d.webp",
+    "replacesImageRef": null,
+    "source": "https://www.quartier-5.de/",
+    "kind": "Dish-name candidate"
+  },
+  "hot badam milk": {
+    "image": "/menu-images/web-463e509a08897cce004a-5d2f40a388aa.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/jaipur/kota-kachori-falahaar-c-scheme/order",
+    "kind": "Dish-name candidate"
+  },
+  "hot chocolate milk": {
+    "image": "/menu-images/web-804b147835bac78807b4-7eafe247d22e.webp",
+    "replacesImageRef": null,
+    "source": "https://www.terra.com.br/vida-e-estilo/degusta/receitas/bebidas/3-receitas-de-chocolate-quente-vegano%2Ccac0381be789d2bd32e6b7c45b63bb4ay8y3pkix.html",
+    "kind": "Dish-name candidate"
+  },
+  "plain milk": {
+    "image": "/menu-images/web-3597d25c068b10fc7856-5ea5aa0b9fbe.webp",
+    "replacesImageRef": null,
+    "source": "https://theprovidenthomemaker.com/my-blog/week-38-powdered-milk-faqs-what-why-how-what-if-it-gets-old-and-storing-dairy-free-substitutes",
+    "kind": "Dish-name candidate"
+  },
+  "mango lassi": {
+    "image": "/menu-images/web-b39a1478dbdf1cfbb772-9b1a82476151.webp",
+    "replacesImageRef": null,
+    "source": "https://www.tasteatlas.com/mango-lassi",
+    "kind": "Dish-name candidate"
+  },
+  "plain lassi": {
+    "image": "/menu-images/web-10076325cd8f90981ed8-457b7b92cd51.webp",
+    "replacesImageRef": null,
+    "source": "https://mydukaan.io/yogeshgupta73267gmailcom/products/plain-lassi",
+    "kind": "Dish-name candidate"
+  },
+  "strawberry lassi": {
+    "image": "/menu-images/web-afc102087a6560896529-8191b018c115.webp",
+    "replacesImageRef": null,
+    "source": "https://www.fifthseason.com.sg/Kolkata-Menu",
+    "kind": "Dish-name candidate"
+  },
+  "cheese maggi": {
+    "image": "/menu-images/web-2994f7a317d32bc9ef86-38e40e5aa413.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/jaipur/aunty-cafe-jhotwara-rest1273149",
+    "kind": "Dish-name candidate"
+  },
+  "chilli garlic maggi": {
+    "image": "/menu-images/web-f05e5e08c262bc3c272d-df154ae44014.webp",
+    "replacesImageRef": null,
+    "source": "https://www.herzindagi.com/recipe-tips/chilli-garlic-maggi-recipe-article-303019",
+    "kind": "Dish-name candidate"
+  },
+  "mix veg maggi": {
+    "image": "/menu-images/web-278b8ea6eddfe9c134cc-20bdc73f79f5.webp",
+    "replacesImageRef": null,
+    "source": "https://www.pizzamerrano.in/",
+    "kind": "Dish-name candidate"
+  },
+  "plain maggi": {
+    "image": "/menu-images/web-e3946d60990322de6325-d60037ddebab.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/thiruvananthapuram/the-cozy-cup-nemom-circle-thampanoor-rest984080",
+    "kind": "Dish-name candidate"
+  },
+  "tadka maggi": {
+    "image": "/menu-images/web-36e19f20bc0953d7a1f4-06a480c63528.webp",
+    "replacesImageRef": null,
+    "source": "https://www.whiskaffair.com/cheesy-tadka-maggi-recipe/",
+    "kind": "Dish-name candidate"
+  },
+  "blue ocean": {
+    "image": "/menu-images/generated-blue-ocean-b5acb74ae198.webp",
+    "replacesImageRef": null,
+    "source": null,
+    "kind": "AI-generated reference"
+  },
+  "kachcha aam mojito": {
+    "image": "/menu-images/web-037750c19d437d9c5582-fe5fee82f7ea.webp",
+    "replacesImageRef": null,
+    "source": "https://www.telegraphindia.com/my-kolkata/food/tfo-celebrates-eight-years-with-smashing-offers/cid/1893868",
+    "kind": "Dish-name candidate"
+  },
+  "lemon virgin mojito": {
+    "image": "/menu-images/web-11ab2a516730565664bf-76801ad226c3.webp",
+    "replacesImageRef": null,
+    "source": "https://cookpad.com/eng/recipes/17030959",
+    "kind": "Dish-name candidate"
+  },
+  "litchi blast": {
+    "image": "/menu-images/a2b9a83cfe7171d0fd-5ae9a5347a1d.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Mocktail_Margarita_-_Food_for_Friends_2026-03-09.jpg",
+    "kind": "Related-dish reference"
+  },
+  "peach blast": {
+    "image": "/menu-images/web-797ed4f53327e4e43e9f-46b88b77a909.webp",
+    "replacesImageRef": null,
+    "source": "https://www.jamba.com/menu/over-ice/peachberry-blast",
+    "kind": "Dish-name candidate"
+  },
+  "strawberry lemonade": {
+    "image": "/menu-images/web-3fb993b86eec2c641f40-1c03492ac028.webp",
+    "replacesImageRef": null,
+    "source": "https://www.walmart.com/ip/3718817744",
+    "kind": "Dish-name candidate"
+  },
+  "aloo paratha (1 pc)": {
+    "image": "/menu-images/web-61aec640c0aa8ee599fd-7b16639012be.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/pune/mumbai-paratha-house-lohgaon-rest1311454",
+    "kind": "Dish-name candidate"
+  },
+  "butter masala pav bhaji": {
+    "image": "/menu-images/web-510c18d6dff386a7ab16-cbf05db9b5a6.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/delhi/bombay-plate-najafarh-vikas-puri-rest495644",
+    "kind": "Dish-name candidate"
+  },
+  "butter roti": {
+    "image": "/menu-images/web-3e1a6e246bd787a76364-61d3ae1dcc51.webp",
+    "replacesImageRef": null,
+    "source": "https://order.biriyanizone.com/product-detail/butter-roti",
+    "kind": "Dish-name candidate"
+  },
+  "chola bhatura": {
+    "image": "/menu-images/web-92e262cd2d023a16ae77-c999175fe550.webp",
+    "replacesImageRef": null,
+    "source": "https://recipes.timesofindia.com/recipes/chole-bhatura/rs53314156.cms",
+    "kind": "Dish-name candidate"
+  },
+  "kulcha chhola": {
+    "image": "/menu-images/web-ed74320c189e6b9ef86d-9e63ae47c0ef.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/karnal/chaat-king-india-old-housing-board-colony-sector-13-rest784643",
+    "kind": "Dish-name candidate"
+  },
+  "lachha paratha with chhola": {
+    "image": "/menu-images/web-fa42a7dfe5ff2cd06e35-a3909d106042.webp",
+    "replacesImageRef": null,
+    "source": "https://savitadeshpande.blogspot.com/2017/12/chhole-lachha-paratha.html",
+    "kind": "Dish-name candidate"
+  },
+  "lachha paratha with dal makhni": {
+    "image": "/menu-images/web-902cb341464b2b6897db-b88f7b783184.webp",
+    "replacesImageRef": null,
+    "source": "https://cookpad.com/eng/recipes/4758518",
+    "kind": "Dish-name candidate"
+  },
+  "lachha paratha with shahi paneer": {
+    "image": "/menu-images/web-f8c4cfb7d9a2ebbf0c74-087bfa501424.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/patna/veggies-story-anandpur-khajpura-rest698491",
+    "kind": "Dish-name candidate"
+  },
+  "onion paratha (1 pc)": {
+    "image": "/menu-images/web-c60af6d1649ca1ff6a6c-9d1665cbff82.webp",
+    "replacesImageRef": null,
+    "source": "https://jantaserishta.com/life-style/onion-paratha-recipe-3645156",
+    "kind": "Dish-name candidate"
+  },
+  "paneer paratha (1 pc)": {
+    "image": "/menu-images/web-d068b651803d69e99ff2-f2eef757a18a.webp",
+    "replacesImageRef": null,
+    "source": "https://food.ndtv.com/webstories/food/5-smart-tips-to-make-perfect-paneer-paratha-31838",
+    "kind": "Dish-name candidate"
+  },
+  "plain roti": {
+    "image": "/menu-images/web-db330fdf6531c943aee1-0ef2912484b8.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/nagpur/varhadi-tadka-veg-restaurant-nandanvan/order",
+    "kind": "Dish-name candidate"
+  },
+  "sabji puri": {
+    "image": "/menu-images/web-6b9d9c5487d3a8e7120c-db2cc6cd4bb3.webp",
+    "replacesImageRef": null,
+    "source": "https://id.vyaparify.com/greenleafrestaurant/product/sabji-puri",
+    "kind": "Dish-name candidate"
+  },
+  "arrabiata pasta": {
+    "image": "/menu-images/web-39a8001c137aa52af57b-f57a92e4a104.webp",
+    "replacesImageRef": null,
+    "source": "https://delidoor.com.au/products/penne-arrabiata-sauce",
+    "kind": "Dish-name candidate"
+  },
+  "arrabiata pasta baked with cheese": {
+    "image": "/menu-images/web-4d1981dcdef6664fea47-0be9387c1508.webp",
+    "replacesImageRef": null,
+    "source": "https://www.washingtonpost.com/recipes/baked-pasta-with-vegetables-and-cheese/",
+    "kind": "Dish-name candidate"
+  },
+  "creamy mushroom pasta": {
+    "image": "/menu-images/web-1e0820d6e1f8b4968e5d-320fbe4a99a8.webp",
+    "replacesImageRef": null,
+    "source": "https://www.tinasrezepteblog.de/herzhafte-rezepte/2951864_pasta-in-cremiger-champignonsosse-einfaches-rezept-fuer-cremigen-genuss",
+    "kind": "Dish-name candidate"
+  },
+  "mix sauce pasta": {
+    "image": "/menu-images/web-2187ea0ad6ba1831356f-deb28c375ca1.webp",
+    "replacesImageRef": null,
+    "source": "https://www.ishrikitchen.com/post/mix-sauce-veg-pasta",
+    "kind": "Dish-name candidate"
+  },
+  "pink sauce pasta": {
+    "image": "/menu-images/web-dc7a7b9097450a0c53ad-f22e50e72190.webp",
+    "replacesImageRef": null,
+    "source": "https://pizza-and-pasta.store.shoopy.in/products/pink-sauce-pasta-SKU-0021",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori pasta": {
+    "image": "/menu-images/web-a50029774b8af4c259e7-23b7f7d082e9.webp",
+    "replacesImageRef": null,
+    "source": "https://order.toasttab.com/online/cali-bros-clovis-ave/item-tandoori-pasta_b7da97ec-c722-41d5-879f-883acbc2bccb",
+    "kind": "Dish-name candidate"
+  },
+  "baby corn pizza": {
+    "image": "/menu-images/web-969611dc921c7f2766f7-f812365b61ca.webp",
+    "replacesImageRef": null,
+    "source": "https://www.blissofcooking.com/2017/07/baby-corn-and-pepper-pizza/",
+    "kind": "Dish-name candidate"
+  },
+  "cheese burst pizza": {
+    "image": "/menu-images/web-41f2b5d986e15634be84-815396486ff9.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/bangalore/crustos-cheese-burst-pizza-by-olio-ali-askar-road-central-bangalore-rest770774",
+    "kind": "Dish-name candidate"
+  },
+  "cheese overloaded pizza": {
+    "image": "/menu-images/web-4a69df1db9bb81d6be6e-919352cc402a.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/jaipur/cheese-pizza-dish-restaurants",
+    "kind": "Dish-name candidate"
+  },
+  "chilli baby corn pizza": {
+    "image": "/menu-images/web-2bfda1e04bc9a00c16e3-198f7c6a2867.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/ncr/uncle-johns-pizza-vaishali-ghaziabad",
+    "kind": "Dish-name candidate"
+  },
+  "corn and cheese pizza": {
+    "image": "/menu-images/web-11a201fbdfde5f27ce12-f98a9721994e.webp",
+    "replacesImageRef": null,
+    "source": "https://storage.googleapis.com/dnrzggxwxidlhe/corn-cheese-pizza-recipe.html",
+    "kind": "Dish-name candidate"
+  },
+  "exotica delight pizza": {
+    "image": "/menu-images/web-847c0351cbf79e66f38a-b2597118bccd.webp",
+    "replacesImageRef": null,
+    "source": "https://build-01.gallarias.com/kw/en/store/pastamania-2733/veggie-delight-pizza-460058",
+    "kind": "Dish-name candidate"
+  },
+  "farm fresh pizza": {
+    "image": "/menu-images/web-bf3e1375c640ffc70734-71dbc1ab2b24.webp",
+    "replacesImageRef": null,
+    "source": "https://www.farmfreshpizza.ca/",
+    "kind": "Dish-name candidate"
+  },
+  "italian pizza": {
+    "image": "/menu-images/web-4596229135dc5dd8b268-f16dc9587401.webp",
+    "replacesImageRef": null,
+    "source": "https://pizzaone.ro/galerie-mancare/",
+    "kind": "Dish-name candidate"
+  },
+  "margherita pizza": {
+    "image": "/menu-images/web-13225cd799d6c2ac2de5-539552920179.webp",
+    "replacesImageRef": null,
+    "source": "https://www.pinterest.com/pin/plantbased-margherita-pizza-with-vegan-mozzarella-and-fresh-basil-in-2025--720013059212371500/",
+    "kind": "Dish-name candidate"
+  },
+  "onion pizza": {
+    "image": "/menu-images/web-0fd67dff7434cafccae8-4d7785d3be39.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/hyderabad/naples-pizza-circle-no-17-khairatabad-rest974638",
+    "kind": "Dish-name candidate"
+  },
+  "schezwan pizza": {
+    "image": "/menu-images/web-56ec396bab09166fd9f2-6babe5bddbbd.webp",
+    "replacesImageRef": null,
+    "source": "https://cookpad.com/eng/recipes/14561804",
+    "kind": "Dish-name candidate"
+  },
+  "shanu's special pizza": {
+    "image": "/menu-images/9d4186afbd03ebd696-9823d1328748.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_Pizza.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "afghani chaap roll": {
+    "image": "/menu-images/web-1fa66119aa9a39e29de2-e17760cb9d2b.webp",
+    "replacesImageRef": null,
+    "source": "https://clayton.sahibeswad.com.au/dish/afghani-chaap-roll",
+    "kind": "Dish-name candidate"
+  },
+  "aloo masala roll": {
+    "image": "/menu-images/web-33b86d97e4db18b0b2a1-ba74fd873356.webp",
+    "replacesImageRef": null,
+    "source": "https://order.kebabscurries.com/product-detail/aloo-masala-roll",
+    "kind": "Dish-name candidate"
+  },
+  "cheese corn roll": {
+    "image": "/menu-images/web-a1810e7f270113c30186-fe2a3ff6998f.webp",
+    "replacesImageRef": null,
+    "source": "https://mydukaan.io/justlikefood/products/corn-cheese-roll",
+    "kind": "Dish-name candidate"
+  },
+  "cheese roll": {
+    "image": "/menu-images/web-9d5933312d48edbdc9f2-a4698c7f9b20.webp",
+    "replacesImageRef": null,
+    "source": "https://www.jansukhcart.com/products/cheese-spring-roll-SKU-3270",
+    "kind": "Dish-name candidate"
+  },
+  "masala chaap roll": {
+    "image": "/menu-images/web-8edd1e85b0dfa2310088-e35300d18e10.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/jaipur/baozi-momos-malviya-nagar-rest973233",
+    "kind": "Dish-name candidate"
+  },
+  "masala paneer wrap": {
+    "image": "/menu-images/web-92c6088b58dcd0e4b8a0-1ccefbf4cba2.webp",
+    "replacesImageRef": null,
+    "source": "https://rotimatic.com/blogs/recipes/paneer-wrap",
+    "kind": "Dish-name candidate"
+  },
+  "mix veg roll": {
+    "image": "/menu-images/web-33f8ea02a5e76321a174-05a65e6f29c3.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/rohtak/roll-box-sector-3-sec-2-3-mkt--rest184843",
+    "kind": "Dish-name candidate"
+  },
+  "paneer bhurji roll": {
+    "image": "/menu-images/web-ef23364fbe5f25cd9749-8543b6cec66f.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/muzaffarnagar/radhika-snacks-and-kathi-rolls-gandhi-colony-dwarkapuri-rest136863",
+    "kind": "Dish-name candidate"
+  },
+  "paneer tikka roll": {
+    "image": "/menu-images/web-0f7cfb9f5e36f4ba0b25-fc83cfd5aa12.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/delhi/calcutta-roll-stories-chattarpur-rest1037227",
+    "kind": "Dish-name candidate"
+  },
+  "spring roll": {
+    "image": "/menu-images/web-f8eba840fba37453acf8-fe3934b57062.webp",
+    "replacesImageRef": null,
+    "source": "https://unsplash.com/s/photos/spring-roll",
+    "kind": "Dish-name candidate"
+  },
+  "tortilla wrap": {
+    "image": "/menu-images/web-619be7d5e7a48c7a9fea-8faff7b8a2ac.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/manipal/asian-k-flavour-tiger-circle",
+    "kind": "Dish-name candidate"
+  },
+  "besan gatta": {
+    "image": "/menu-images/web-41d73fdb0085e25d570f-0416d76dbb5a.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/bathinda/apna-rajasthani-chulha-bathinda-city-model-town--rest1097438",
+    "kind": "Dish-name candidate"
+  },
+  "chola sabji": {
+    "image": "/menu-images/web-41688d52a0ba49e6f4e7-b6350cc12871.webp",
+    "replacesImageRef": null,
+    "source": "https://funhobby2023.blogspot.com/2023/02/new-chole-sabji-for-you.html",
+    "kind": "Dish-name candidate"
+  },
+  "dal fry": {
+    "image": "/menu-images/web-7124d66ce57aaeef3474-b9590c1ff242.webp",
+    "replacesImageRef": null,
+    "source": "https://susrecipes.blogspot.com/2013/07/dal-fry.html",
+    "kind": "Dish-name candidate"
+  },
+  "dal tadka": {
+    "image": "/menu-images/web-6f83f6b6f44647ee8cd8-e23394f1b41e.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/jaipur/annapurna-pavitra-bhojnalaya-jagatpura-rest1290241",
+    "kind": "Dish-name candidate"
+  },
+  "kadhai paneer": {
+    "image": "/menu-images/web-b5dbe115ed3d02411a6d-26c2cf222281.webp",
+    "replacesImageRef": null,
+    "source": "https://mirchiindiangrill.com/product/kadhai-paneer/",
+    "kind": "Dish-name candidate"
+  },
+  "malai kofta": {
+    "image": "/menu-images/web-0ddeed6fcf59fae2e2fd-db3c41a25ae1.webp",
+    "replacesImageRef": null,
+    "source": "https://clayovenlouisville.com/",
+    "kind": "Dish-name candidate"
+  },
+  "mix veg sabji": {
+    "image": "/menu-images/web-4c081603c913540c0cac-746e930108c5.webp",
+    "replacesImageRef": null,
+    "source": "https://www.purepantry.net/products/mix-veg-sabji-half",
+    "kind": "Dish-name candidate"
+  },
+  "paneer bhurji": {
+    "image": "/menu-images/web-99727a86c521cc5a4bb7-70c66509c68a.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/bangalore/healthy-prana-hoodi-mahadevpura-rest705782",
+    "kind": "Dish-name candidate"
+  },
+  "paneer butter masala": {
+    "image": "/menu-images/web-4f8d5f3206650b1cf60e-e84319e5a15d.webp",
+    "replacesImageRef": null,
+    "source": "https://id.vyaparify.com/ayodhya-pure-veg-restaurant",
+    "kind": "Dish-name candidate"
+  },
+  "shahi paneer": {
+    "image": "/menu-images/web-88a3eb5ac65731d36eb7-440a8b3f3669.webp",
+    "replacesImageRef": null,
+    "source": "https://flavorquotient.com/2025/06/restaurant-style-shahi-paneer-recipe/",
+    "kind": "Dish-name candidate"
+  },
+  "coleslaw grilled sandwich": {
+    "image": "/menu-images/web-fe850a151d28fdbf17c3-de577505a4a7.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/bangalore/cream-and-fudge-jakkur-bangalore",
+    "kind": "Dish-name candidate"
+  },
+  "masala sandwich": {
+    "image": "/menu-images/web-7933cc34b7be054f97cf-958cb5e092ee.webp",
+    "replacesImageRef": null,
+    "source": "https://mayuris-jikoni.com/2025/02/16/vegetable-masala-bread/",
+    "kind": "Dish-name candidate"
+  },
+  "mumbainya sandwich": {
+    "image": "/menu-images/web-d20d6a0b86d25c8a9036-404a7365815b.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/mumbai/ministryy-of-greens-2-kandivali-west",
+    "kind": "Dish-name candidate"
+  },
+  "russian sandwich": {
+    "image": "/menu-images/web-13234458b79898413ef1-8c4173894725.webp",
+    "replacesImageRef": null,
+    "source": "https://cookpad.com/eng/recipes/7648819",
+    "kind": "Dish-name candidate"
+  },
+  "spicy italian sandwich": {
+    "image": "/menu-images/web-ce36de17db59034820e2-6f3484d95a96.webp",
+    "replacesImageRef": null,
+    "source": "https://www.goudywashpark.com/product/the-italian/874",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori paneer sandwich": {
+    "image": "/menu-images/web-e29e943c36be85a716db-27d0812b854a.webp",
+    "replacesImageRef": null,
+    "source": "https://relishfood.in/product/tandoori-paneer-tikka-sandwich-filling/",
+    "kind": "Dish-name candidate"
+  },
+  "veg cheese grilled sandwich": {
+    "image": "/menu-images/web-a2b6b7ce8cb20a78fe6b-c70b367cce7b.webp",
+    "replacesImageRef": null,
+    "source": "https://urbankinghotel.com/index.php/2022/03/17/veg-cheese-grilled-sandwich/",
+    "kind": "Dish-name candidate"
+  },
+  "veggie delight cheese sandwich": {
+    "image": "/menu-images/web-a6ffc4c63b982a18a5b0-a9e7ca7fc8ce.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/mumbai/raju-ki-chai-fort-rest53691",
+    "kind": "Dish-name candidate"
+  },
+  "badam shake": {
+    "image": "/menu-images/web-1cac9e02aa68d064d219-89ba091deddd.webp",
+    "replacesImageRef": null,
+    "source": "https://mydukaan.io/ice84/products/badam-shake",
+    "kind": "Dish-name candidate"
+  },
+  "banana shake": {
+    "image": "/menu-images/web-e658d7fbaa43fc4c1554-60798ce1462f.webp",
+    "replacesImageRef": null,
+    "source": "https://saapadureadymakka.store.shoopy.in/products/indian-banana-shake-SKU-0316",
+    "kind": "Dish-name candidate"
+  },
+  "black currant shake": {
+    "image": "/menu-images/web-75761ddb72ca320daeab-c8078446f293.webp",
+    "replacesImageRef": null,
+    "source": "https://www.bustle.com/p/13-desserts-you-can-get-at-burger-kings-around-the-world-18155278",
+    "kind": "Dish-name candidate"
+  },
+  "bubblegum shake": {
+    "image": "/menu-images/web-98da7af19fa908035519-0cca61567958.webp",
+    "replacesImageRef": null,
+    "source": "https://www.pinterest.com/pin/bubblegum-milkshake-with-colorful-sprinkles--59250551335356283/",
+    "kind": "Dish-name candidate"
+  },
+  "butterscotch shake": {
+    "image": "/menu-images/web-bc9e3d1189079c96c19e-63aff3fd7169.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/hyderabad/thickshake-theory-medipally/order",
+    "kind": "Dish-name candidate"
+  },
+  "choco mud shake": {
+    "image": "/menu-images/web-bca70547abee8643e3da-d94facaba733.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/bhubaneswar/the-chocolate-house-sahid-nagar-bhubaneshwar",
+    "kind": "Related-dish reference"
+  },
+  "choco nut shake": {
+    "image": "/menu-images/web-419afdcbae6bb8efd361-759a3e416f02.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/delhi/nishta-mango-and-banana-shake-doctor-ambedkar-nagar-malviya-nagar-rest855622",
+    "kind": "Dish-name candidate"
+  },
+  "choco shake": {
+    "image": "/menu-images/web-0176fb4d6a28e6eca1f7-d6601f6254bb.webp",
+    "replacesImageRef": null,
+    "source": "https://www.maxhusky.com.my/cn/showproducts/productid/5865305/cid/590250/%E5%B7%A7%E5%85%8B%E5%8A%9B%E5%A5%B6%E6%98%94/",
+    "kind": "Dish-name candidate"
+  },
+  "irish choco shake": {
+    "image": "/menu-images/web-4b12b0615bc69c4c6591-bcc06847e5d5.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File%3AVegan_chocolate_shake_at_Chicago_Diner.jpg",
+    "kind": "Related-dish reference"
+  },
+  "kitkat shake": {
+    "image": "/menu-images/web-10cdf64e67e590f64189-f165310c14d4.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/patna/the-chocolate-room-kanti-factory-road-kankarbagh-rest725994",
+    "kind": "Dish-name candidate"
+  },
+  "mango shake": {
+    "image": "/menu-images/web-540cb8912f1b3d7178b2-b089ac27c960.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/vapi/cafe-ville-villa-vapi-locality/order",
+    "kind": "Dish-name candidate"
+  },
+  "mix berries shake": {
+    "image": "/menu-images/web-1234efbcc7515dbd15ea-0b4d7caf1e8f.webp",
+    "replacesImageRef": null,
+    "source": "https://order.goodflippin.com/product-detail/double-chocolate-thicc-shake",
+    "kind": "Related-dish reference"
+  },
+  "oreo shake": {
+    "image": "/menu-images/web-89f520bda5f2f3b717ac-e6197f9bc862.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/jhansi/suto-cafe-bundelkhand-university-road-shivaji-nagar-rest1360018",
+    "kind": "Dish-name candidate"
+  },
+  "pan and thandai shake": {
+    "image": "/menu-images/web-be1b2e34aaaecd1d2b05-a65e3b8e4822.webp",
+    "replacesImageRef": null,
+    "source": "https://foodtrails25.com/paan-gulkand-shake/",
+    "kind": "Related-dish reference"
+  },
+  "papaya shake": {
+    "image": "/menu-images/web-23f104d4cf1cfc90b9d5-089d755fc91e.webp",
+    "replacesImageRef": null,
+    "source": "https://storage.googleapis.com/dqkevcpckzqoue/how-to-juice-green-papaya.html",
+    "kind": "Dish-name candidate"
+  },
+  "pineapple shake": {
+    "image": "/menu-images/web-fa2365c01af50dba9f1b-2285f9e8c1b9.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/kollam/juice-lab-resto-cafe-kanjirappalli-karunagappally-rest900748",
+    "kind": "Dish-name candidate"
+  },
+  "red berry shake": {
+    "image": "/menu-images/web-acf9410c38356b855163-c3ede61ba2d3.webp",
+    "replacesImageRef": null,
+    "source": "https://www.receitasnestle.com.br/receitas/shake-de-frutas-vermelhas",
+    "kind": "Dish-name candidate"
+  },
+  "strawberry bubblegum shake": {
+    "image": "/menu-images/web-b0bc49c130d7815a8265-69662368b112.webp",
+    "replacesImageRef": null,
+    "source": "https://vegplatter.in/cart/item/add/Strawberry-Bubblegum-Shake/6896",
+    "kind": "Dish-name candidate"
+  },
+  "strawberry shake": {
+    "image": "/menu-images/web-9278bfc445b0d0f3bbd2-750c7eda10c5.webp",
+    "replacesImageRef": null,
+    "source": "https://unsplash.com/photos/strawberry-shake-in-clear-drinking-glass-rwBJaJdesGg",
+    "kind": "Dish-name candidate"
+  },
+  "mango smoothie": {
+    "image": "/menu-images/web-7106455796b481d7cee4-5ae811f95b7d.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/bangalore/sunshine-cafe-btm-bangalore",
+    "kind": "Dish-name candidate"
+  },
+  "passion fruit smoothie": {
+    "image": "/menu-images/web-f7df10b66488c307080a-aeb61f20e9f3.webp",
+    "replacesImageRef": null,
+    "source": "https://www.pinterest.com/pin/fresh-and-healthy-passion-fruit-smoothie--631981760205502907/",
+    "kind": "Dish-name candidate"
+  },
+  "strawberry smoothie": {
+    "image": "/menu-images/web-754e0bb31e951822b277-d276381ef07c.webp",
+    "replacesImageRef": null,
+    "source": "https://russelltaylors.sg/blogs/imix-recipes/strawberry-smoothie",
+    "kind": "Dish-name candidate"
+  },
+  "green apple soda": {
+    "image": "/menu-images/web-28967b8e8683114bb440-c728223d5ffa.webp",
+    "replacesImageRef": null,
+    "source": "https://sarah30.com/menus/2730950",
+    "kind": "Dish-name candidate"
+  },
+  "green mint soda": {
+    "image": "/menu-images/web-5a8f8f33dcbd90e72345-a342a739757a.webp",
+    "replacesImageRef": null,
+    "source": "https://www.thecozykitchen.in/post/fresh-green-soda-now-available-at-the-cozy-kitchen-kangra",
+    "kind": "Dish-name candidate"
+  },
+  "jeera masala soda": {
+    "image": "/menu-images/web-e77954c3c5b892d356d3-d3234fc0484a.webp",
+    "replacesImageRef": null,
+    "source": "https://www.exportersindia.com/product-detail/jeera-masala-soda-flavor-6346354.htm",
+    "kind": "Dish-name candidate"
+  },
+  "lemon masala soda": {
+    "image": "/menu-images/web-4578acb3a639c9663e88-8577bd4e45b5.webp",
+    "replacesImageRef": null,
+    "source": "https://parathaas.square.site/product/Lemon-soda/79",
+    "kind": "Dish-name candidate"
+  },
+  "lemon soda": {
+    "image": "/menu-images/web-ec6011d4e64f4c630c7c-f596a17a588c.webp",
+    "replacesImageRef": null,
+    "source": "https://www.kkday.com/zh-cn/product/202349",
+    "kind": "Dish-name candidate"
+  },
+  "salty cucumber soda": {
+    "image": "/menu-images/web-eeccff59cf8068825e29-f11120d3084e.webp",
+    "replacesImageRef": null,
+    "source": "https://www.webstaurantstore.com/tractor-beverage-co-organic-cucumber-beverage-soda-syrup-2-5-gallon-bag-in-box/103TRBIBCUCB.html",
+    "kind": "Dish-name candidate"
+  },
+  "salty watermelon soda": {
+    "image": "/menu-images/web-245e9b2f1a8f3f764cb0-87b6b1da85f6.webp",
+    "replacesImageRef": null,
+    "source": "https://cookpad.com/eng/recipes/24752862",
+    "kind": "Dish-name candidate"
+  },
+  "hot and sour soup (300 ml)": {
+    "image": "/menu-images/web-c009083ecb4980f0c8f4-52e7a3c97c0e.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/bangalore/mandarin-oak-the-heavenly-chinese-sarvagna-nagar-indiranagar-rest738571",
+    "kind": "Dish-name candidate"
+  },
+  "lemon coriander soup (300 ml)": {
+    "image": "/menu-images/web-0d86692efbb8f8de4832-0ad8a6cefdfa.webp",
+    "replacesImageRef": null,
+    "source": "https://www.yummyfoodrecipes.com/food/recipedetails/2889/healthy-lemon-coriander-soup-recipe.html",
+    "kind": "Dish-name candidate"
+  },
+  "manchow soup (300 ml)": {
+    "image": "/menu-images/web-d632b92924e671878b93-4d47211043c8.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/mumbai/tadka-kitchen-sector-9-vashi-rest915499",
+    "kind": "Dish-name candidate"
+  },
+  "tomato soup (300 ml)": {
+    "image": "/menu-images/web-99a35f56f845a03ba52e-fdf7026a978a.webp",
+    "replacesImageRef": null,
+    "source": "https://mandimu.pl/blogs/przepisy/zupa-pomidorowa",
+    "kind": "Dish-name candidate"
+  },
+  "cheese dosa": {
+    "image": "/menu-images/web-aca584ca13ec2ed3475c-21cb98569911.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/nashik/anna-idli-college-road/order",
+    "kind": "Dish-name candidate"
+  },
+  "idli sambar": {
+    "image": "/menu-images/web-55c17e21d381c37f7965-fde316f4ffeb.webp",
+    "replacesImageRef": null,
+    "source": "https://balajidosalive.com/menu",
+    "kind": "Dish-name candidate"
+  },
+  "masala dosa": {
+    "image": "/menu-images/web-0d745ef2a2d58062be21-857509a01b56.webp",
+    "replacesImageRef": null,
+    "source": "https://jaiindiankitchen.com/",
+    "kind": "Dish-name candidate"
+  },
+  "mix veg uttapam": {
+    "image": "/menu-images/web-83166d26e96896b59667-23605809d4a7.webp",
+    "replacesImageRef": null,
+    "source": "https://www.jansukhcart.com/products/mix-veg-uttapam-SKU-3293",
+    "kind": "Dish-name candidate"
+  },
+  "mysore masala dosa": {
+    "image": "/menu-images/web-3c70e07d93304b78655e-da43c01e2463.webp",
+    "replacesImageRef": null,
+    "source": "https://ayyappadakshinam.com/",
+    "kind": "Dish-name candidate"
+  },
+  "onion dosa": {
+    "image": "/menu-images/web-a4764689e7fabe4a7786-8a55c134d9ee.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/guntur/sri-akshaya-kitchen-bharathpet-srinagar-colony-rest1315237",
+    "kind": "Dish-name candidate"
+  },
+  "onion rava dosa": {
+    "image": "/menu-images/web-b1073c59caa79ebeae61-76b3ad59c8ef.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/chandigarh/sundarams-sector-26/order",
+    "kind": "Dish-name candidate"
+  },
+  "onion uttapam": {
+    "image": "/menu-images/web-04b9abc485f580cb8614-902a48c67e42.webp",
+    "replacesImageRef": null,
+    "source": "https://www.sharmispassions.com/onion-uttapam-uthappam-recipe-easy-breakfast-recipes/",
+    "kind": "Dish-name candidate"
+  },
+  "paneer dosa": {
+    "image": "/menu-images/web-5452206ef1b5aff44748-e1390efd6ec0.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/coimbatore/plain-dosa-dish-restaurants",
+    "kind": "Dish-name candidate"
+  },
+  "plain dosa": {
+    "image": "/menu-images/web-af6e1b7e387a4bc68472-f580374c8960.webp",
+    "replacesImageRef": null,
+    "source": "https://www.thebananaleafkitchen.com/menu",
+    "kind": "Dish-name candidate"
+  },
+  "rava masala dosa": {
+    "image": "/menu-images/web-63a421042c5cb1d682fb-8686ba32b218.webp",
+    "replacesImageRef": null,
+    "source": "https://paakashala.com/",
+    "kind": "Dish-name candidate"
+  },
+  "rava paneer dosa": {
+    "image": "/menu-images/web-b341e119506810b23e14-6c992d6ef51c.webp",
+    "replacesImageRef": null,
+    "source": "https://www.justgotochef.com/public/recipes/ghee-roast-paneer-stuffed-rava-dosa-with-spicy-ghee-roast-aloo-recipe",
+    "kind": "Dish-name candidate"
+  },
+  "shanu's special dosa": {
+    "image": "/menu-images/e9b66a2b1d27889ae2-8c2ef816c99e.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Dosa-chutney-sambhar.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "tomato uttapam": {
+    "image": "/menu-images/web-5cff5dec91672bc2bd0a-0fbf98ce2af6.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/mumbai/ammas-veg-near-andheri-east-station",
+    "kind": "Dish-name candidate"
+  },
+  "butter naan": {
+    "image": "/menu-images/web-3e96a7ccfa10862cc7c7-d3989b41bf99.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/noida-1/ji-didi-ki-special-malai-chaap-sector-64-rest1304007",
+    "kind": "Dish-name candidate"
+  },
+  "chur chur naan": {
+    "image": "/menu-images/web-9826ef012f174d02c2f4-bf108bc38c66.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/ahmedabad/tandoor-story-chur-chur-naan-bodakdev-rest818352",
+    "kind": "Dish-name candidate"
+  },
+  "garlic naan": {
+    "image": "/menu-images/web-5bef8b44585679e792c1-779c41363ea0.webp",
+    "replacesImageRef": null,
+    "source": "https://currybliss.com/",
+    "kind": "Dish-name candidate"
+  },
+  "kasturi roti": {
+    "image": "/menu-images/web-c4a1aba8119456017eb6-283ab7fcdf24.webp",
+    "replacesImageRef": null,
+    "source": "https://cookpad.com/uk/recipes/11687492-finger-millet-roti",
+    "kind": "Dish-name candidate"
+  },
+  "lachha paratha": {
+    "image": "/menu-images/web-78958f7178e522417f7e-d90f13eddd56.webp",
+    "replacesImageRef": null,
+    "source": "https://foodfy.ai/MYknmJiyBS",
+    "kind": "Dish-name candidate"
+  },
+  "mirchi paratha": {
+    "image": "/menu-images/web-2a82ff81ee6acd5415b6-b5757185db8b.webp",
+    "replacesImageRef": null,
+    "source": "https://www.pinterest.com/pin/hari-mirchi-paratha-recipe--21462535712277699/",
+    "kind": "Dish-name candidate"
+  },
+  "missi roti": {
+    "image": "/menu-images/web-9d36a876a327f486e70c-f30baa9c59fd.webp",
+    "replacesImageRef": null,
+    "source": "https://www.sukipantal.com/post/indian-flatbread",
+    "kind": "Dish-name candidate"
+  },
+  "plain naan": {
+    "image": "/menu-images/web-3d3e201fa5b5ca471bdb-929117f65f9c.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/amritsar/amritsar-haveli-new-chheharta-rest482484",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori aloo paratha": {
+    "image": "/menu-images/web-d8722ad6c48e891851ec-b315133c7db6.webp",
+    "replacesImageRef": null,
+    "source": "https://www.livehindustan.com/lifestyle/recipe/recipe-to-make-dhaba-style-tandoori-aloo-paratha-at-home-201734343797522.html",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori butter roti": {
+    "image": "/menu-images/web-9cc24dade30b0fee4b08-9d46d252660d.webp",
+    "replacesImageRef": null,
+    "source": "https://www.thelazeez.in/products/butter-tandoori-roti-SKU-0686",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori gobhi paratha": {
+    "image": "/menu-images/web-3873cf92bc5a11cfc17c-bed166cef639.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/chandigarh/veg-village-food-sas-nagar-phase-5-mohali-rest653708",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori mix paratha": {
+    "image": "/menu-images/web-d9c24af553ecca48f163-6c6c620c8dd7.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/chandigarh/veg-village-food-sas-nagar-phase-5-mohali-rest653708",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori onion paratha": {
+    "image": "/menu-images/web-c6680358a70001172310-3c787334fe00.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/ncr/unique-kitchen-1-sector-37-faridabad",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori paneer paratha": {
+    "image": "/menu-images/web-a3de938271f6d7bef215-6e115d98aa4a.webp",
+    "replacesImageRef": null,
+    "source": "https://cookpad.com/in-hi/recipes/13368327",
+    "kind": "Dish-name candidate"
+  },
+  "tandoori plain roti": {
+    "image": "/menu-images/web-963ebbbda608400de95b-e2f1b7c3a50b.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/mahoba/apni-rasoi-mahoba-rest968973",
+    "kind": "Dish-name candidate"
+  },
+  "basic kabab": {
+    "image": "/menu-images/37fe9f5a2b4e2aa92d-cf95603f8444.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Malai_Paneer_Tikka,_PK_007.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "dahi kabab": {
+    "image": "/menu-images/web-0b9fa9c95506ba3bfd36-2f5b81742058.webp",
+    "replacesImageRef": null,
+    "source": "https://kalimirchbysmita.com/dahi-ke-kabab/",
+    "kind": "Dish-name candidate"
+  },
+  "hara bhara kabab": {
+    "image": "/menu-images/web-4907b74dced470e12c85-a8d3c99bec23.webp",
+    "replacesImageRef": null,
+    "source": "https://www.hercircle.in/engage/food/recipes/best-hara-bhara-kabab-recipe-with-expert-tips-4463.html",
+    "kind": "Dish-name candidate"
+  },
+  "malai soya chaap": {
+    "image": "/menu-images/web-84be7e9d5d437b5fa9fb-77c94db151af.webp",
+    "replacesImageRef": null,
+    "source": "https://www.purepantry.net/products/malai-soya-chaap-half-11am-to-9-pm",
+    "kind": "Dish-name candidate"
+  },
+  "malai tikka": {
+    "image": "/menu-images/web-2d44ee33066fe825a0cd-c4f0eea29af1.webp",
+    "replacesImageRef": null,
+    "source": "https://axisjuice.in/product-detail/paneer-malai-tikka",
+    "kind": "Dish-name candidate"
+  },
+  "paneer tikka": {
+    "image": "/menu-images/web-0c2e19f9330b60559cbb-9d0e83232209.webp",
+    "replacesImageRef": null,
+    "source": "https://organicmandya.com/pages/recipes",
+    "kind": "Dish-name candidate"
+  },
+  "soya chaap": {
+    "image": "/menu-images/web-f7997f4244e891beac76-b5a2a88b657f.webp",
+    "replacesImageRef": null,
+    "source": "https://www.herzindagi.com/recipe-tips/karwa-chauth-easy-soya-chaap-curry-recipe-article-247429",
+    "kind": "Dish-name candidate"
+  },
+  "kulhad tea": {
+    "image": "/menu-images/web-fad6ebe46fbc0f81123b-d09c1d1051f6.webp",
+    "replacesImageRef": null,
+    "source": "https://in.pinterest.com/pin/kulhad-chai-authentic-indian-masala-tea--584975439126713331/",
+    "kind": "Dish-name candidate"
+  },
+  "lemon iced tea": {
+    "image": "/menu-images/web-3a282810c3979a074d53-09fd9108db56.webp",
+    "replacesImageRef": null,
+    "source": "https://www.thehealthybelly.co/lifestyle/culture/sejarah-teh-manis-di-indonesia-sudah-terkenal-sejak-abad-ke-19/",
+    "kind": "Dish-name candidate"
+  },
+  "tea": {
+    "image": "/menu-images/web-0ac0237cc7d9f9f482ec-e9c1a3d6d08f.webp",
+    "replacesImageRef": null,
+    "source": "https://www.klook.com/zh-CN/activity/59598-joye-sanyi-miaoli/",
+    "kind": "Dish-name candidate"
+  },
+  "tea (big)": {
+    "image": "/menu-images/web-55ce11167eb764bca69f-9cc3bd4d9fb6.webp",
+    "replacesImageRef": null,
+    "source": "https://www.happycow.net/reviews/kozy-eats-riga-204366",
+    "kind": "Dish-name candidate"
+  },
+  "basic thali (4 rotis)": {
+    "image": "/menu-images/f983870f93c415c749-8269b376490e.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_Thali_4.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "exclusive thali": {
+    "image": "/menu-images/f983870f93c415c749-8269b376490e.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_Thali_4.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "small thali": {
+    "image": "/menu-images/f983870f93c415c749-8269b376490e.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_Thali_4.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "special thali": {
+    "image": "/menu-images/f983870f93c415c749-8269b376490e.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Vegetarian_Thali_4.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "belgian dark chocolate waffle combo": {
+    "image": "/menu-images/dd030c8bc662c2d83c-107d3f4131e2.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Waffle,_Baytree_Waffle_House,_Remerton.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "mix chocolate waffle combo": {
+    "image": "/menu-images/dd030c8bc662c2d83c-107d3f4131e2.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Waffle,_Baytree_Waffle_House,_Remerton.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "oreo kitkat waffle combo": {
+    "image": "/menu-images/dd030c8bc662c2d83c-107d3f4131e2.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Waffle,_Baytree_Waffle_House,_Remerton.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "triple chocolate waffle combo": {
+    "image": "/menu-images/dd030c8bc662c2d83c-107d3f4131e2.webp",
+    "replacesImageRef": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Waffle,_Baytree_Waffle_House,_Remerton.jpg",
+    "kind": "Canteen confirmation needed"
+  },
+  "belgian dark chocolate waffle": {
+    "image": "/menu-images/web-9062610883c02f5f5e02-de8b0b277447.webp",
+    "replacesImageRef": null,
+    "source": "https://us2guntur.com/EnlargeServ1?category_id=10005&product_id=p0100020&srsltid=AfmBOorMEO7jwz7xCplTlJKUh6Swz0RtvJbR_avPv1P6bONQcEy_5hkH",
+    "kind": "Dish-name candidate"
+  },
+  "biscoff waffle": {
+    "image": "/menu-images/web-39e100e39e2babbeccef-33543e639461.webp",
+    "replacesImageRef": null,
+    "source": "https://foodaciously.com/recipe/biscoff-waffles",
+    "kind": "Dish-name candidate"
+  },
+  "chocolate overloaded waffle": {
+    "image": "/menu-images/web-5d2fac6f06258983388b-5da08db08a86.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/hyderabad/waffle-treat-1-miyapur",
+    "kind": "Dish-name candidate"
+  },
+  "kitkat waffle": {
+    "image": "/menu-images/web-e6e41d7a5392deb57e39-3207c5d0e521.webp",
+    "replacesImageRef": null,
+    "source": "https://99pancakes.in/products/kitkat-waffle",
+    "kind": "Dish-name candidate"
+  },
+  "mix chocolate waffle": {
+    "image": "/menu-images/web-f0dbb6c7f8326f6c6cee-e936c4ab2a3c.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/mangalore/the-waffle-man-from-the-house-of-cookie-man-attavar/order",
+    "kind": "Dish-name candidate"
+  },
+  "nutella waffle": {
+    "image": "/menu-images/web-d4b47829b5c2e8f216ed-202c304ebf94.webp",
+    "replacesImageRef": null,
+    "source": "https://order.toasttab.com/online/bora-bora-chicago-9935-ridgeland-avenue/item-6-nutella-waffle_13b7e109-450c-40f6-983a-de49f12ee656",
+    "kind": "Dish-name candidate"
+  },
+  "oreo kitkat waffle": {
+    "image": "/menu-images/web-adbd2325b99ad2120168-0e61106f1d97.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/jaipur/waffle-99-vaishali-nagar-rest1093726",
+    "kind": "Dish-name candidate"
+  },
+  "oreo waffle": {
+    "image": "/menu-images/web-cad76965a9e574dcd0be-a351e8ae0ad2.webp",
+    "replacesImageRef": null,
+    "source": "https://www.zomato.com/ludhiana/restaurants/waffle",
+    "kind": "Dish-name candidate"
+  },
+  "red velvet waffle": {
+    "image": "/menu-images/web-4d00dd029b31f0d7b092-2ba4849e04b8.webp",
+    "replacesImageRef": null,
+    "source": "https://savouryflavor.com/recipes/red-velvet-waffles",
+    "kind": "Dish-name candidate"
+  },
+  "triple chocolate waffle": {
+    "image": "/menu-images/web-2910802f22778ad79600-ea48f926136a.webp",
+    "replacesImageRef": null,
+    "source": "https://www.swiggy.com/city/kolkata/belgium-waffles-station-106-bangur-avenue-rest426224",
+    "kind": "Dish-name candidate"
+  },
+  "white fantasy waffle": {
+    "image": "/menu-images/web-725c3182ea6af2e02ae5-d5ef0d36ff2f.webp",
+    "replacesImageRef": null,
+    "source": "https://x.com/belgianwaffleco/status/1102452564757368832",
+    "kind": "Dish-name candidate"
+  }
+}

@@ -1,4 +1,4 @@
-import OfferPrice from './OfferPrice';
+import MenuItemCard, { menuGrid } from './MenuItemCard';
 import Promotions from './Promotions';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -152,7 +152,7 @@ export function PromotionBanners() { return <Promotions />; }
 
 export function ComboPanel({ staff = false }) {
   const { user } = useAuth();
-  const { foods, categories, addToCart, isFoodAvailable, refreshCatalog } = useOrders();
+  const { foods, categories, refreshCatalog } = useOrders();
   const [error,setError] = useState(''), [busy,setBusy] = useState(false), [success,setSuccess] = useState('');
   const combos = foods.filter(f => f.cafeId === 'canteen' && f.category === 'Combos');
   async function create(event) {
@@ -168,7 +168,7 @@ export function ComboPanel({ staff = false }) {
   return <section className="mb-8" aria-label="Combos"><div className="mb-4 flex items-center justify-between"><h2 className="text-2xl font-black">{staff?'Manage combos':'Better together'}</h2>{staff && <Link className="font-bold text-[#075d50]" to="/canteen/menu">Edit prices & availability →</Link>}</div>
     {staff && <form onSubmit={create} className="mb-5 grid gap-4 rounded-2xl border bg-white p-5 sm:grid-cols-2"><label className="text-sm font-bold">Combo name<input required maxLength={120} name="name" placeholder="Sandwich & coffee combo" className="mt-2 w-full rounded-xl border p-3" /></label><label className="text-sm font-bold">Included items & portions<input required maxLength={500} name="contents" placeholder="1 veg sandwich + 1 regular cold coffee" className="mt-2 w-full rounded-xl border p-3" /></label><label className="text-sm font-bold">Bundle price (₹)<input required min="0.01" step="0.01" type="number" name="price" className="mt-2 w-full rounded-xl border p-3" /></label><div className="self-end"><button disabled={busy} className={button}>{busy?'Saving…':'Publish combo'}</button></div><p className="text-xs text-gray-500 sm:col-span-2">Fixed bundles are prepared as listed. Manage bundle availability separately when any included item runs out.</p></form>}
     {error && <p role="alert" className="mb-4 text-red-700">{error}</p>}{success && <p role="status" className="mb-4 text-green-700">{success}</p>}
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{combos.map(c => <article key={c.id} className="rounded-2xl border border-[#dfe7de] bg-white p-6"><p className="text-xs font-bold uppercase tracking-widest text-[#a17925]">Canteen combo</p><h3 className="mt-3 text-xl font-black">{c.name}</h3><p className="my-3 text-sm text-gray-500">{c.description}</p><div className="flex items-center justify-between gap-3"><OfferPrice item={c} />{staff ? <span>{c.available?'Available':'Paused'}</span> : <button disabled={!isFoodAvailable(c)} className={button} onClick={() => addToCart(c)}>{isFoodAvailable(c)?'Add combo +':'Unavailable'}</button>}</div></article>)}</div>
+    <div className={menuGrid}>{combos.map(food => <MenuItemCard key={food.id} food={food} staff={staff} />)}</div>
     {!combos.length && <p className="rounded-2xl bg-white p-6 text-gray-500">{staff?'Create your first fixed combo above.':'Canteen combos will appear here when the canteen publishes them.'}</p>}
   </section>;
 }

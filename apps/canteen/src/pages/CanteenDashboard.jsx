@@ -1,6 +1,6 @@
 import OrderPayment from '@spoonate/portal/components/OrderPayment';
 import CanteenPoster from '@spoonate/portal/components/CanteenPoster';
-import { orderCode, orderDay, newestOrderFirst, orderReceivedTime } from "@spoonate/portal/utils/orderRules";
+import { orderCode, orderDay, canteenActiveOrderFirst, newestOrderFirst, orderReceivedTime } from "@spoonate/portal/utils/orderRules";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ClipboardList, LogOut, Store } from "lucide-react";
@@ -16,7 +16,7 @@ export default function CanteenDashboard() {
   const cafe = cafes.find((item) => item.databaseId === user.canteenId);
   const [section, setSection] = useState("Active");
   const filtered = orders.filter((order) => canteenOrderInSection(order, section))
-    .sort(newestOrderFirst);
+    .sort(section === "Active" ? canteenActiveOrderFirst : newestOrderFirst);
   const [error, setError] = useState("");
   const perform = async (action) => { try { await action(); setError(""); } catch (issue) { setError(issue.message); } };
   const handleLogout = () => { void perform(async () => { await logout(); navigate("/login", { replace: true }); }); };
@@ -33,7 +33,7 @@ export default function CanteenDashboard() {
           <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-6 shadow-sm"><div><h2 className="flex items-center gap-2 text-xl font-black"><Store size={20} /> Incoming orders</h2><p className="mt-2 text-gray-500">{cafe?.status === "Paused" ? "New orders are paused. Continue fulfilling existing orders." : "Your canteen is accepting new orders."}</p></div><button onClick={() => perform(toggleOrders)} className="rounded-xl bg-[#075d50] px-5 py-3 font-bold text-white">{cafe?.status === "Paused" ? "Resume orders" : "Pause incoming orders"}</button></section>
           {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{canteenOrderSections.map(label => <button key={label} onClick={() => setSection(label)} className="rounded-xl bg-white p-4 text-left shadow-sm"><p className="text-sm text-gray-500">{label}</p><p className="mt-1 text-2xl font-black">{orders.filter(order => canteenOrderInSection(order, label)).length}</p></button>)}</div>
-          <section><OrderSectionTabs sections={canteenOrderSections} selected={section} onChange={setSection} /><h2 className="mt-5 text-2xl font-black">{section} orders</h2>{loadMoreOrders && <button onClick={loadMoreOrders} className="mt-3 font-bold underline">Load more orders</button>}<p className="mt-2 text-gray-500">Newest orders are shown first.</p><div className="mt-5 space-y-4">{filtered.length === 0 ? <div className="rounded-2xl bg-white p-10 text-center"><ClipboardList className="mx-auto text-gray-300" size={36} /><p className="mt-4 font-bold">No {section.toLowerCase()} orders</p></div> : filtered.map((order) => <CanteenOrderCard key={order.id} order={order} />)}</div></section>
+          <section><OrderSectionTabs sections={canteenOrderSections} selected={section} onChange={setSection} /><h2 className="mt-5 text-2xl font-black">{section} orders</h2>{loadMoreOrders && <button onClick={loadMoreOrders} className="mt-3 font-bold underline">Load more orders</button>}<p className="mt-2 text-gray-500">{section === "Active" ? "Paid orders first · Awaiting payment at the bottom." : "Newest orders are shown first."}</p><div className="mt-5 space-y-4">{filtered.length === 0 ? <div className="rounded-2xl bg-white p-10 text-center"><ClipboardList className="mx-auto text-gray-300" size={36} /><p className="mt-4 font-bold">No {section.toLowerCase()} orders</p></div> : filtered.map((order) => <CanteenOrderCard key={order.id} order={order} />)}</div></section>
 
         </div>
       </main>
@@ -52,6 +52,7 @@ export function CanteenOrderCard({ order }) {
         <Link to={`/canteen/orders/${order.id}`} className="text-2xl font-black tracking-wider text-[#075d50]">{orderCode(order)}</Link>
         <span className="rounded-full bg-[#e9f5ef] px-2 py-1 text-xs font-bold text-[#075d50]">{isUnpaidOrder(order) ? "Unpaid" : statusLabels[order.status]}</span>
         <span className="text-sm font-bold">₹{order.total}</span>
+        {order.paymentStatus === "PAID" && <span className="inline-flex items-center gap-1 rounded-full bg-[#075d50] px-3 py-1 text-xs font-black tracking-wide text-white">✓ PAID</span>}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {!actionError && order.status === "RECEIVED" && <button onClick={() => advance("REJECTED")} className="rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-700">Reject</button>}

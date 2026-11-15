@@ -61,7 +61,7 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
     finally { guard.current = false; safe(() => setPhase('')); }
   }
   if (deadlinePassed || (!paid && order.closedReason === 'PAYMENT_EXPIRED')) return <p className="my-2 text-sm font-bold text-[#173d32]">Payment window ended</p>;
-  if (staff) return order.status === 'RECEIVED' ? null : <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#075d50]">
+  if (staff) return order.status === 'RECEIVED' || paid ? null : <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#075d50]">
     <span className="font-semibold">{paid ? 'Paid' : labels[order.paymentStatus] || 'Awaiting payment'}</span>
     {order.paymentDeadline && !paid && order.status === 'ACCEPTED' && <span className={secondsRemaining <= 60 ? 'font-semibold text-red-700' : ''}>Time left <span role="timer" aria-label="Payment time remaining" aria-live="off" className="font-mono font-bold tabular-nums">{remainingTime}</span></span>}
   </div>;

@@ -1,3 +1,4 @@
+import MenuItemCard, { menuGrid } from './MenuItemCard';
 import OfferPrice from './OfferPrice';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -31,7 +32,7 @@ export default function Promotions({staff=false}) {
 }
 
 export function PromotionMenuItems({itemIds,staff=false}) {
-  const {foods,cart,addToCart,isFoodAvailable}=useOrders();
+  const {foods}=useOrders();
   const items=itemIds.map(id=>foods.find(food=>food.id===id)).filter(Boolean);
-  return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(food=><article key={food.id} className="rounded-2xl border bg-white p-5"><p className="text-xs text-gray-500">{food.category}</p><h2 className="mt-1 text-lg font-black">{food.name}</h2><p className="my-3 text-sm text-gray-500">{food.description}</p><div className="flex items-center justify-between gap-3"><OfferPrice item={food} />{staff?<span className="text-xs">{food.available?'Available':'Unavailable'}</span>:<button disabled={!isFoodAvailable(food)} onClick={()=>addToCart(food)} className="shrink-0 whitespace-nowrap rounded-xl bg-[#075d50] px-4 py-2 font-bold text-white disabled:opacity-40">{isFoodAvailable(food)?cart.some(item=>item.id===food.id)?`Add more (${cart.find(item=>item.id===food.id).quantity})`:'Add to cart':'Unavailable'}</button>}</div></article>)}</div>;
+  return <div className={menuGrid}>{items.map(food => <MenuItemCard key={food.id} food={food} staff={staff} />)}</div>;
 }

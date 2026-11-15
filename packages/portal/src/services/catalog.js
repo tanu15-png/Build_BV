@@ -1,4 +1,4 @@
-import { menuImageSrc } from './menuImages.js';
+import { menuPhoto } from './menuPhotos.js';
 import { canteenPoster } from './canteenBranding.js';
 export const foodImage = '/food-placeholder.svg';
 export function mapCatalog(data) {
@@ -10,13 +10,13 @@ export function mapCatalog(data) {
       categories: data.categories.filter(category => category.canteenId === c.id).map(category => category.name),
       image: canteenPoster(c.slug) })),
     categories: data.categories,
-    foods: data.items.map(item => ({ ...item, cafeId: slugs.get(item.canteenId), price: (item.effectivePricePaise ?? item.pricePaise) / 100, image: menuImageSrc(item.imageRef) || foodImage })),
+    foods: data.items.map(item => ({ ...item, cafeId: slugs.get(item.canteenId), price: (item.effectivePricePaise ?? item.pricePaise) / 100, ...menuPhoto(item) })),
   };
 }
 export function mapCart(data, cafes) {
   return data.items.map(line => ({ ...line, id: line.menuItemId, lineId: line.id,
     cafeId: cafes.find(c => c.databaseId === line.canteenId)?.id,
-    price: line.unitPricePaise / 100, image: menuImageSrc(line.imageRef) || foodImage }));
+    price: line.unitPricePaise / 100, ...menuPhoto(line) }));
 }
 export function rupeesToPaise(value) {
   const text = String(value).trim();

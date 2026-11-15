@@ -14,6 +14,11 @@ export const isUnpaidOrder = order => order.paymentStatus !== 'PAID' && order.cl
 export function newestOrderFirst(a, b) {
   return new Date(b.createdAt) - new Date(a.createdAt) || b.id.localeCompare(a.id);
 }
+export function canteenActiveOrderFirst(a, b) {
+  const priority = order => order.paymentStatus === 'PAID' ? 0
+    : order.status === 'ACCEPTED' && order.executionMode === 'RAZORPAY_TEST' ? 2 : 1;
+  return priority(a) - priority(b) || newestOrderFirst(a, b);
+}
 
 export function orderReceivedTime(order) {
   return new Intl.DateTimeFormat('en-IN', {
