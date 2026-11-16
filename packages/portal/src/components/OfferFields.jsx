@@ -1,6 +1,6 @@
 export default function OfferFields({draft,onChange,foods,lockItem=false}) {
   const field=(name,value)=>onChange({...draft,[name]:value});
-  const input='mt-1 w-full rounded-xl border border-gray-200 bg-white p-2.5';
+  const input='mt-1 w-full rounded-xl border border-gray-200 bg-[#fffdf7] p-2.5';
   return <div className="grid gap-3 sm:grid-cols-2">
     <label className="text-sm font-bold">Item or combo<select required disabled={lockItem} value={draft.menuItemId} onChange={e=>field('menuItemId',e.target.value)} className={input}><option value="">Choose item or combo</option>{foods.map(food=><option key={food.id} value={food.id}>{food.name} · ₹{((food.pricePaise??0)/100).toFixed(2)}</option>)}</select></label>
     <label className="text-sm font-bold">Offer name<input required maxLength={120} value={draft.name} onChange={e=>field('name',e.target.value)} className={input} placeholder="Study break special" /></label>

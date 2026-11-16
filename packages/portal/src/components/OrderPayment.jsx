@@ -34,7 +34,7 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
       let verifying = false;
       const instance = new Razorpay({
         key: checkout.keyId, order_id: checkout.razorpayOrderId, amount: checkout.amountPaise, currency: checkout.currency,
-        name: 'SpoonAte', description: 'Accepted canteen order · Test payment', theme: { color: '#075d50' },
+        name: 'SpoonAte', description: 'Accepted canteen order · Test payment', theme: { color: '#185c3a' },
         handler: async response => {
           verifying = true; safe(() => setPhase('Confirming payment…'));
           try {
@@ -60,14 +60,14 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
     catch (issue) { safe(() => setError(issue.message)); }
     finally { guard.current = false; safe(() => setPhase('')); }
   }
-  if (deadlinePassed || (!paid && order.closedReason === 'PAYMENT_EXPIRED')) return <p className="my-2 text-sm font-bold text-[#173d32]">Payment window ended</p>;
-  if (staff) return order.status === 'RECEIVED' || paid ? null : <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#075d50]">
+  if (deadlinePassed || (!paid && order.closedReason === 'PAYMENT_EXPIRED')) return <p className="my-2 text-sm font-bold text-[#203d2b]">Payment window ended</p>;
+  if (staff) return order.status === 'RECEIVED' || paid ? null : <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#185c3a]">
     <span className="font-semibold">{paid ? 'Paid' : labels[order.paymentStatus] || 'Awaiting payment'}</span>
     {order.paymentDeadline && !paid && order.status === 'ACCEPTED' && <span className={secondsRemaining <= 60 ? 'font-semibold text-red-700' : ''}>Time left <span role="timer" aria-label="Payment time remaining" aria-live="off" className="font-mono font-bold tabular-nums">{remainingTime}</span></span>}
   </div>;
-  return <section aria-label="Order payment" className={`${compact ? 'mt-3 p-4' : 'my-5 p-5'} rounded-xl border border-[#dce9df] bg-[#f2f7f3] text-[#173d32]`}>
+  return <section aria-label="Order payment" className={`${compact ? 'mt-3 p-4' : 'my-5 p-5'} rounded-xl border border-[#dce9df] bg-[#f2f7f3] text-[#203d2b]`}>
     <p className="font-bold">{deadlinePassed ? 'Payment window ended' : labels[order.paymentStatus] || 'Payment status unavailable'}</p>
-    {order.paymentDeadline && !paid && order.status === 'ACCEPTED' && <div className={`mt-3 inline-flex items-center gap-3 rounded-xl border px-4 py-2 ${secondsRemaining <= 60 ? 'border-red-200 bg-red-50 text-red-700' : 'border-[#dce9df] bg-white text-[#075d50]'}`}>
+    {order.paymentDeadline && !paid && order.status === 'ACCEPTED' && <div className={`mt-3 inline-flex items-center gap-3 rounded-xl border px-4 py-2 ${secondsRemaining <= 60 ? 'border-red-200 bg-red-50 text-red-700' : 'border-[#dce9df] bg-[#fffdf7] text-[#185c3a]'}`}>
       <span className="text-sm font-medium">{deadlinePassed ? 'Time expired' : 'Time left to pay'}</span>
       <span role="timer" aria-label="Payment time remaining" aria-live="off" className="font-mono text-2xl font-bold tabular-nums">{remainingTime}</span>
     </div>}
@@ -75,7 +75,7 @@ export default function OrderPayment({ order, staff = false, compact = false }) 
     {!compact && !paid && <p className="mt-2 text-sm">Payment is requested only after acceptance. Once paid, orders cannot be cancelled or refunded.</p>}
     {order.closedReason === 'STUDENT_CANCELLED' && <p className="mt-2 text-sm">You cancelled before starting payment.</p>}
     <div className="mt-3 flex flex-wrap items-center gap-3">
-      {canPay && <button disabled={Boolean(phase)} onClick={pay} className="rounded-lg bg-[#075d50] px-4 py-2 font-bold text-white disabled:opacity-50">{action === 'pay' && phase ? phase : order.paymentStatus === 'PROCESSING' ? 'Resume payment' : `${order.paymentStatus === 'FAILED' ? 'Retry payment' : 'Pay'} ₹${(order.totalPaise / 100).toFixed(2)}`}</button>}
+      {canPay && <button disabled={Boolean(phase)} onClick={pay} className="rounded-lg bg-[#185c3a] px-4 py-2 font-bold text-white disabled:opacity-50">{action === 'pay' && phase ? phase : order.paymentStatus === 'PROCESSING' ? 'Resume payment' : `${order.paymentStatus === 'FAILED' ? 'Retry payment' : 'Pay'} ₹${(order.totalPaise / 100).toFixed(2)}`}</button>}
       {canCancel && <button disabled={Boolean(phase)} onClick={cancel} className="rounded-lg px-2 py-2 text-sm underline disabled:opacity-50">{action === 'cancel' && phase ? phase : 'Cancel unpaid order'}</button>}
     </div>
     {message && !paid && <p role="status" className="mt-3 text-sm">{message}</p>}

@@ -50,7 +50,7 @@ export function OrderProvider({ children }) {
     {user && remote.catalogError && <div role="alert" className="relative z-50 bg-red-50 p-3 text-center text-red-800">{remote.catalogError} <button onClick={remote.refreshCatalog} className="ml-3 font-bold underline">Refresh menus and cart</button></div>}
     {user && serverOrders.ordersError && <div role="alert" className="relative z-50 bg-red-50 p-3 text-center text-red-800">{serverOrders.ordersError} <button onClick={() => serverOrders.refreshOrders()} className="ml-3 font-bold underline">Refresh orders</button></div>}
     {children}
-    {notice && notice.owner === noticeOwner && <div role="status" className={`fixed ${user?.role === 'student' ? 'bottom-36 lg:bottom-20' : 'bottom-20'} left-5 right-5 z-50 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-xl bg-[#075d50] p-4 text-white shadow-xl`}><p>{notice.message}</p><button aria-label="Dismiss message" onClick={() => setNotice(null)} className="rounded border border-white/30 px-3 py-1">Close</button></div>}
+    {notice && notice.owner === noticeOwner && <div role="status" className={`fixed ${user?.role === 'student' ? 'bottom-36 lg:bottom-20' : 'bottom-20'} left-5 right-5 z-50 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-xl bg-[#185c3a] p-4 text-white shadow-xl`}><p>{notice.message}</p><button aria-label="Dismiss message" onClick={() => setNotice(null)} className="rounded border border-white/30 px-3 py-1">Close</button></div>}
   </OrderContext.Provider>;
 }
 export function useOrders() { return useContext(OrderContext); }

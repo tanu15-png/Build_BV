@@ -1,3 +1,4 @@
+import { BrandSplash } from './components/Brand';
 import { Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { OrderProvider } from './context/OrderContext';
@@ -7,7 +8,7 @@ export function PortalProviders({ children }) {
 }
 export function ProtectedRoute({ children }) {
   const { user, loading, authError, refreshSession } = useAuth();
-  if (loading) return <p role="status" className="p-8">Checking your session…</p>;
+  if (loading) return <BrandSplash />;
   if (authError) return <div role="alert" className="p-8"><p>{authError}</p><button onClick={refreshSession} className="mt-4 rounded-xl border p-3">Retry connection</button></div>;
   if (!user) return <Navigate to="/login" replace />;
   if (user.role !== portal) return <p role="alert" className="p-8">Sign in with your {roleLabel(portal).toLowerCase()} account.</p>;

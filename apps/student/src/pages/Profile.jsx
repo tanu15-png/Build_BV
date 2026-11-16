@@ -5,7 +5,7 @@ export default function Profile() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] p-5 lg:p-10">
+    <div className="min-h-screen bg-[#fff8e9] p-5 lg:p-10">
 
       <div className="max-w-3xl mx-auto">
 
@@ -13,9 +13,9 @@ export default function Profile() {
           Profile
         </h1>
 
-        <div className="bg-white rounded-2xl shadow-card p-8 mt-8">
+        <div className="bg-[#fffdf7] rounded-2xl shadow-card p-8 mt-8">
 
-          <div className="w-24 h-24 rounded-full bg-[#d9f4ec] text-[#075d50] flex items-center justify-center text-3xl font-black">
+          <div className="w-24 h-24 rounded-full bg-[#e5eedb] text-[#185c3a] flex items-center justify-center text-3xl font-black">
             {user?.name?.split(" ").map((part) => part[0]).slice(0, 2).join("")}
           </div>
 

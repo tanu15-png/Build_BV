@@ -1,3 +1,4 @@
+import { BrandMark, BrandSplash, FoodSticker } from '../components/Brand';
 import { portal as role, portalHome } from '../portal.js';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -78,23 +79,24 @@ export default function Login() {
     });
   };
 
-  const inputStyle = 'mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-[#0f8f73]';
+  const inputStyle = 'mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-[#287647]';
   const title = recovery ? 'Choose a new password' : pending ? 'Check your email' : reset ? 'Reset your password'
     : register && role === 'student' ? 'Create your account' : adminActivate ? 'Activate admin account' : 'Welcome back';
-  return <div className="flex min-h-screen items-center justify-center bg-[#075d50] px-5 py-10">
-    <div className="grid w-full max-w-5xl overflow-hidden rounded-[28px] bg-white shadow-2xl lg:grid-cols-2">
-      <section className="flex flex-col justify-between bg-[#064e43] p-8 text-white lg:p-12">
-        <p className="text-2xl font-black">Spoon<span className="text-[#facc15]">Ate</span></p>
-        <div className="my-12"><p className="font-bold text-[#facc15]">BANASTHALI VIDYAPITH</p><h1 className="mt-4 text-4xl font-black">{role === 'student' ? <>Order ahead.<br />Collect when ready.</> : role === 'canteen' ? <>Your kitchen.<br />Your orders.</> : <>Campus oversight.<br />One clear view.</>}</h1><p className="mt-5 text-white/70">{role === 'student' ? 'Choose your canteen, schedule your pickup, and track your order until it is ready.' : role === 'canteen' ? 'Manage your menu, prepare orders and mark collections.' : 'Manage campus canteens, accounts and order activity.'}</p></div>
+  if (auth.loading) return <BrandSplash />;
+  return <div className="flex min-h-screen items-center justify-center bg-[#185c3a] px-5 py-10">
+    <div className="grid w-full max-w-5xl overflow-hidden rounded-[28px] bg-[#fffdf7] shadow-2xl lg:grid-cols-2">
+      <section className="flex flex-col justify-between bg-[#12492e] p-8 text-white lg:p-12">
+        <BrandMark />
+        <div className="my-8"><FoodSticker className="login-sticker" /><p className="font-bold text-[#ffc565]">BANASTHALI VIDYAPITH</p><h1 className="mt-4 text-4xl font-black">{role === 'student' ? <>Order ahead.<br />Collect when ready.</> : role === 'canteen' ? <>Your kitchen.<br />Your orders.</> : <>Campus oversight.<br />One clear view.</>}</h1><p className="mt-5 text-white/70">{role === 'student' ? 'Find your favourites, order ahead, and collect when ready.' : role === 'canteen' ? 'Manage your menu, prepare orders and mark collections.' : 'Manage campus canteens, accounts and order activity.'}</p></div>
         <p className="flex items-center gap-2 text-sm text-white/70"><ShieldCheck size={18} /> Verified email access</p>
       </section>
       <section className="p-8 lg:p-12">
-        <p className="mb-2 text-sm font-bold uppercase tracking-wide text-[#075d50]">{role === 'student' ? 'Account' : role} portal</p>
+        <p className="mb-2 text-sm font-bold uppercase tracking-wide text-[#185c3a]">{role === 'student' ? 'Account' : role} portal</p>
         <h2 className="text-3xl font-black">{title}</h2>
         {role === 'student' && !pending && !recovery && !reset && <div className="mt-6 flex gap-5 text-sm font-bold">{[false, true].map(value =>
-          <button key={String(value)} type="button" disabled={busy} onClick={() => { setRegister(value); setError(''); setSuccess(''); }} className={register === value ? 'text-[#0f8f73] underline' : 'text-gray-500'}>{value ? 'Sign up' : 'Login'}</button>)}</div>}
+          <button key={String(value)} type="button" disabled={busy} onClick={() => { setRegister(value); setError(''); setSuccess(''); }} className={register === value ? 'text-[#287647] underline' : 'text-gray-500'}>{value ? 'Sign up' : 'Login'}</button>)}</div>}
         {role === 'canteen' && !pending && <div className="mt-6 flex gap-5 text-sm font-bold">{['login', 'join'].map(value =>
-          <button key={value} type="button" disabled={busy} aria-pressed={canteenMode === value} onClick={() => { setCanteenMode(value); setSecretCode(''); setError(''); setSuccess(''); }} className={canteenMode === value ? 'text-[#0f8f73] underline' : 'text-gray-500'}>{value === 'login' ? 'Login' : 'Join canteen'}</button>)}</div>}
+          <button key={value} type="button" disabled={busy} aria-pressed={canteenMode === value} onClick={() => { setCanteenMode(value); setSecretCode(''); setError(''); setSuccess(''); }} className={canteenMode === value ? 'text-[#287647] underline' : 'text-gray-500'}>{value === 'login' ? 'Login' : 'Join canteen'}</button>)}</div>}
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           <fieldset disabled={busy} className="space-y-5">
             {pending && <>
@@ -119,18 +121,18 @@ export default function Login() {
                 <p className="text-sm text-gray-500">{canteenMode === 'login' ? 'Already a member? Verify your email to log in. No access code needed.' : 'Enter the access code once to join, then verify your email. Next time, use Login.'}</p>
               </>}
             </>}
-            <button className="w-full rounded-xl bg-[#0f8f73] py-3 font-black text-white disabled:opacity-60">{busy ? 'Please wait…' : recovery ? 'Save new password' : pending ? pending.flow === 'reset' ? 'Verify reset code' : 'Verify email' : reset ? 'Send reset code' : adminActivate ? 'Activate account' : role === 'student' && register ? 'Sign up' : role === 'canteen' ? 'Send verification email' : 'Login'}</button>
+            <button className="w-full rounded-xl bg-[#287647] py-3 font-black text-white disabled:opacity-60">{busy ? 'Please wait…' : recovery ? 'Save new password' : pending ? pending.flow === 'reset' ? 'Verify reset code' : 'Verify email' : reset ? 'Send reset code' : adminActivate ? 'Activate account' : role === 'student' && register ? 'Sign up' : role === 'canteen' ? 'Send verification email' : 'Login'}</button>
           </fieldset>
         </form>
         {success && <p role="status" className="mt-4 rounded-xl bg-green-50 p-3 text-sm text-green-700">{success}</p>}
         {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
         {pending && <div className="mt-5 flex flex-wrap gap-4 text-sm font-bold">
-          <button disabled={busy || wait > 0} onClick={() => void perform(async () => { await auth.resend(); setPending(auth.pendingAuth()); setCode(''); setSuccess('New verification email requested. Use the newest code in your inbox.'); })} className="text-[#075d50] disabled:opacity-50">{wait ? 'Resend unavailable' : pending.flow === 'reset' ? 'Resend reset code' : pending.flow === 'signup' ? 'Resend OTP' : 'Resend email'}</button>
+          <button disabled={busy || wait > 0} onClick={() => void perform(async () => { await auth.resend(); setPending(auth.pendingAuth()); setCode(''); setSuccess('New verification email requested. Use the newest code in your inbox.'); })} className="text-[#185c3a] disabled:opacity-50">{wait ? 'Resend unavailable' : pending.flow === 'reset' ? 'Resend reset code' : pending.flow === 'signup' ? 'Resend OTP' : 'Resend email'}</button>
           <button disabled={busy} onClick={() => { auth.clearPending(); setPending(null); setCode(''); setError(''); setSuccess(''); }} className="text-gray-600">Start again</button>
         </div>}
         {!pending && !recovery && role !== 'canteen' && !(role === 'student' && register) && <div className="mt-5 flex flex-wrap gap-4 text-sm font-bold">
-          <button disabled={busy} onClick={() => { setReset(!reset); setAdminActivate(false); setError(''); setSuccess(''); }} className="text-[#075d50]">{reset ? 'Back to login' : 'Forgot password?'}</button>
-          {role === 'admin' && !reset && <button disabled={busy} onClick={() => { setAdminActivate(!adminActivate); setError(''); setSuccess(''); }} className="text-[#075d50]">{adminActivate ? 'Back to login' : 'First sign-in? Activate account'}</button>}
+          <button disabled={busy} onClick={() => { setReset(!reset); setAdminActivate(false); setError(''); setSuccess(''); }} className="text-[#185c3a]">{reset ? 'Back to login' : 'Forgot password?'}</button>
+          {role === 'admin' && !reset && <button disabled={busy} onClick={() => { setAdminActivate(!adminActivate); setError(''); setSuccess(''); }} className="text-[#185c3a]">{adminActivate ? 'Back to login' : 'First sign-in? Activate account'}</button>}
         </div>}
       </section>
     </div>

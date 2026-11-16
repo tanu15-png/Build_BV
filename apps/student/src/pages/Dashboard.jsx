@@ -1,3 +1,4 @@
+import { BrandMark, FoodSticker } from '@spoonate/portal/components/Brand';
 import StudentMenu from '@spoonate/portal/components/StudentMenu';
 import { RewardsPanel, PromotionBanners, ComboPanel } from '@spoonate/portal/components/RewardsAndCombos';
 import { orderCode, orderDay, statusLabels } from "@spoonate/portal/utils/orderRules";
@@ -36,20 +37,14 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8faf9]">
+    <div className="min-h-screen bg-[#fff8e9]">
 
       {/* DESKTOP SIDEBAR */}
 
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-[#075d50] text-white p-6 flex-col">
+      <aside className="hidden lg:flex fixed left-0 top-9 bottom-0 w-64 bg-[#185c3a] text-white p-6 flex-col">
 
         <div className="flex items-center gap-2 mb-12">
-          <div className="w-9 h-9 bg-[#facc15] text-[#075d50] rounded-lg flex items-center justify-center font-black">
-            SA
-          </div>
-
-          <span className="text-xl font-black">
-            Spoon<span className="text-[#facc15]">Ate</span>
-          </span>
+          <BrandMark />
         </div>
 
         <nav className="space-y-2">
@@ -103,9 +98,9 @@ export default function Dashboard() {
 
         {/* TOP BAR */}
 
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-5 lg:px-10">
+        <header className="h-20 bg-[#fffdf7] border-b border-gray-100 flex items-center justify-between px-5 lg:px-10">
 
-          <div className="flex items-center gap-5 ml-auto">
+          <BrandMark className="mobile-brand lg:hidden" /><div className="flex items-center gap-3 sm:gap-5 ml-auto">
 
             <Link
               to="/dashboard/notifications"
@@ -133,7 +128,7 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-3">
 
-              <div className="w-10 h-10 rounded-full bg-[#d9f4ec] text-[#075d50] flex items-center justify-center font-bold">
+              <div className="hidden sm:flex w-10 h-10 rounded-full bg-[#e5eedb] text-[#185c3a] flex items-center justify-center font-bold">
                 {initials}
               </div>
 
@@ -165,18 +160,19 @@ export default function Dashboard() {
 
         <div className="p-5 lg:p-10 max-w-7xl mx-auto">
 
-          <section className="mb-8">
+          <section className="student-welcome mb-7">
+            <FoodSticker className="welcome-sticker" />
 
-            <p className="text-sm text-[#0f8f73] font-bold">
+            <p className="text-sm text-[#287647] font-bold">
               SPOONATE
             </p>
 
             <h1 className="text-3xl lg:text-4xl font-black mt-1">
-              Good evening, {user?.name?.split(" ")[0]} 👋
+              Hi, {user?.name?.split(" ")[0]} 👋
             </h1>
 
             <p className="text-gray-500 mt-2">
-              What are you craving today?
+              Your next delicious break starts here.
             </p>
 
           </section>
@@ -187,7 +183,7 @@ export default function Dashboard() {
           {/* ACTIVE ORDER */}
 
           {activeOrder && (
-            <section className="bg-[#075d50] text-white rounded-[28px] p-6 lg:p-8 mb-10 shadow-card">
+            <section className="bg-[#185c3a] text-white rounded-[28px] p-6 lg:p-8 mb-10 shadow-card">
 
               <div className="flex flex-wrap justify-between gap-5">
 
@@ -199,7 +195,7 @@ export default function Dashboard() {
 
                   <div className="flex items-center gap-4 mt-2">
 
-                    <span className="text-4xl font-black tracking-widest text-[#facc15]">
+                    <span className="text-4xl font-black tracking-widest text-[#ffc565]">
                       {orderCode(activeOrder)}
                     </span>
 
@@ -230,7 +226,7 @@ export default function Dashboard() {
 
 <Link
                     to={`/dashboard/orders/${activeOrder.id}`}
-                    className="mt-2 bg-[#facc15] text-[#075d50] px-5 py-2.5 rounded-xl font-bold"
+                    className="mt-2 bg-[#ffc565] text-[#185c3a] px-5 py-2.5 rounded-xl font-bold"
                   >
                     View order / Pay
                   </Link>
@@ -256,7 +252,7 @@ export default function Dashboard() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search menu..."
-              className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-11 pr-4 outline-none focus:border-[#0f8f73] focus:ring-2 focus:ring-[#0f8f73]/20"
+              className="w-full rounded-xl border border-gray-200 bg-[#fffdf7] py-3 pl-11 pr-4 outline-none focus:border-[#287647] focus:ring-2 focus:ring-[#287647]/20"
             />
 
           </div>
@@ -270,7 +266,7 @@ export default function Dashboard() {
 
       {/* MOBILE NAV */}
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 h-16 flex justify-around items-center z-50">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#fffdf7] border-t border-gray-200 h-16 flex justify-around items-center z-50">
 
         <MobileLink
           to="/dashboard"
@@ -326,7 +322,7 @@ function SidebarLink({
       to={to}
       className={`flex items-center gap-3 px-4 py-3 rounded-xl ${
         active
-          ? "bg-white text-[#075d50]"
+          ? "bg-[#fffdf7] text-[#185c3a]"
           : "text-white/70 hover:bg-white/10 hover:text-white"
       }`}
     >

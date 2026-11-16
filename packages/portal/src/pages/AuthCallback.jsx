@@ -33,14 +33,14 @@ export default function AuthCallback() {
       navigate(portalHome(result.role), { replace: true });
     } catch (issue) { setError(issue.message); } finally { setBusy(false); }
   }
-  return <main className="flex min-h-screen items-center justify-center bg-[#075d50] p-6"><section className="w-full max-w-md rounded-2xl bg-white p-8">
+  return <main className="flex min-h-screen items-center justify-center bg-[#185c3a] p-6"><section className="w-full max-w-md rounded-2xl bg-[#fffdf7] p-8">
     <h1 className="text-2xl font-black">{recovery ? 'Choose a new password' : flow === 'signup' ? 'Enter your signup OTP' : 'Verifying your email'}</h1>
     {recovery && <form onSubmit={submit} className="mt-6 space-y-4"><fieldset disabled={busy} className="space-y-4">
       <label className="block">New password<input type="password" autoComplete="new-password" required minLength={8} maxLength={256} value={password} onChange={event => setPassword(event.target.value)} className="mt-2 w-full rounded-xl border p-3" /></label>
       <label className="block">Confirm password<input type="password" autoComplete="new-password" required value={confirmation} onChange={event => setConfirmation(event.target.value)} className="mt-2 w-full rounded-xl border p-3" /></label>
-      <button className="w-full rounded-xl bg-[#0f8f73] p-3 font-bold text-white">{busy ? 'Saving…' : 'Save new password'}</button>
+      <button className="w-full rounded-xl bg-[#287647] p-3 font-bold text-white">{busy ? 'Saving…' : 'Save new password'}</button>
     </fieldset></form>}
     {error ? <p role="alert" className="mt-4 text-red-700">{error}</p> : !recovery && <p role="status" className="mt-4">Please wait…</p>}
-    <Link to="/login" className="mt-6 inline-block font-bold text-[#075d50]">{flow === 'signup' ? 'Back to OTP verification' : 'Back to login'}</Link>
+    <Link to="/login" className="mt-6 inline-block font-bold text-[#185c3a]">{flow === 'signup' ? 'Back to OTP verification' : 'Back to login'}</Link>
   </section></main>;
 }

@@ -13,11 +13,11 @@ export default function CanteenMembers() {
     catch (issue) { setError(issue.message); }
     finally { setRemoving(false); }
   };
-  return <main className="min-h-screen bg-[#f6f8f7] p-5 lg:p-10"><div className="mx-auto max-w-5xl">
-    <Link to="/canteen" className="font-bold text-[#075d50]">← Canteen dashboard</Link>
+  return <main className="min-h-screen bg-[#fff8e9] p-5 lg:p-10"><div className="mx-auto max-w-5xl">
+    <Link to="/canteen" className="font-bold text-[#185c3a]">← Canteen dashboard</Link>
     <h1 className="my-7 text-3xl font-black">Canteen members</h1>
     {error && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
-          <section id="members" className="rounded-2xl bg-white p-6 shadow-sm">
+          <section id="members" className="rounded-2xl bg-[#fffdf7] p-6 shadow-sm">
             <h2 className="text-xl font-black">Member access</h2>
             <p className="mt-2 text-gray-500">{memberSummary?.membersWithAccess ?? 0} members with access · {memberSummary?.signedInPeople ?? 0} people signed in · {memberSummary?.sessionCount ?? 0} sessions</p>
             <p className="mt-2 text-sm text-gray-500">Signed-in counts include valid sessions until logout or expiry; they do not indicate who is online now.</p>

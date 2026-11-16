@@ -10,14 +10,14 @@ export default function OrderTracking() {
   if (!order) return <div className="p-10">{error || (loading ? "Loading order…" : "Order not found.")} <Link to="/dashboard/orders">My orders</Link></div>;
   const currentIndex = order.status === "REJECTED" ? 1 : orderStatuses.indexOf(order.status);
   return (
-    <div className="min-h-screen bg-[#f8faf9]">
-      <header className="border-b bg-white p-5"><Link to="/dashboard/orders" className="flex items-center gap-2 text-gray-500"><ArrowLeft size={18} /> My orders</Link></header>
+    <div className="min-h-screen bg-[#fff8e9]">
+      <header className="border-b bg-[#fffdf7] p-5"><Link to="/dashboard/orders" className="flex items-center gap-2 text-gray-500"><ArrowLeft size={18} /> My orders</Link></header>
       <main className="mx-auto max-w-3xl p-5 lg:p-10">
         <h1 className="text-3xl font-black">Track order</h1>
-        <div className="mt-8 rounded-[28px] bg-[#075d50] p-8 text-center text-white"><p className="text-sm text-white/60">ORDER REFERENCE</p><p className="mt-3 text-5xl font-black tracking-widest text-[#facc15]">{orderCode(order)}</p><p className="mt-2 text-sm">Day: {orderDay(order)}</p><p className="mt-5 font-bold">{order.cafeName}</p></div>
-        <div className="mt-6 rounded-2xl bg-white p-8 shadow-card">
+        <div className="mt-8 rounded-[28px] bg-[#185c3a] p-8 text-center text-white"><p className="text-sm text-white/60">ORDER REFERENCE</p><p className="mt-3 text-5xl font-black tracking-widest text-[#ffc565]">{orderCode(order)}</p><p className="mt-2 text-sm">Day: {orderDay(order)}</p><p className="mt-5 font-bold">{order.cafeName}</p></div>
+        <div className="mt-6 rounded-2xl bg-[#fffdf7] p-8 shadow-card">
           <p className="mt-5 text-gray-500">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(" · ")}</p>
-          <OrderPayment order={order} /><div className="mt-8 space-y-4">{(order.status === "REJECTED" ? ["RECEIVED", "REJECTED"] : orderStatuses).map((status, index) => <div key={status} className="flex items-center gap-4"><span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${index <= currentIndex ? "bg-[#0f8f73] text-white" : "bg-gray-100 text-gray-400"}`}>{index <= currentIndex ? <Check size={18} /> : <Circle size={16} />}</span><div><p className="font-bold">{statusLabels[status]}</p>{status === order.status && <p className="text-sm text-[#0f8f73]">Current status</p>}</div></div>)}</div>
+          <OrderPayment order={order} /><div className="mt-8 space-y-4">{(order.status === "REJECTED" ? ["RECEIVED", "REJECTED"] : orderStatuses).map((status, index) => <div key={status} className="flex items-center gap-4"><span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${index <= currentIndex ? "bg-[#287647] text-white" : "bg-gray-100 text-gray-400"}`}>{index <= currentIndex ? <Check size={18} /> : <Circle size={16} />}</span><div><p className="font-bold">{statusLabels[status]}</p>{status === order.status && <p className="text-sm text-[#287647]">Current status</p>}</div></div>)}</div>
           {order.status === "REJECTED" && <p role="status" className="mt-8 rounded-xl bg-red-50 p-5 font-bold text-red-700">{order.closedReason === 'PAYMENT_EXPIRED' ? 'The unpaid payment window expired.' : order.closedReason === 'STUDENT_CANCELLED' ? 'You cancelled this unpaid order.' : 'The canteen rejected this order. No payment is required.'}</p>}
 
           {order.status === "COLLECTED" && <p className="mt-8 rounded-xl bg-green-50 p-5 font-bold text-green-700">Collected. Enjoy your food!</p>}

@@ -1,3 +1,4 @@
+import { MenuLoading } from '@spoonate/portal/components/Brand';
 import OfferPrice from '@spoonate/portal/components/OfferPrice';
 import { ArrowLeft, Search } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
@@ -28,7 +29,7 @@ export default function CafePage() {
           (food) => food.categoryId === category
         );
 
-  if (!cafe && (catalogLoading || catalogError)) return <p role="status" className="p-10">{catalogError || "Loading menu…"}</p>;
+  if (!cafe && (catalogLoading || catalogError)) return catalogError ? <p role="alert" className="p-10">{catalogError}</p> : <main className="p-5"><MenuLoading /></main>;
   if (!cafe) {
     return (
       <div className="p-10">
@@ -38,9 +39,9 @@ export default function CafePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8faf9]">
+    <div className="min-h-screen bg-[#fff8e9]">
 
-      <header className="bg-white border-b px-5 lg:px-10 py-5">
+      <header className="bg-[#fffdf7] border-b px-5 lg:px-10 py-5">
 
         <Link
           to="/dashboard"
@@ -54,14 +55,14 @@ export default function CafePage() {
 
       <main className="max-w-7xl mx-auto p-5 lg:p-10">
 
-        <section className="bg-[#075d50] text-white rounded-[28px] overflow-hidden">
+        <section className="bg-[#185c3a] text-white rounded-[28px] overflow-hidden">
 
           <div className="grid md:grid-cols-2">
 
             <img
               src={cafe.image}
               alt={`${cafe.name} poster`}
-              className="h-72 md:h-full w-full bg-white object-contain"
+              className="h-72 md:h-full w-full bg-[#fffdf7] object-contain"
             />
 
             <div className="p-8 lg:p-12">
@@ -94,7 +95,7 @@ export default function CafePage() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search menu..."
-            className="w-full bg-white border border-gray-200 rounded-xl py-3 pl-11 pr-4 outline-none"
+            className="w-full bg-[#fffdf7] border border-gray-200 rounded-xl py-3 pl-11 pr-4 outline-none"
           />
 
         </div>
@@ -113,8 +114,8 @@ export default function CafePage() {
               onClick={() => setCategory(item.id)}
               className={`px-5 py-2.5 rounded-full font-semibold whitespace-nowrap ${
                 category === item.id
-                  ? "bg-[#075d50] text-white"
-                  : "bg-white border border-gray-200"
+                  ? "bg-[#185c3a] text-white"
+                  : "bg-[#fffdf7] border border-gray-200"
               }`}
             >
               {item.name}
@@ -133,7 +134,7 @@ export default function CafePage() {
 
             <div
               key={food.id}
-              className="bg-white rounded-2xl overflow-hidden shadow-card"
+              className="bg-[#fffdf7] rounded-2xl overflow-hidden shadow-card"
             >
 
               <img
@@ -153,7 +154,7 @@ export default function CafePage() {
 
                 <div className="flex justify-between items-center mt-5">
 
-                  <span className="text-[#0f8f73] font-black text-xl">
+                  <span className="text-[#287647] font-black text-xl">
                     <OfferPrice item={food} />
                   </span>
 
@@ -162,7 +163,7 @@ export default function CafePage() {
                     onClick={() =>
                       addToCart(food)
                     }
-                    className="bg-[#0f8f73] text-white px-4 py-2 rounded-xl font-bold"
+                    className="bg-[#287647] text-white px-4 py-2 rounded-xl font-bold"
                   >
                     {isFoodAvailable(food) ? (cart.some(item => item.id === food.id) ? `Add more (${cart.find(item => item.id === food.id).quantity})` : "Add to Cart") : "Unavailable"}
                   </button>

@@ -30,7 +30,7 @@ export default function Cart() {
   if (!cartState) return <div className="p-10"><p role="status">{catalogError || "Loading your saved cart…"}</p><button onClick={refreshCatalog} className="mt-4 underline">Retry</button></div>;
   if (!cart.length && !pendingCheckout) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8faf9]">
+      <div className="min-h-screen flex items-center justify-center bg-[#fff8e9]">
 
         <div className="text-center">
 
@@ -48,7 +48,7 @@ export default function Cart() {
 
           <Link
             to="/dashboard"
-            className="inline-block mt-6 bg-[#075d50] text-white px-6 py-3 rounded-xl font-bold"
+            className="inline-block mt-6 bg-[#185c3a] text-white px-6 py-3 rounded-xl font-bold"
           >
             Browse menu
           </Link>
@@ -60,9 +60,9 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8faf9]">
+    <div className="min-h-screen bg-[#fff8e9]">
 
-      <header className="bg-white border-b p-5">
+      <header className="bg-[#fffdf7] border-b p-5">
 
         <Link
           to="/dashboard"
@@ -92,7 +92,7 @@ export default function Cart() {
 
               <div
                 key={item.id}
-                className="bg-white rounded-2xl p-4 flex gap-4 shadow-card"
+                className="bg-[#fffdf7] rounded-2xl p-4 flex gap-4 shadow-card"
               >
 
                 {!isComboCategory(item.category) && <img
@@ -106,7 +106,7 @@ export default function Cart() {
                     {item.name}
                   </h3>
 
-                  <p className="text-[#0f8f73] font-bold mt-1">
+                  <p className="text-[#287647] font-bold mt-1">
                     <OfferPrice item={item} />
                   </p>
 
@@ -161,7 +161,7 @@ export default function Cart() {
 
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-card h-fit">
+          <div className="bg-[#fffdf7] rounded-2xl p-6 shadow-card h-fit">
 
             <h2 className="text-xl font-black">
               Order Summary
