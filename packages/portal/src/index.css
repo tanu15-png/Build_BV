@@ -167,3 +167,17 @@ h1, h2, h3 { letter-spacing: -.025em; text-wrap: pretty; }
   .loading-film { display: none; }
   .is-playing .loading-fallback { opacity: 1; }
 }
+
+/* The supplied artwork is the single logo source across both portals. */
+.brand-mark { display: inline-block; width: 174px; height: auto; max-width: 100%; border-radius: 10px; flex-shrink: 0; object-fit: contain; }
+.brand-splash .brand-mark { width: min(76vw, 310px); }
+.loading-fallback .brand-mark { width: min(76vw, 260px); }
+.menu-loading-animation .brand-mark { width: 180px; }
+@media (max-width: 639px) { .mobile-brand { width: 95px; } }
+@media (min-width: 1024px) { .mobile-brand { display: none; } }
+
+.brand-splash { position: fixed; inset: 0; z-index: 100; overflow: hidden; }
+
+.staff-sidebar .brand-mark { width: 130px; }
+.staff-sidebar nav { display: flex; flex-direction: column; gap: 4px; margin-top: 24px; min-height: 0; overflow-y: auto; }
+.staff-sidebar nav > a { margin-block: 0; padding-block: .55rem; }

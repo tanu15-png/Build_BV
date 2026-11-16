@@ -23,7 +23,7 @@ export default function CanteenDashboard() {
   const handleLogout = () => { void perform(async () => { await logout(); navigate("/login", { replace: true }); }); };
   return (
     <div className="min-h-screen bg-[#fff8e9]">
-      <aside className="fixed bottom-0 left-0 top-9 hidden w-64 flex-col bg-[#185c3a] p-6 text-white lg:flex">
+      <aside className="staff-sidebar fixed bottom-0 left-0 top-9 hidden w-64 flex-col bg-[#185c3a] p-6 text-white lg:flex">
         <BrandMark /><p className="mt-2 text-sm text-white/60">Canteen management</p>
         <nav className="mt-10 space-y-3" aria-label="Canteen navigation"><Link to="/canteen" className="block rounded-xl bg-[#fffdf7] px-4 py-3 font-bold text-[#185c3a]">Dashboard</Link><Link to="/canteen/menu" className="block px-4 py-3">Manage menu</Link><Link to="/canteen/combos" className="block px-4 py-3">Manage combos</Link><Link to="/canteen/offers" className="block px-4 py-3">Manage offers</Link><Link to="/canteen/banners" className="block px-4 py-3">Manage banners</Link><Link to="/canteen/rewards" className="block px-4 py-3">Manage rewards</Link><Link to="/canteen/stats" className="block px-4 py-3">Stats</Link><Link to="/canteen/members" className="block px-4 py-3">Members</Link></nav>
         <button onClick={handleLogout} className="mt-auto flex items-center gap-2 px-4 py-3"><LogOut size={18} /> Logout</button>

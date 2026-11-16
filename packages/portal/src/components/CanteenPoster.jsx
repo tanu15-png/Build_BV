@@ -1,4 +1,3 @@
-import { canteenPoster } from '../services/canteenBranding';
-export default function CanteenPoster({ slug, name, className = '' }) {
-  return <img src={canteenPoster(slug)} alt={`${name || 'Canteen'} poster`} className={`shrink-0 bg-[#fffdf7] object-contain ${className}`} onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = '/food-placeholder.svg'; }} />;
+export default function CanteenPoster({ className = '' }) {
+  return <img src="/brand/spoonate-logo.svg" alt="SpoonAte" className={`shrink-0 rounded-lg bg-[#fff8e9] object-contain ${className}`} />;
 }

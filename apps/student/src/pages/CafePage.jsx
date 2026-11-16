@@ -1,3 +1,4 @@
+import { useLoadingAnimation } from '@spoonate/portal/hooks/useLoadingAnimation';
 import { MenuLoading } from '@spoonate/portal/components/Brand';
 import OfferPrice from '@spoonate/portal/components/OfferPrice';
 import { ArrowLeft, Search } from "lucide-react";
@@ -20,6 +21,7 @@ export default function CafePage() {
     (c) => c.id === cafeId
   );
 
+  const animation = useLoadingAnimation(!cafe && catalogLoading);
   const cafeFoods = foods.filter((food) => food.cafeId === cafeId && (!offersOnly||food.offer) && food.name.toLowerCase().includes(search.trim().toLowerCase()));
 
   const filteredFoods =
@@ -29,7 +31,8 @@ export default function CafePage() {
           (food) => food.categoryId === category
         );
 
-  if (!cafe && (catalogLoading || catalogError)) return catalogError ? <p role="alert" className="p-10">{catalogError}</p> : <main className="p-5"><MenuLoading /></main>;
+  if (animation.pending) return <main className="p-5"><MenuLoading onComplete={animation.complete} /></main>;
+  if (!cafe && catalogError) return <p role="alert" className="p-10">{catalogError}</p>;
   if (!cafe) {
     return (
       <div className="p-10">

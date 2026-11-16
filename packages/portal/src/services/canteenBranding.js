@@ -1,1 +1,1 @@
-export function canteenPoster() { return '/food-placeholder.svg'; }
+export function canteenPoster() { return '/brand/spoonate-logo.svg'; }
