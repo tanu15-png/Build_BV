@@ -1,1 +1,1 @@
-export function canteenPoster() { return '/brand/spoonate-logo.svg'; }
+export function canteenPoster() { return '/brand/shanu-logo.jpg'; }

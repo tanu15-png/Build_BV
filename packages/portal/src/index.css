@@ -181,3 +181,8 @@ h1, h2, h3 { letter-spacing: -.025em; text-wrap: pretty; }
 .staff-sidebar .brand-mark { width: 130px; }
 .staff-sidebar nav { display: flex; flex-direction: column; gap: 4px; margin-top: 24px; min-height: 0; overflow-y: auto; }
 .staff-sidebar nav > a { margin-block: 0; padding-block: .55rem; }
+
+/* Only mount this artwork after a playback failure (or a reduced-motion preference). */
+.loading-fallback > img { width: min(92vw, 650px); max-width: 100%; max-height: 100%; object-fit: contain; animation: fallback-breathe 2s ease-in-out infinite; }
+.menu-loading-animation .loading-fallback > img { width: 100%; height: 100%; }
+@keyframes fallback-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .8; } }

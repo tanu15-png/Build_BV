@@ -7,20 +7,22 @@ export function BrandMark({ className = '' }) {
 function LoadingAnimation({ onComplete }) {
   const video = useRef(null);
   const [playing, setPlaying] = useState(false);
+  const [finished, setFinished] = useState(false);
   const [fallback, setFallback] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   useEffect(() => {
     if (fallback) {
       const timer = setTimeout(() => onComplete?.(), 3000);
       return () => clearTimeout(timer);
     }
-    void video.current?.play().catch(() => setFallback(true));
+    if (finished) return;
+    void video.current?.play().catch(error => { if (error.name !== 'AbortError') setFallback(true); });
     // A missing or stalled media download must not lock users out of the app.
     const timeout = setTimeout(() => setFallback(true), 20000);
     return () => clearTimeout(timeout);
-  }, [fallback, onComplete]);
+  }, [fallback, finished, onComplete]);
   return <div className={`loading-animation ${playing && !fallback ? 'is-playing' : ''}`}>
-    <div className="loading-fallback"><BrandMark /><span className="brand-loading-dots" aria-hidden="true"><i /><i /><i /></span></div>
-    {!fallback && <video ref={video} className="loading-film" src="/brand/spoonate-loading.mp4" autoPlay muted playsInline preload="auto" aria-hidden="true" disablePictureInPicture onPlaying={() => setPlaying(true)} onEnded={onComplete} onError={() => setFallback(true)} />}
+    {fallback && <div className="loading-fallback"><img src="/brand/spoonate-fallback.png" alt="SpoonAte — Eat, enjoy, repeat" width="731" height="500" /></div>}
+    {!fallback && <video ref={video} className="loading-film" src="/brand/spoonate-loading.mp4" autoPlay muted playsInline preload="auto" aria-hidden="true" disablePictureInPicture onPlaying={() => setPlaying(true)} onEnded={() => { setFinished(true); onComplete?.(); }} onError={() => setFallback(true)} />}
   </div>;
 }
 
