@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { campusDay } from "@spoonate/portal/utils/orderRules";
 import { Bell } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useOrders } from "@spoonate/portal/context/OrderContext";
 export default function Notifications() {
+  const location = useLocation();
   const { notifications, unreadNotificationCount, notificationsLoading, notificationsError, notificationsInitialized, notificationsInitialLoading,
     refreshNotifications, loadMoreNotifications, markNotificationRead, markNotificationsOpened } = useOrders();
   const opened = useRef(new Set());
@@ -23,7 +24,7 @@ export default function Notifications() {
     <div className="mt-8 space-y-4">{!notifications.length && notificationsInitialized && !notificationsError ? <p className="rounded-2xl bg-[#fffdf7] p-8 text-gray-500">Acceptance, rejection and ready-for-pickup notifications will appear here.</p> : notifications.map(notification => <article key={notification.id} className={`rounded-2xl border-l-4 bg-[#fffdf7] p-5 shadow-card ${notification.readAt ? 'border-gray-200' : 'border-[#287647]'}`}>
       <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-black">{notification.type === 'PAYMENT_EXPIRED' ? 'Order expired · Unpaid' : notification.type === 'PAID' ? 'Payment confirmed' : notification.type === 'READY' ? 'Ready for pickup' : notification.type === 'REJECTED' ? 'Order rejected' : 'Order accepted'}</h2></div>
       <p className="mt-2 text-gray-500">{notification.message}</p><p className="mt-2 text-xs text-gray-400">{campusDay(notification.createdAt)}</p>
-      <Link to={`/dashboard/orders/${notification.orderId}`} onClick={() => { if (!notification.readAt) read(notification.id); }} className="mt-4 inline-block font-bold text-[#287647]">View order →</Link>
+      <Link to={`/dashboard/orders/${notification.orderId}`} state={{ from: location.pathname + location.search + location.hash }} onClick={() => { if (!notification.readAt) read(notification.id); }} className="mt-4 inline-block font-bold text-[#287647]">View order →</Link>
     </article>)}</div>
     {loadMoreNotifications && <button disabled={notificationsLoading} onClick={loadMoreNotifications} className="mt-6 rounded-xl border px-4 py-3 font-bold disabled:opacity-50">Load more notifications</button>}
   </main>;

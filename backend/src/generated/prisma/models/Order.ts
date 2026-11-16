@@ -30,12 +30,14 @@ export type OrderAvgAggregateOutputType = {
   totalPaise: number | null
   rewardTokenCost: number | null
   version: number | null
+  rating: number | null
 }
 
 export type OrderSumAggregateOutputType = {
   totalPaise: number | null
   rewardTokenCost: number | null
   version: number | null
+  rating: number | null
 }
 
 export type OrderMinAggregateOutputType = {
@@ -61,6 +63,8 @@ export type OrderMinAggregateOutputType = {
   version: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  rating: number | null
+  ratedAt: Date | null
   collectedAt: Date | null
   pickupVerifiedBy: string | null
 }
@@ -88,6 +92,8 @@ export type OrderMaxAggregateOutputType = {
   version: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  rating: number | null
+  ratedAt: Date | null
   collectedAt: Date | null
   pickupVerifiedBy: string | null
 }
@@ -115,6 +121,8 @@ export type OrderCountAggregateOutputType = {
   version: number
   createdAt: number
   updatedAt: number
+  rating: number
+  ratedAt: number
   collectedAt: number
   pickupVerifiedBy: number
   _all: number
@@ -125,12 +133,14 @@ export type OrderAvgAggregateInputType = {
   totalPaise?: true
   rewardTokenCost?: true
   version?: true
+  rating?: true
 }
 
 export type OrderSumAggregateInputType = {
   totalPaise?: true
   rewardTokenCost?: true
   version?: true
+  rating?: true
 }
 
 export type OrderMinAggregateInputType = {
@@ -156,6 +166,8 @@ export type OrderMinAggregateInputType = {
   version?: true
   createdAt?: true
   updatedAt?: true
+  rating?: true
+  ratedAt?: true
   collectedAt?: true
   pickupVerifiedBy?: true
 }
@@ -183,6 +195,8 @@ export type OrderMaxAggregateInputType = {
   version?: true
   createdAt?: true
   updatedAt?: true
+  rating?: true
+  ratedAt?: true
   collectedAt?: true
   pickupVerifiedBy?: true
 }
@@ -210,6 +224,8 @@ export type OrderCountAggregateInputType = {
   version?: true
   createdAt?: true
   updatedAt?: true
+  rating?: true
+  ratedAt?: true
   collectedAt?: true
   pickupVerifiedBy?: true
   _all?: true
@@ -324,6 +340,8 @@ export type OrderGroupByOutputType = {
   version: number
   createdAt: Date
   updatedAt: Date
+  rating: number | null
+  ratedAt: Date | null
   collectedAt: Date | null
   pickupVerifiedBy: string | null
   _count: OrderCountAggregateOutputType | null
@@ -374,6 +392,8 @@ export type OrderWhereInput = {
   version?: Prisma.IntFilter<"Order"> | number
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  rating?: Prisma.IntNullableFilter<"Order"> | number | null
+  ratedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   collectedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   pickupVerifiedBy?: Prisma.UuidNullableFilter<"Order"> | string | null
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -409,6 +429,8 @@ export type OrderOrderByWithRelationInput = {
   version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  rating?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   collectedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pickupVerifiedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   student?: Prisma.UserOrderByWithRelationInput
@@ -449,6 +471,8 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   version?: Prisma.IntFilter<"Order"> | number
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  rating?: Prisma.IntNullableFilter<"Order"> | number | null
+  ratedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   collectedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   pickupVerifiedBy?: Prisma.UuidNullableFilter<"Order"> | string | null
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -484,6 +508,8 @@ export type OrderOrderByWithAggregationInput = {
   version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  rating?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   collectedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pickupVerifiedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.OrderCountOrderByAggregateInput
@@ -519,6 +545,8 @@ export type OrderScalarWhereWithAggregatesInput = {
   version?: Prisma.IntWithAggregatesFilter<"Order"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
+  rating?: Prisma.IntNullableWithAggregatesFilter<"Order"> | number | null
+  ratedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
   collectedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
   pickupVerifiedBy?: Prisma.UuidNullableWithAggregatesFilter<"Order"> | string | null
 }
@@ -544,6 +572,8 @@ export type OrderCreateInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   student: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -579,6 +609,8 @@ export type OrderUncheckedCreateInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -610,6 +642,8 @@ export type OrderUpdateInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -645,6 +679,8 @@ export type OrderUncheckedUpdateInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -678,6 +714,8 @@ export type OrderCreateManyInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
 }
@@ -703,6 +741,8 @@ export type OrderUpdateManyMutationInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -730,6 +770,8 @@ export type OrderUncheckedUpdateManyInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -778,6 +820,8 @@ export type OrderCountOrderByAggregateInput = {
   version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  rating?: Prisma.SortOrder
+  ratedAt?: Prisma.SortOrder
   collectedAt?: Prisma.SortOrder
   pickupVerifiedBy?: Prisma.SortOrder
 }
@@ -786,6 +830,7 @@ export type OrderAvgOrderByAggregateInput = {
   totalPaise?: Prisma.SortOrder
   rewardTokenCost?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  rating?: Prisma.SortOrder
 }
 
 export type OrderMaxOrderByAggregateInput = {
@@ -811,6 +856,8 @@ export type OrderMaxOrderByAggregateInput = {
   version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  rating?: Prisma.SortOrder
+  ratedAt?: Prisma.SortOrder
   collectedAt?: Prisma.SortOrder
   pickupVerifiedBy?: Prisma.SortOrder
 }
@@ -838,6 +885,8 @@ export type OrderMinOrderByAggregateInput = {
   version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  rating?: Prisma.SortOrder
+  ratedAt?: Prisma.SortOrder
   collectedAt?: Prisma.SortOrder
   pickupVerifiedBy?: Prisma.SortOrder
 }
@@ -846,6 +895,7 @@ export type OrderSumOrderByAggregateInput = {
   totalPaise?: Prisma.SortOrder
   rewardTokenCost?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  rating?: Prisma.SortOrder
 }
 
 export type OrderScalarRelationFilter = {
@@ -1053,6 +1103,8 @@ export type OrderCreateWithoutStudentInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   canteen: Prisma.CanteenCreateNestedOneWithoutOrdersInput
@@ -1086,6 +1138,8 @@ export type OrderUncheckedCreateWithoutStudentInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -1148,6 +1202,8 @@ export type OrderScalarWhereInput = {
   version?: Prisma.IntFilter<"Order"> | number
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  rating?: Prisma.IntNullableFilter<"Order"> | number | null
+  ratedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   collectedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   pickupVerifiedBy?: Prisma.UuidNullableFilter<"Order"> | string | null
 }
@@ -1173,6 +1229,8 @@ export type OrderCreateWithoutCanteenInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   student: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1206,6 +1264,8 @@ export type OrderUncheckedCreateWithoutCanteenInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -1263,6 +1323,8 @@ export type OrderCreateWithoutPickupCredentialInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   student: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1297,6 +1359,8 @@ export type OrderUncheckedCreateWithoutPickupCredentialInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -1343,6 +1407,8 @@ export type OrderUpdateWithoutPickupCredentialInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -1377,6 +1443,8 @@ export type OrderUncheckedUpdateWithoutPickupCredentialInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -1407,6 +1475,8 @@ export type OrderCreateWithoutItemsInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   student: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1441,6 +1511,8 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
@@ -1487,6 +1559,8 @@ export type OrderUpdateWithoutItemsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -1521,6 +1595,8 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
@@ -1551,6 +1627,8 @@ export type OrderCreateWithoutEventsInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   student: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1585,6 +1663,8 @@ export type OrderUncheckedCreateWithoutEventsInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -1631,6 +1711,8 @@ export type OrderUpdateWithoutEventsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -1665,6 +1747,8 @@ export type OrderUncheckedUpdateWithoutEventsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -1695,6 +1779,8 @@ export type OrderCreateWithoutAllocationInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   student: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1729,6 +1815,8 @@ export type OrderUncheckedCreateWithoutAllocationInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -1775,6 +1863,8 @@ export type OrderUpdateWithoutAllocationInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -1809,6 +1899,8 @@ export type OrderUncheckedUpdateWithoutAllocationInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -1839,6 +1931,8 @@ export type OrderCreateWithoutNotificationsInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   student: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1873,6 +1967,8 @@ export type OrderUncheckedCreateWithoutNotificationsInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -1919,6 +2015,8 @@ export type OrderUpdateWithoutNotificationsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -1953,6 +2051,8 @@ export type OrderUncheckedUpdateWithoutNotificationsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -1983,6 +2083,8 @@ export type OrderCreateWithoutIdempotencyKeysInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   student: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -2017,6 +2119,8 @@ export type OrderUncheckedCreateWithoutIdempotencyKeysInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -2063,6 +2167,8 @@ export type OrderUpdateWithoutIdempotencyKeysInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -2097,6 +2203,8 @@ export type OrderUncheckedUpdateWithoutIdempotencyKeysInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -2128,6 +2236,8 @@ export type OrderCreateManyStudentInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
 }
@@ -2153,6 +2263,8 @@ export type OrderUpdateWithoutStudentInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canteen?: Prisma.CanteenUpdateOneRequiredWithoutOrdersNestedInput
@@ -2186,6 +2298,8 @@ export type OrderUncheckedUpdateWithoutStudentInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -2218,6 +2332,8 @@ export type OrderUncheckedUpdateManyWithoutStudentInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -2244,6 +2360,8 @@ export type OrderCreateManyCanteenInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  rating?: number | null
+  ratedAt?: Date | string | null
   collectedAt?: Date | string | null
   pickupVerifiedBy?: string | null
 }
@@ -2269,6 +2387,8 @@ export type OrderUpdateWithoutCanteenInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -2302,6 +2422,8 @@ export type OrderUncheckedUpdateWithoutCanteenInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -2334,6 +2456,8 @@ export type OrderUncheckedUpdateManyWithoutCanteenInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pickupVerifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -2419,6 +2543,8 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  rating?: boolean
+  ratedAt?: boolean
   collectedAt?: boolean
   pickupVerifiedBy?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -2455,6 +2581,8 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  rating?: boolean
+  ratedAt?: boolean
   collectedAt?: boolean
   pickupVerifiedBy?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -2484,6 +2612,8 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  rating?: boolean
+  ratedAt?: boolean
   collectedAt?: boolean
   pickupVerifiedBy?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -2513,11 +2643,13 @@ export type OrderSelectScalar = {
   version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  rating?: boolean
+  ratedAt?: boolean
   collectedAt?: boolean
   pickupVerifiedBy?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "canteenId" | "status" | "executionMode" | "paymentStatus" | "razorpayOrderId" | "razorpayPaymentId" | "paymentKeyId" | "paymentDeadline" | "paymentPaidAt" | "paymentLeaseUntil" | "paymentNextCheckAt" | "closedReason" | "totalPaise" | "rewardTokenCost" | "pickupAt" | "codeDay" | "orderCode" | "version" | "createdAt" | "updatedAt" | "collectedAt" | "pickupVerifiedBy", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "canteenId" | "status" | "executionMode" | "paymentStatus" | "razorpayOrderId" | "razorpayPaymentId" | "paymentKeyId" | "paymentDeadline" | "paymentPaidAt" | "paymentLeaseUntil" | "paymentNextCheckAt" | "closedReason" | "totalPaise" | "rewardTokenCost" | "pickupAt" | "codeDay" | "orderCode" | "version" | "createdAt" | "updatedAt" | "rating" | "ratedAt" | "collectedAt" | "pickupVerifiedBy", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   canteen?: boolean | Prisma.CanteenDefaultArgs<ExtArgs>
@@ -2573,6 +2705,8 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     version: number
     createdAt: Date
     updatedAt: Date
+    rating: number | null
+    ratedAt: Date | null
     collectedAt: Date | null
     pickupVerifiedBy: string | null
   }, ExtArgs["result"]["order"]>
@@ -3028,6 +3162,8 @@ export interface OrderFieldRefs {
   readonly version: Prisma.FieldRef<"Order", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Order", 'DateTime'>
+  readonly rating: Prisma.FieldRef<"Order", 'Int'>
+  readonly ratedAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly collectedAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly pickupVerifiedBy: Prisma.FieldRef<"Order", 'String'>
 }

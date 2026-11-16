@@ -2718,6 +2718,8 @@ export const OrderScalarFieldEnum = {
   version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  rating: 'rating',
+  ratedAt: 'ratedAt',
   collectedAt: 'collectedAt',
   pickupVerifiedBy: 'pickupVerifiedBy'
 } as const

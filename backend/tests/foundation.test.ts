@@ -108,7 +108,9 @@ test('frontend fixtures enforce identity, quantity, campus domain, paise, status
   }
   contracts['POST /orders/:id/reject']!.body.parse({ expectedVersion: 1 });
   assert.equal(contracts['POST /orders/:id/reject']!.body.safeParse({}).success, false);
-  assert.equal(Object.keys(contracts).length, 53);
+  contracts['POST /orders/:id/rating']!.body.parse({ rating: 5 });
+  for (const rating of [0, 6, 2.5, '5']) assert.equal(contracts['POST /orders/:id/rating']!.body.safeParse({ rating }).success, false);
+  assert.equal(Object.keys(contracts).length, 54);
 });
 test('validation handles body, params and parsed query with stable 422 envelope', async () => {
   const app = express(); app.use(requestId); app.use(express.json());

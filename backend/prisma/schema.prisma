@@ -298,6 +298,8 @@ model Order {
   version Int @default(1)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  rating Int?
+  ratedAt DateTime? @map("rated_at") @db.Timestamptz
   collectedAt DateTime? @map("collected_at") @db.Timestamptz
   pickupVerifiedBy String? @map("pickup_verified_by") @db.Uuid
   student User @relation(fields: [studentId], references: [id], onDelete: Restrict)

@@ -65,6 +65,7 @@ export function CanteenOrderCard({ order }) {
     <p className="mt-1 text-xs text-gray-500">Day: {orderDay(order)} · Received <time dateTime={order.createdAt}>{orderReceivedTime(order)}</time></p>
     <p className="mt-2 text-sm text-gray-600">{order.items.map(item => `${item.name} × ${item.quantity}`).join(" · ")}</p>
     <OrderPayment order={order} staff compact />
+    {order.rating && <p className="mt-2 text-sm font-bold text-[#185c3a]">Customer rating: {"★".repeat(order.rating)}{"☆".repeat(5-order.rating)} · {order.rating}/5</p>}
     {order.status === "REJECTED" && !isUnpaidOrder(order) && <p className="mt-2 text-sm text-red-700">{order.closedReason === 'STUDENT_CANCELLED' ? 'Student cancelled before payment.' : 'Order rejected.'}</p>}
     {actionError && <div role="alert" className="mt-3 text-sm text-red-600"><p>{actionError.message}</p><button disabled={actionError.recovering} onClick={() => { void retryOrderAction(order.id).catch(() => {}); }} className="mt-2 rounded-lg border px-3 py-2 font-bold disabled:opacity-50">Retry update</button></div>}
   </article>;

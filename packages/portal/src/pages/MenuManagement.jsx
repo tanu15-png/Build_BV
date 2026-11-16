@@ -1,4 +1,3 @@
-import { useLoadingAnimation } from '../hooks/useLoadingAnimation';
 import { MenuLoading } from '../components/Brand';
 import { isComboCategory } from '../utils/menuRules';
 import MenuImageField from '../components/MenuImageField';
@@ -19,7 +18,6 @@ export default function MenuManagement({ combosOnly = false }) {
   const canteenId = user.role === 'admin' ? adminCanteenId : user.canteenId;
   const { managementMenu: loadedMenu, queueMenuChange, seedManagementMenu, pendingMenuSaves, catalogRevision } = useOrders();
   const menu = loadedMenu?.canteen.id === canteenId ? loadedMenu : null;
-  const animation = useLoadingAnimation(!menu);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const loadSequence = useRef(0);
@@ -85,7 +83,7 @@ export default function MenuManagement({ combosOnly = false }) {
     {error && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
     {pendingMenuSaves > 0 && <p role="status" className="mb-5 text-sm text-gray-500">Saving {pendingMenuSaves === 1 ? 'change' : `${pendingMenuSaves} changes`} in the background. You can keep editing.</p>}
     {success && <p role="status" className="mb-5 rounded-xl bg-green-50 p-4 text-green-800">{success}</p>}
-    {animation.pending ? <MenuLoading onComplete={animation.complete} /> : <>
+    {(!menu) ? <MenuLoading /> : <>
       <details className="mb-6 rounded-2xl border border-[#cde5da] bg-[#fffdf7] p-5"><summary className="cursor-pointer font-black text-[#185c3a]">Archived categories and items</summary><p className="mt-3 text-sm text-gray-600">Archived entries can be restored. The bin permanently deletes an entry. Restore a category before restoring its items.</p>
         {menu.categories.filter(c => c.archived && (combosOnly ? c.name === 'Combos' : c.name !== 'Combos')).map(category => <div key={category.id} className="mt-4 flex justify-between gap-3"><span>{category.name}</span><div className="flex items-center gap-3"><button onClick={() => patchCategory(category, { archived: false })} className="font-bold text-[#185c3a]">Restore category</button><DeleteButton label={`Delete category ${category.name}`} onClick={() => deleteEntry('category', category)} /></div></div>)}
         {menu.items.filter(item => item.archived && (combosOnly ? item.category === 'Combos' : item.category !== 'Combos')).map(item => <div key={item.id} className="mt-4 flex justify-between gap-3"><span>{item.name} · {item.category}</span><div className="flex items-center gap-3"><button disabled={!activeCategories.some(c => c.id === item.categoryId)} onClick={() => patchItem(item, { archived: false })} className="font-bold text-[#185c3a] disabled:opacity-40">Restore item</button><DeleteButton label={`Delete item ${item.name}`} onClick={() => deleteEntry('item', item)} /></div></div>)}

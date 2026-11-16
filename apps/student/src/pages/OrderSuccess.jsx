@@ -1,9 +1,10 @@
 import OrderPayment from '@spoonate/portal/components/OrderPayment';
 import { orderCode, orderDay, statusLabels } from "@spoonate/portal/utils/orderRules";
-import { Link, useSearchParams } from "react-router-dom";
+import { useLocation, Link, useSearchParams } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
 import { useOrderDetails } from "@spoonate/portal/hooks/useOrderDetails";
 export default function OrderSuccess() {
+  const location = useLocation();
   const [params] = useSearchParams();
   const { order, error, loading } = useOrderDetails(params.get("id"));
   if (!order) return <div className="p-10">{error || (loading ? "Loading order…" : "Order not found.")} <Link to="/dashboard/orders">My orders</Link></div>;
@@ -16,7 +17,7 @@ export default function OrderSuccess() {
 
         <OrderPayment order={order} /><p className="mt-6 text-gray-500">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")}</p>
         <p className="mt-5 rounded-xl bg-green-50 p-4 text-sm text-green-800">Track this order to see when it is ready. The canteen will mark it collected when you pick up your food.</p>
-        <Link to={`/dashboard/orders/${order.id}`} className="mt-6 block rounded-xl bg-[#287647] py-3 font-black text-white">Track order</Link>
+        <Link to={`/dashboard/orders/${order.id}`} state={{ from: location.pathname + location.search + location.hash }} className="mt-6 block rounded-xl bg-[#287647] py-3 font-black text-white">Track order</Link>
         <Link to="/dashboard" className="mt-4 inline-block text-sm font-bold text-[#185c3a]">Back to canteens</Link>
       </div>
     </div>

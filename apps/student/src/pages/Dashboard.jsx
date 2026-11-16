@@ -13,12 +13,13 @@ import {
   Utensils,
 } from "lucide-react";
 
-import { Link, useNavigate } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@spoonate/portal/context/AuthContext";
 import { useState } from "react";
 import { useOrders } from "@spoonate/portal/context/OrderContext";
 
 export default function Dashboard() {
+  const location = useLocation();
   const { user, logout } = useAuth();
   const { cart, orders, unreadNotificationCount } = useOrders();
   const [search, setSearch] = useState("");
@@ -225,7 +226,7 @@ export default function Dashboard() {
                 <div className="flex flex-col items-start lg:items-end gap-2">
 
 <Link
-                    to={`/dashboard/orders/${activeOrder.id}`}
+                    to={`/dashboard/orders/${activeOrder.id}`} state={{ from: location.pathname + location.search + location.hash }}
                     className="mt-2 bg-[#ffc565] text-[#185c3a] px-5 py-2.5 rounded-xl font-bold"
                   >
                     View order / Pay

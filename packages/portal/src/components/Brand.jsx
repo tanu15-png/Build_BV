@@ -34,6 +34,6 @@ export function FoodSticker({ className = '' }) {
   return <img src="/brand/campus-snack.webp" alt="" aria-hidden="true" width="240" height="240" decoding="async" className={`food-sticker ${className}`} />;
 }
 
-export function MenuLoading({ onComplete }) {
-  return <div role="status" className="menu-loading"><div className="menu-loading-animation"><LoadingAnimation onComplete={onComplete} /></div><p className="mt-3 text-center text-sm font-bold">Loading the menu…</p><div className="menu-skeletons" aria-hidden="true">{[0, 1, 2].map(i => <div key={i}><span /><div><i /><i /></div></div>)}</div></div>;
+export function MenuLoading() {
+  return <div role="status" className="menu-loading"><p className="text-sm font-bold text-gray-600">Loading the menu…</p><div className="menu-skeletons" aria-hidden="true">{[0, 1, 2].map(i => <div key={i}><span /><div><i /><i /></div></div>)}</div></div>;
 }

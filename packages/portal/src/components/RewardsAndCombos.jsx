@@ -1,7 +1,7 @@
 import MenuItemCard, { menuGrid } from './MenuItemCard';
 import Promotions from './Promotions';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api, peekApiCache, subscribeApiReads } from '../services/api';
 import { useOrders } from '../context/OrderContext';
 import { useAuth } from '../context/AuthContext';
@@ -28,6 +28,7 @@ function useRewardData() {
   return { data, error, setError, load, setData, invalidate };
 }
 export function RewardsPanel({ staff = false }) {
+  const location = useLocation();
   const { data, error, setError, load } = useRewardData();
   const [pendingIds, setPendingIds] = useState({});
   const pending = useRef(new Set()), retries = useRef(new Map()), rewardStrip = useRef(null);
@@ -44,7 +45,7 @@ export function RewardsPanel({ staff = false }) {
     const key = retries.current.get(identity);
     try {
       const order = await api('/rewards/redeem', { method: 'POST', body: { rewardId: reward.id, expectedTokenCost: reward.tokenCost }, idempotencyKey: key });
-      retries.current.delete(identity); navigate(`/dashboard/orders/${order.id}`);
+      retries.current.delete(identity); navigate(`/dashboard/orders/${order.id}`, { state: { from: location.pathname + location.search + location.hash } });
     } catch (issue) { setError(issue.message); } finally {
       pending.current.delete(reward.id);
       setPendingIds(current => { const next = { ...current }; delete next[reward.id]; return next; });

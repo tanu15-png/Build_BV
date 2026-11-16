@@ -1,17 +1,21 @@
+import OrderRating from '../components/OrderRating';
+import { orderReturnLocation } from '@spoonate/portal/utils/orderNavigation';
 import OrderPayment from '@spoonate/portal/components/OrderPayment';
 import { orderCode, orderDay } from "@spoonate/portal/utils/orderRules";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { ArrowLeft, Check, Circle } from "lucide-react";
 import { useOrderDetails } from "@spoonate/portal/hooks/useOrderDetails";
 import { orderStatuses, statusLabels } from "@spoonate/portal/utils/orderRules";
 export default function OrderTracking() {
   const { orderId } = useParams();
+  const location = useLocation();
+  const back = orderReturnLocation(location.state?.from);
   const { order, error, loading } = useOrderDetails(orderId);
-  if (!order) return <div className="p-10">{error || (loading ? "Loading order…" : "Order not found.")} <Link to="/dashboard/orders">My orders</Link></div>;
+  if (!order) return <div className="p-10">{error || (loading ? "Loading order…" : "Order not found.")} <Link to={back.to}>{back.label}</Link></div>;
   const currentIndex = order.status === "REJECTED" ? 1 : orderStatuses.indexOf(order.status);
   return (
     <div className="min-h-screen bg-[#fff8e9]">
-      <header className="border-b bg-[#fffdf7] p-5"><Link to="/dashboard/orders" className="flex items-center gap-2 text-gray-500"><ArrowLeft size={18} /> My orders</Link></header>
+      <header className="border-b bg-[#fffdf7] p-5"><Link to={back.to} className="flex items-center gap-2 text-gray-500"><ArrowLeft size={18} /> {back.label}</Link></header>
       <main className="mx-auto max-w-3xl p-5 lg:p-10">
         <h1 className="text-3xl font-black">Track order</h1>
         <div className="mt-8 rounded-[28px] bg-[#185c3a] p-8 text-center text-white"><p className="text-sm text-white/60">ORDER REFERENCE</p><p className="mt-3 text-5xl font-black tracking-widest text-[#ffc565]">{orderCode(order)}</p><p className="mt-2 text-sm">Day: {orderDay(order)}</p><p className="mt-5 font-bold">{order.cafeName}</p></div>
@@ -21,6 +25,7 @@ export default function OrderTracking() {
           {order.status === "REJECTED" && <p role="status" className="mt-8 rounded-xl bg-red-50 p-5 font-bold text-red-700">{order.closedReason === 'PAYMENT_EXPIRED' ? 'The unpaid payment window expired.' : order.closedReason === 'STUDENT_CANCELLED' ? 'You cancelled this unpaid order.' : 'The canteen rejected this order. No payment is required.'}</p>}
 
           {order.status === "COLLECTED" && <p className="mt-8 rounded-xl bg-green-50 p-5 font-bold text-green-700">Collected. Enjoy your food!</p>}
+          {order.status === "COLLECTED" && <OrderRating key={order.id} order={order} />}
         </div>
       </main>
     </div>

@@ -145,6 +145,29 @@ test('canteen-controlled collection and atomic staff handover', { skip: !url }, 
       assert.equal((await collect(order, staff.browser, key)).status, 200);
     });
 
+    await t.test('ratings are owner-only, collected-only, validated, durable and safely retried', async () => {
+      const order = await ready();
+      const path = `/orders/${order.id}/rating`;
+      assert.equal((await student.browser.request(path, 'POST', { rating: 4 })).status, 409);
+      assert.equal((await collect(order)).status, 200);
+      assert.equal((await other.browser.request(path, 'POST', { rating: 4 })).status, 404);
+      assert.equal((await staff.browser.request(path, 'POST', { rating: 4 })).status, 403);
+      for (const rating of [0, 6, 1.5, '5']) assert.equal((await student.browser.request(path, 'POST', { rating })).status, 422);
+      assert.equal((await student.browser.request(path, 'POST', { rating: 4, studentId: other.user.id })).status, 422);
+      const results = await Promise.all([student.browser.request(path, 'POST', { rating: 4 }), student.browser.request(path, 'POST', { rating: 4 })]);
+      assert.deepEqual(results.map(result => result.status), [200, 200]);
+      assert.equal(results[0].body.rating, 4);
+      assert.equal(results[0].body.version, order.version + 2);
+      assert.deepEqual(results[0].body, results[1].body);
+      assert.equal((await student.browser.request(path, 'POST', { rating: 5 })).status, 409);
+      const fetched = await student.browser.request(`/orders/${order.id}`);
+      assert.equal(fetched.body.rating, 4); assert.equal(fetched.body.ratedAt, now.toISOString());
+      const stored = await db.order.findUniqueOrThrow({ where: { id: order.id } });
+      assert.equal(stored.rating, 4);
+      await assert.rejects(db.order.update({ where: { id: order.id }, data: { rating: 0 } }));
+      await assert.rejects(db.order.update({ where: { id: order.id }, data: { rating: null } }));
+    });
+
     await t.test('paused canteens and existing READY orders need no credential or code', async () => {
       const order = await ready();
       await db.pickupCredential.create({ data: { orderId: order.id, encryptedCode: 'obsolete-credential', failedAttempts: 5, windowEndsAt: new Date(now.getTime() + 600000) } });

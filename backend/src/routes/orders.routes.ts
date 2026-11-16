@@ -92,6 +92,27 @@ export function createOrdersRouter(config: Config, db: PrismaClient, options: Or
     res.status(result.status).json(result.body);
   });
 
+  router.post('/orders/:id/rating', ...route('POST /orders/:id/rating'), async (req, res) => {
+    const { actor } = await current(req);
+    if (actor.role !== 'STUDENT') throw new AppError(403, 'STUDENT_REQUIRED', 'Only the customer can rate their order.');
+    const id = res.locals.params.id;
+    const result = await orderTransaction(db, config.DB_TIMEOUT_MS, async tx => {
+      await tx.$queryRaw`SELECT id FROM users WHERE id = ${actor.id}::uuid FOR UPDATE`;
+      await createSessionReader(config, tx)(req);
+      const locked = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM orders WHERE id = ${id}::uuid AND student_id = ${actor.id}::uuid FOR UPDATE`;
+      if (!locked.length) throw new AppError(404, 'ORDER_NOT_FOUND', 'Order not found.');
+      const order = await tx.order.findUniqueOrThrow({ where: { id }, include: orderInclude });
+      if (order.status !== 'COLLECTED') throw new AppError(409, 'ORDER_NOT_COLLECTED', 'You can rate an order after collecting it.');
+      if (order.rating !== null) {
+        if (order.rating !== req.body.rating) throw new AppError(409, 'ORDER_ALREADY_RATED', 'This order has already been rated.');
+        return orderResponse(order); // Safe retry after a lost response, including concurrent submits.
+      }
+      const updated = await tx.order.update({ where: { id }, data: { rating: req.body.rating, ratedAt: await serverNow(tx, options), version: { increment: 1 } }, include: orderInclude });
+      return orderResponse(updated);
+    });
+    res.json(result);
+  });
+
   const transitions = { accept: ['RECEIVED', 'ACCEPTED'], reject: ['RECEIVED', 'REJECTED'], prepare: ['ACCEPTED', 'PREPARING'], ready: ['PREPARING', 'READY'] } as const;
   for (const [action, [before, after]] of Object.entries(transitions)) {
     router.post('/orders/:id/' + action, ...route('POST /orders/:id/' + action), async (req, res) => {

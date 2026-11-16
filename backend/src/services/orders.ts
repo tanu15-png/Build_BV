@@ -33,6 +33,7 @@ export function orderResponse(order: LoadedOrder) {
     paymentStarted: Boolean(order.paymentKeyId),
     totalPaise: order.totalPaise, pickupAt: order.pickupAt.toISOString(), codeDay: order.codeDay.toISOString().slice(0, 10),
     orderCode: order.orderCode!, version: order.version, createdAt: order.createdAt.toISOString(),
+    rating: order.rating ?? null, ratedAt: order.ratedAt?.toISOString() ?? null,
     collectedAt: order.collectedAt?.toISOString() ?? null, pickupVerifiedBy: order.pickupVerifiedBy,
     items: order.items.map(line => ({ id: line.id, menuItemId: line.menuItemId, name: line.name, quantity: line.quantity, unitPricePaise: line.unitPricePaise, ...(line.offerId ? { originalUnitPricePaise: line.originalUnitPricePaise, offerId: line.offerId, offerName: line.offerName } : {}) })),
     events: order.events.map(event => ({ id: event.id, previousStatus: event.previousStatus, newStatus: event.newStatus, actorId: event.actorId, createdAt: event.createdAt.toISOString() })),
