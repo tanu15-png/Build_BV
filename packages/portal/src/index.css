@@ -122,7 +122,7 @@ h1, h2, h3 { letter-spacing: -.025em; text-wrap: pretty; }
 .student-welcome h1 { font-size: clamp(1.65rem, 3vw, 2.4rem); }
 .food-sticker { object-fit: contain; width: 120px; height: 120px; flex-shrink: 0; }
 .welcome-sticker { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%) rotate(-7deg); width: 145px; height: 145px; z-index: -1; }
-.login-sticker { width: 160px; height: 130px; margin-bottom: 1.25rem; }
+
 .menu-loading { padding: 1.25rem 0; }
 .menu-loading .food-sticker { width: 76px; height: 76px; animation: brand-bob 2s ease-in-out infinite; }
 .menu-skeletons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem; }
@@ -186,3 +186,5 @@ h1, h2, h3 { letter-spacing: -.025em; text-wrap: pretty; }
 .loading-fallback > img { width: min(92vw, 650px); max-width: 100%; max-height: 100%; object-fit: contain; animation: fallback-breathe 2s ease-in-out infinite; }
 .menu-loading-animation .loading-fallback > img { width: 100%; height: 100%; }
 @keyframes fallback-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .8; } }
+
+.brand-mark.login-brand { width: clamp(140px, 16vw, 174px); max-width: 100%; height: auto; aspect-ratio: 410 / 285; object-fit: contain; align-self: flex-start; }

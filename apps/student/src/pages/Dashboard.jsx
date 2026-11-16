@@ -169,12 +169,9 @@ export default function Dashboard() {
             </p>
 
             <h1 className="text-3xl lg:text-4xl font-black mt-1">
-              Hi, {user?.name?.split(" ")[0]} 👋
+              Hi, {user?.name?.split(" ")[0]}
             </h1>
 
-            <p className="text-gray-500 mt-2">
-              Your next delicious break starts here.
-            </p>
 
           </section>
 

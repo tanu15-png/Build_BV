@@ -24,7 +24,7 @@ export default function BannerManagement() {
     finally{setPending(old=>{const next={...old};delete next[banner.id];return next;});}
   }
   function close(){setEditing(null);setCreating(false);setParams({});}
-  return <main className="min-h-screen bg-[#fff8e9] p-5 lg:p-10"><div className="mx-auto max-w-6xl"><Link to="/canteen" className="font-bold text-[#185c3a]">← Dashboard</Link><div className="my-6 flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-3xl font-black">Manage banners & special menus</h1><p className="mt-2 text-gray-500">One poster for every screen. Newest published banners appear first.</p></div><button className={button} onClick={()=>{close();setCreating(true);}}>+ Add banner</button></div>
+  return <main className="min-h-screen bg-[#fff8e9] p-5 lg:p-10"><div className="mx-auto max-w-6xl"><Link to="/canteen" className="font-bold text-[#185c3a]">← Dashboard</Link><div className="my-6 flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-3xl font-black">Manage banners & special menus</h1></div><button className={button} onClick={()=>{close();setCreating(true);}}>+ Add banner</button></div>
     {(error||failure)&&<p role="alert" className="mb-4 text-red-700">{failure||error} <button onClick={()=>load(true)} className="underline">Reload</button></p>}
     {(creating||selected)&&<BannerEditor key={creating?'new':selected.id} banner={creating?blank:selected} close={close} saved={async()=>{close();await load(true);}} />}
     {loading&&<p role="status">Loading banners…</p>}

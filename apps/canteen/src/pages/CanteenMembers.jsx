@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@spoonate/portal/context/AuthContext";
 
 export default function CanteenMembers() {
-  const { user, canteenMembers, removeMember, memberSummary, memberError, loadMoreMembers } = useAuth();
+  const { user, canteenMembers, removeMember, memberError, loadMoreMembers } = useAuth();
   const [error, setError] = useState("");
   const [pendingRemoval, setPendingRemoval] = useState(null);
   const [removing, setRemoving] = useState(false);
@@ -19,8 +19,6 @@ export default function CanteenMembers() {
     {error && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
           <section id="members" className="rounded-2xl bg-[#fffdf7] p-6 shadow-sm">
             <h2 className="text-xl font-black">Member access</h2>
-            <p className="mt-2 text-gray-500">{memberSummary?.membersWithAccess ?? 0} members with access · {memberSummary?.signedInPeople ?? 0} people signed in · {memberSummary?.sessionCount ?? 0} sessions</p>
-            <p className="mt-2 text-sm text-gray-500">Signed-in counts include valid sessions until logout or expiry; they do not indicate who is online now.</p>
             {memberError && <p role="alert" className="mt-3 text-red-700">{memberError}</p>}
             <ul className="mt-5 divide-y divide-gray-100">{canteenMembers.map((member) => <li key={member.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
               <div><p className="break-all font-bold">{member.name || 'Member'}{member.userId === user.id ? " (you)" : ""}</p><p className="mt-1 text-sm text-gray-500">{member.status === "REVOKED" ? "Access removed" : `${member.sessionCount} signed-in sessions`}</p></div>

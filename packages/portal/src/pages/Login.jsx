@@ -1,4 +1,4 @@
-import { BrandMark, BrandSplash, FoodSticker } from '../components/Brand';
+import { BrandMark, BrandSplash } from '../components/Brand';
 import { portal as role, portalHome } from '../portal.js';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -86,8 +86,8 @@ export default function Login() {
   return <div className="flex min-h-screen items-center justify-center bg-[#185c3a] px-5 py-10">
     <div className="grid w-full max-w-5xl overflow-hidden rounded-[28px] bg-[#fffdf7] shadow-2xl lg:grid-cols-2">
       <section className="flex flex-col justify-between bg-[#12492e] p-8 text-white lg:p-12">
-        <BrandMark />
-        <div className="my-8"><FoodSticker className="login-sticker" /><p className="font-bold text-[#ffc565]">BANASTHALI VIDYAPITH</p><h1 className="mt-4 text-4xl font-black">{role === 'student' ? <>Order ahead.<br />Collect when ready.</> : role === 'canteen' ? <>Your kitchen.<br />Your orders.</> : <>Campus oversight.<br />One clear view.</>}</h1><p className="mt-5 text-white/70">{role === 'student' ? 'Find your favourites, order ahead, and collect when ready.' : role === 'canteen' ? 'Manage your menu, prepare orders and mark collections.' : 'Manage campus canteens, accounts and order activity.'}</p></div>
+        <BrandMark className="login-brand" />
+        <div className="my-8"><p className="font-bold text-[#ffc565]">BANASTHALI VIDYAPITH</p><h1 className="mt-4 text-4xl font-black">{role === 'student' ? <>Order ahead.<br />Collect when ready.</> : role === 'canteen' ? <>Your kitchen.<br />Your orders.</> : <>Campus oversight.<br />One clear view.</>}</h1><p className="mt-5 text-white/70">{role === 'student' ? 'Find your favourites, order ahead, and collect when ready.' : role === 'canteen' ? 'Manage your menu, prepare orders and mark collections.' : 'Manage campus canteens, accounts and order activity.'}</p></div>
         <p className="flex items-center gap-2 text-sm text-white/70"><ShieldCheck size={18} /> Verified email access</p>
       </section>
       <section className="p-8 lg:p-12">
