@@ -21,8 +21,8 @@ function LoadingAnimation({ onComplete }) {
     return () => clearTimeout(timeout);
   }, [fallback, finished, onComplete]);
   return <div className={`loading-animation ${playing && !fallback ? 'is-playing' : ''}`}>
-    {fallback && <div className="loading-fallback"><img src="/brand/spoonate-fallback.png" alt="SpoonAte — Eat, enjoy, repeat" width="731" height="500" /></div>}
-    {!fallback && <video ref={video} className="loading-film" src="/brand/spoonate-loading.mp4" autoPlay muted playsInline preload="auto" aria-hidden="true" disablePictureInPicture onPlaying={() => setPlaying(true)} onEnded={() => { setFinished(true); onComplete?.(); }} onError={() => setFallback(true)} />}
+    {fallback && <div className="loading-fallback"><img src="/brand/spoonate-logo.svg" alt="SpoonAte — Eat, enjoy, repeat" width="410" height="285" /></div>}
+    {!fallback && <video ref={video} className="loading-film" src="/brand/spoonate-loading-beige-v1.mp4" autoPlay muted playsInline preload="auto" aria-hidden="true" disablePictureInPicture onPlaying={() => setPlaying(true)} onEnded={() => { setFinished(true); onComplete?.(); }} onError={() => setFallback(true)} />}
   </div>;
 }
 

@@ -109,7 +109,7 @@ h1, h2, h3 { letter-spacing: -.025em; text-wrap: pretty; }
 .brand-mark { display: inline-flex; align-items: center; gap: .5rem; font-weight: 900; font-size: 1.65rem; letter-spacing: -.065em; line-height: 1; white-space: nowrap; }
 .brand-mark > svg { width: 34px; height: 34px; stroke-width: 1.7; }
 .brand-accent { color: #efad48; }
-.brand-splash { min-height: 100svh; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 40%, #247947, #12492e 75%); color: #fff7df; padding: 2rem; }
+.brand-splash { min-height: 100svh; display: grid; place-items: center; background: #fff7e9; color: #fff7df; padding: 2rem; }
 .brand-splash-content { text-align: center; }
 .brand-splash .brand-mark { font-size: clamp(2.8rem, 7vw, 4.5rem); flex-direction: column; gap: 1rem; }
 .brand-splash .brand-mark > svg { width: 68px; height: 68px; }
@@ -154,8 +154,8 @@ h1, h2, h3 { letter-spacing: -.025em; text-wrap: pretty; }
 @media (min-width: 1024px) { .mobile-brand { display: none; } }
 
 /* Play the supplied artwork unchanged; contain preserves its portrait logo. */
-.brand-splash { padding: 0; background: #00552f; }
-.loading-animation { position: relative; width: 100%; height: 100%; min-height: inherit; overflow: hidden; background: #00552f; color: #fff7df; }
+.brand-splash { padding: 0; background: #fff7e9; }
+.loading-animation { position: relative; width: 100%; height: 100%; min-height: inherit; overflow: hidden; background: #fff7e9; color: #fff7df; }
 .brand-splash > .loading-animation { min-height: 100svh; }
 .loading-film { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; pointer-events: none; }
 .is-playing .loading-film { opacity: 1; }
@@ -183,7 +183,7 @@ h1, h2, h3 { letter-spacing: -.025em; text-wrap: pretty; }
 .staff-sidebar nav > a { margin-block: 0; padding-block: .55rem; }
 
 /* Only mount this artwork after a playback failure (or a reduced-motion preference). */
-.loading-fallback > img { width: min(92vw, 650px); max-width: 100%; max-height: 100%; object-fit: contain; animation: fallback-breathe 2s ease-in-out infinite; }
+.loading-fallback > img { width: min(86vw, 360px); max-width: 100%; max-height: 100%; object-fit: contain; animation: fallback-breathe 2s ease-in-out infinite; }
 .menu-loading-animation .loading-fallback > img { width: 100%; height: 100%; }
 @keyframes fallback-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .8; } }
 
