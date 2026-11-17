@@ -31,6 +31,7 @@ export function orderResponse(order: LoadedOrder) {
     paymentDeadline: order.paymentDeadline?.toISOString() ?? null, paymentPaidAt: order.paymentPaidAt?.toISOString() ?? null,
     closedReason: order.closedReason,
     paymentStarted: Boolean(order.paymentKeyId),
+    rewardTokenCost: order.executionMode === 'REWARD' ? (order.rewardTokenCost ?? 100) : null,
     totalPaise: order.totalPaise, pickupAt: order.pickupAt.toISOString(), codeDay: order.codeDay.toISOString().slice(0, 10),
     orderCode: order.orderCode!, version: order.version, createdAt: order.createdAt.toISOString(),
     rating: order.rating ?? null, ratedAt: order.ratedAt?.toISOString() ?? null,

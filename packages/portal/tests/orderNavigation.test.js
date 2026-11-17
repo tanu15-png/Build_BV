@@ -12,3 +12,12 @@ test('direct links and invalid return destinations use the safe orders fallback'
     assert.deepEqual(orderReturnLocation(value), { to: '/dashboard/orders', label: 'My orders' });
   }
 });
+
+test('reward amounts show the saved token cost while paid orders retain rupees', async () => {
+  const { orderAmountLabel } = await import('../src/utils/orderRules.js');
+  assert.equal(orderAmountLabel({ executionMode: 'REWARD', rewardTokenCost: 40, total: 0 }), '40 tokens');
+  assert.equal(orderAmountLabel({ executionMode: 'REWARD', rewardTokenCost: 100, total: 0 }), '100 tokens');
+  assert.equal(orderAmountLabel({ executionMode: 'REWARD', total: 0 }), 'Token reward');
+  assert.equal(orderAmountLabel({ executionMode: 'TEST', total: 560 }), '₹560');
+  assert.equal(orderAmountLabel({ executionMode: 'RAZORPAY_TEST', totalPaise: 9050 }), '₹90.5');
+});

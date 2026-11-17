@@ -173,3 +173,11 @@ export function transitionOrder(order, user, nextStatus, now = new Date()) {
     ...(nextStatus === "COLLECTED" ? { pickupVerifiedBy: user.email, collectedAt: at } : {}),
   };
 }
+
+export function orderAmountLabel(order) {
+  if (order.executionMode === 'REWARD') {
+    return Number.isSafeInteger(order.rewardTokenCost) && order.rewardTokenCost > 0
+      ? `${order.rewardTokenCost} tokens` : 'Token reward';
+  }
+  return `₹${order.total ?? (order.totalPaise ?? 0) / 100}`;
+}

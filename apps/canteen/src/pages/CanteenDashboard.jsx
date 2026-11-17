@@ -1,7 +1,7 @@
 import { BrandMark } from '@spoonate/portal/components/Brand';
 import OrderPayment from '@spoonate/portal/components/OrderPayment';
 import CanteenPoster from '@spoonate/portal/components/CanteenPoster';
-import { orderCode, orderDay, canteenActiveOrderFirst, newestOrderFirst, orderReceivedTime } from "@spoonate/portal/utils/orderRules";
+import { orderCode, orderDay, orderAmountLabel, canteenActiveOrderFirst, newestOrderFirst, orderReceivedTime } from "@spoonate/portal/utils/orderRules";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ClipboardList, LogOut, Store } from "lucide-react";
@@ -52,7 +52,7 @@ export function CanteenOrderCard({ order }) {
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <Link to={`/canteen/orders/${order.id}`} className="text-2xl font-black tracking-wider text-[#185c3a]">{orderCode(order)}</Link>
         <span className="rounded-full bg-[#eaf1e2] px-2 py-1 text-xs font-bold text-[#185c3a]">{isUnpaidOrder(order) ? "Unpaid" : statusLabels[order.status]}</span>
-        <span className="text-sm font-bold">₹{order.total}</span>
+        <span className="text-sm font-bold">{orderAmountLabel(order)}</span>
         {order.paymentStatus === "PAID" && <span className="inline-flex items-center gap-1 rounded-full bg-[#185c3a] px-3 py-1 text-xs font-black tracking-wide text-white">✓ PAID</span>}
       </div>
       <div className="flex flex-wrap items-center gap-2">

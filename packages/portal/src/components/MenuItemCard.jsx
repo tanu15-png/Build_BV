@@ -1,4 +1,4 @@
-import { isComboCategory } from '../utils/menuRules';
+import { showMenuImage } from '../utils/menuRules';
 import OfferPrice from './OfferPrice';
 import { useId, useRef } from 'react';
 import { useOrders } from '../context/OrderContext';
@@ -10,7 +10,7 @@ export default function MenuItemCard({ food, staff = false }) {
   const titleId = useId();
   const available = isFoodAvailable(food), quantity = cart.find(item => item.id === food.id)?.quantity;
   const discounted = food.offer && (food.price ?? food.effectivePricePaise / 100) < food.pricePaise / 100;
-  const showImage = !isComboCategory(food.category);
+  const showImage = showMenuImage(food);
   const imageAlt = food.illustrative ? `Illustrative image of ${food.name}` : food.name;
   const imageError = event => { if (!event.currentTarget.src.endsWith('/food-placeholder.svg')) event.currentTarget.src = '/food-placeholder.svg'; };
   const add = () => { addToCart(food); details.current?.close(); };

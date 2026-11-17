@@ -22,3 +22,10 @@ test('all reviewed menu references have real, bounded WebP files; owner uploads 
   assert.equal(menuPhoto({ name: 'Aloo Patties', imageRef: 'https://owner.example/new-photo.jpg' }).image, 'https://owner.example/new-photo.jpg');
   assert.equal(menuPhoto({ name: 'New dish' }).image, '/food-placeholder.svg');
 });
+
+test('combo photos are optional and only owner-provided images are shown', () => {
+  for (const category of ['Combos', 'Waffle Combos']) {
+    assert.deepEqual(menuPhoto({ name: 'Roll and Coke Combo', category }), { image: null, illustrative: false });
+    assert.equal(menuPhoto({ name: 'Roll and Coke Combo', category, imageRef: 'https://owner.example/combo.jpg' }).image, 'https://owner.example/combo.jpg');
+  }
+});

@@ -74,7 +74,7 @@ test('offers, combos, promotions, ordering and tokens work together through the 
       assert.equal((await staff.request('/rewards/manage','POST',{menuItemId:comboId,tokenCost:10,active:true})).status,200);
       assert.equal((await student.request('/rewards/redeem','POST',{rewardId,expectedTokenCost:5},randomUUID())).body.error.code,'REWARD_PRICE_CHANGED');
       const [a,b]=await Promise.all([student.request('/rewards/redeem','POST',{rewardId,expectedTokenCost:10},randomUUID()),student.request('/rewards/redeem','POST',{rewardId,expectedTokenCost:10},randomUUID())]);assert.deepEqual([a.status,b.status].sort(),[201,409]);
-      const redeemed=orderSchema.parse((a.status===201?a:b).body);assert.equal(redeemed.totalPaise,0);assert.equal(redeemed.items[0]?.unitPricePaise,0);assert.equal((await rewards()).balance,2);
+      const redeemed=orderSchema.parse((a.status===201?a:b).body);assert.equal(redeemed.totalPaise,0);assert.equal(redeemed.rewardTokenCost,10);assert.equal(redeemed.items[0]?.unitPricePaise,0);assert.equal((await rewards()).balance,2);
       await advance(redeemed,'reject');assert.equal((await rewards()).balance,12);
       const key=randomUUID(),body={rewardId,expectedTokenCost:10};const first=await student.request('/rewards/redeem','POST',body,key);const repeat=await student.request('/rewards/redeem','POST',body,key);assert.deepEqual(first,repeat);
       let collected=orderSchema.parse(first.body);for(const action of ['accept','prepare','ready','collect'])collected=await advance(collected,action);

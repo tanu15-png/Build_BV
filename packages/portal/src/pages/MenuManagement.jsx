@@ -1,5 +1,4 @@
 import { MenuLoading } from '../components/Brand';
-import { isComboCategory } from '../utils/menuRules';
 import MenuImageField from '../components/MenuImageField';
 import OfferPrice from '../components/OfferPrice';
 import CanteenPoster from '../components/CanteenPoster';
@@ -120,13 +119,12 @@ function ItemEditor({ item, categoryId, initialDraft, categories, save, cancel }
   const [draft, setDraft] = useState({ name: initialDraft?.name || item?.name || '', description: initialDraft ? initialDraft.description || '' : item?.description || '', categoryId: initialDraft?.categoryId || item?.categoryId || categoryId, price: initialDraft?.price ?? (item ? (item.pricePaise / 100).toFixed(2) : ''), imageRef: initialDraft ? initialDraft.imageRef || '' : item?.imageRef || '' });
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
-  const allowImage = !isComboCategory(categories.find(category => category.id === draft.categoryId || category.clientId === draft.categoryId)?.name || item?.category);
   const change = event => setDraft(current => ({ ...current, [event.target.name]: event.target.value }));
-  return <form onSubmit={async event => { event.preventDefault(); if (uploading) return; setError(''); try { await save({ name: draft.name, description: draft.description.trim() || null, categoryId: draft.categoryId, pricePaise: rupeesToPaise(draft.price), imageRef: allowImage ? draft.imageRef.trim() || null : null }); } catch (issue) { setError(issue.message); } }}><fieldset className="grid gap-4 sm:grid-cols-2">
+  return <form onSubmit={async event => { event.preventDefault(); if (uploading) return; setError(''); try { await save({ name: draft.name, description: draft.description.trim() || null, categoryId: draft.categoryId, pricePaise: rupeesToPaise(draft.price), imageRef: draft.imageRef.trim() || null }); } catch (issue) { setError(issue.message); } }}><fieldset className="grid gap-4 sm:grid-cols-2">
     <label className="font-bold">Item name<input name="name" required maxLength={120} value={draft.name} onChange={change} className={input} /></label>
     <label className="font-bold">Category<select name="categoryId" disabled={uploading} required value={categories.find(category => category.id === draft.categoryId || category.clientId === draft.categoryId)?.id || draft.categoryId} onChange={change} className={input}>{categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
     <label className="font-bold">Price (₹)<input name="price" required inputMode="decimal" pattern="[0-9]+([.][0-9]{1,2})?" value={draft.price} onChange={change} className={input} /></label>
-    {allowImage && <MenuImageField value={draft.imageRef} onChange={imageRef => setDraft(current => ({ ...current, imageRef }))} onBusy={setUploading} />}
+    <MenuImageField value={draft.imageRef} onChange={imageRef => setDraft(current => ({ ...current, imageRef }))} onBusy={setUploading} />
     <label className="font-bold sm:col-span-2">Description<textarea name="description" maxLength={2000} value={draft.description} onChange={change} className={input} /></label>
     <div className="flex gap-3 sm:col-span-2"><button disabled={uploading} className={button}>{item ? 'Save changes' : 'Add item'}</button><button type="button" onClick={cancel} className="rounded-xl border px-4 py-2">Cancel</button></div>
   </fieldset>{error && <p role="alert" className="mt-3 text-red-700">{error}</p>}</form>;

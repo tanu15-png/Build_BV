@@ -133,12 +133,12 @@ export default function Dashboard() {
                 {initials}
               </div>
 
-              <div className="hidden md:block">
+              <div className="hidden min-w-0 md:block md:max-w-52 xl:max-w-72">
                 <p className="text-sm font-bold">
                   {user?.name}
                 </p>
 
-                <p className="text-xs text-gray-500">
+                <p className="truncate text-xs text-gray-500" title={user?.email}>
                   {user?.email}
                 </p>
               </div>
@@ -333,13 +333,21 @@ function SidebarLink({
 }
 
 function MobileLink({ to, icon, text }) {
+  const location = useLocation();
+  const homeClick = event => {
+    if (to !== '/dashboard') return;
+    // React Router leaves scroll unchanged when re-selecting the current route.
+    if (location.pathname === '/dashboard' && !location.search && !location.hash) event.preventDefault();
+    window.scrollTo({ top: 0, left: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  };
   if (to.includes("#")) {
     return <a href={to} className="flex flex-col items-center gap-1 text-xs text-gray-500">{icon}{text}</a>;
   }
   return (
     <Link
       to={to}
-      className="flex flex-col items-center gap-1 text-gray-500 text-xs"
+      onClick={homeClick}
+      className="flex min-h-11 min-w-12 flex-col items-center justify-center gap-1 text-gray-500 text-xs"
     >
       {icon}
       {text}
