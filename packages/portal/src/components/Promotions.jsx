@@ -13,7 +13,7 @@ export default function Promotions({staff=false}) {
   const [slide,setSlide]=useState(0),track=useRef(null);
   const current=Math.min(slide,Math.max(0,banners.length-1));
   const container = useRef(null);
-  const [paused, setPaused] = useState(false), [hovered, setHovered] = useState(false), [focused, setFocused] = useState(false), [dragging, setDragging] = useState(false);
+  const [hovered, setHovered] = useState(false), [focused, setFocused] = useState(false), [dragging, setDragging] = useState(false);
   const [visible, setVisible] = useState(() => !document.hidden), [onScreen, setOnScreen] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [rotationKey, setRotationKey] = useState(0);
@@ -36,13 +36,13 @@ export default function Promotions({staff=false}) {
     observer.observe(container.current); return () => observer.disconnect();
   }, [banners.length]);
   useEffect(() => {
-    if (staff || banners.length < 2 || paused || hovered || focused || dragging || !visible || !onScreen || reducedMotion) return;
-    const timer = setTimeout(() => go((current + 1) % banners.length), 3000);
+    if (staff || banners.length < 2 || hovered || focused || dragging || !visible || !onScreen || reducedMotion) return;
+    const timer = setTimeout(() => go((current + 1) % banners.length), 2000);
     return () => clearTimeout(timer);
-  }, [staff, banners.length, current, paused, hovered, focused, dragging, visible, onScreen, reducedMotion, rotationKey, go]);
+  }, [staff, banners.length, current, hovered, focused, dragging, visible, onScreen, reducedMotion, rotationKey, go]);
   if(!banners.length&&!staff&&!error)return null;
   return <section ref={container} onPointerEnter={event => { if (event.pointerType === 'mouse') setHovered(true); }} onPointerLeave={event => { if (event.pointerType === 'mouse') setHovered(false); }} className="mb-8 min-w-0" aria-label="Promotions and special menus">
-    <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-black">{staff?'Promotions & special menus':'A little something special'}</h2>{staff?<Link className="font-bold text-[#185c3a]" to="/canteen/banners">Manage banners →</Link>:banners.length>1&&<div className="flex gap-2"><button aria-label="Previous banner" className="rounded-full border px-3 py-1" onClick={()=>go((current+banners.length-1)%banners.length)}>←</button>{!reducedMotion&&<button aria-label={paused ? 'Resume banner slideshow' : 'Pause banner slideshow'} aria-pressed={paused} className="rounded-full border px-3 py-1 text-sm" onClick={() => setPaused(value => !value)}>{paused ? 'Play' : 'Pause'}</button>}<button aria-label="Next banner" className="rounded-full border px-3 py-1" onClick={()=>go((current+1)%banners.length)}>→</button></div>}</div>
+    <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-black">{staff?'Promotions & special menus':'A little something special'}</h2>{staff?<Link className="font-bold text-[#185c3a]" to="/canteen/banners">Manage banners →</Link>:banners.length>1&&<div className="flex gap-2"><button aria-label="Previous banner" className="rounded-full border px-3 py-1" onClick={()=>go((current+banners.length-1)%banners.length)}>←</button><button aria-label="Next banner" className="rounded-full border px-3 py-1" onClick={()=>go((current+1)%banners.length)}>→</button></div>}</div>
     {error&&<p role="alert" className="mb-3 text-red-700">{error} <button className="underline" onClick={()=>load(true)}>Retry</button></p>}
     {!staff&&banners.length>0&&<><div ref={track} onPointerDown={() => setDragging(true)} onFocusCapture={() => setFocused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }} aria-roledescription="carousel" aria-label="Promotional banners" onScroll={event=>{const el=event.currentTarget;if(el.clientWidth)setSlide(Math.round(el.scrollLeft/el.clientWidth));}} className="flex w-full snap-x snap-mandatory overflow-x-auto rounded-2xl" style={{scrollbarWidth:'none'}}>{banners.map((banner,index)=><Link key={banner.id} to={bannerHref(banner)} aria-label={`${banner.title} — open menu`} className="block w-full min-w-full shrink-0 snap-start bg-[#f2f2eb]"><img src={bannerImageSrc(banner.imageRef)} alt={banner.title} loading={index===0?'eager':'lazy'} decoding="async" className="block h-auto w-full object-contain" /></Link>)}</div>{banners.length>1&&<div className="my-3 flex justify-center gap-2">{banners.map((banner,index)=><button key={banner.id} aria-label={`Show ${banner.title}`} aria-current={current===index?'true':undefined} onClick={()=>go(index)} className={`h-2 rounded-full ${current===index?'w-6 bg-[#185c3a]':'w-2 bg-gray-300'}`} />)}</div>}</>}
     {banners.length>0&&(()=>{
